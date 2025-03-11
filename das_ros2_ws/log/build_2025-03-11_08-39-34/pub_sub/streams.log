@@ -1,0 +1,75 @@
+[0.615s] Invoking command in '/home/user/docker_ws/das_ros2_ws/build/pub_sub': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/user/docker_ws/das_ros2_ws/build/pub_sub/build
+[0.687s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options
+[0.687s] !!
+[0.687s] 
+[0.687s]         ********************************************************************************
+[0.687s]         Usage of dash-separated 'script-dir' will not be supported in future
+[0.687s]         versions. Please use the underscore name 'script_dir' instead.
+[0.687s] 
+[0.687s]         This deprecation is overdue, please update your project and remove deprecated
+[0.688s]         calls to avoid build errors in the future.
+[0.688s] 
+[0.688s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[0.688s]         ********************************************************************************
+[0.688s] 
+[0.688s] !!
+[0.688s]   opt = self.warn_dash_deprecation(opt, section)
+[0.763s] running develop
+[0.837s] Removing /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub-sub.egg-link (link to .)
+[0.855s] Invoked command in '/home/user/docker_ws/das_ros2_ws/build/pub_sub' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/user/docker_ws/das_ros2_ws/build/pub_sub/build
+[0.856s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/pub_sub': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/pub_sub build --build-base /home/user/docker_ws/das_ros2_ws/build/pub_sub/build install --record /home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log --install-scripts $base/lib/pub_sub --single-version-externally-managed install_data --force
+[0.928s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options
+[0.928s] !!
+[0.928s] 
+[0.928s]         ********************************************************************************
+[0.928s]         Usage of dash-separated 'script-dir' will not be supported in future
+[0.928s]         versions. Please use the underscore name 'script_dir' instead.
+[0.928s] 
+[0.928s]         This deprecation is overdue, please update your project and remove deprecated
+[0.928s]         calls to avoid build errors in the future.
+[0.928s] 
+[0.928s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[0.928s]         ********************************************************************************
+[0.928s] 
+[0.928s] !!
+[0.928s]   opt = self.warn_dash_deprecation(opt, section)
+[0.973s] running egg_info
+[0.978s] writing ../../build/pub_sub/pub_sub.egg-info/PKG-INFO
+[0.978s] writing dependency_links to ../../build/pub_sub/pub_sub.egg-info/dependency_links.txt
+[0.978s] writing entry points to ../../build/pub_sub/pub_sub.egg-info/entry_points.txt
+[0.978s] writing requirements to ../../build/pub_sub/pub_sub.egg-info/requires.txt
+[0.978s] writing top-level names to ../../build/pub_sub/pub_sub.egg-info/top_level.txt
+[1.001s] ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+[1.001s] reading manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'
+[1.002s] writing manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'
+[1.002s] running build
+[1.002s] running build_py
+[1.002s] creating /home/user/docker_ws/das_ros2_ws/build/pub_sub/build
+[1.002s] creating /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib
+[1.003s] creating /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub
+[1.003s] copying pub_sub/source_file.py -> /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub
+[1.003s] copying pub_sub/__init__.py -> /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub
+[1.003s] copying pub_sub/publisher.py -> /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub
+[1.003s] copying pub_sub/subscriber.py -> /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub
+[1.003s] running install
+[1.006s] running install_lib
+[1.012s] creating /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub
+[1.012s] copying /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub/source_file.py -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub
+[1.012s] copying /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub/__init__.py -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub
+[1.012s] copying /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub/publisher.py -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub
+[1.012s] copying /home/user/docker_ws/das_ros2_ws/build/pub_sub/build/lib/pub_sub/subscriber.py -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub
+[1.012s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub/source_file.py to source_file.cpython-310.pyc
+[1.012s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub/__init__.py to __init__.cpython-310.pyc
+[1.012s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub/publisher.py to publisher.cpython-310.pyc
+[1.012s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub/subscriber.py to subscriber.cpython-310.pyc
+[1.013s] running install_data
+[1.014s] copying resource/pub_sub -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/share/ament_index/resource_index/packages
+[1.015s] copying package.xml -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/share/pub_sub
+[1.015s] copying launch_folder/pub_sub_launch.py -> /home/user/docker_ws/das_ros2_ws/install/pub_sub/share/pub_sub
+[1.016s] running install_egg_info
+[1.022s] Copying ../../build/pub_sub/pub_sub.egg-info to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub-0.0.0-py3.10.egg-info
+[1.023s] running install_scripts
+[1.081s] Installing listener script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub
+[1.081s] Installing talker script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub
+[1.082s] writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log'
+[1.096s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/pub_sub' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/pub_sub build --build-base /home/user/docker_ws/das_ros2_ws/build/pub_sub/build install --record /home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log --install-scripts $base/lib/pub_sub --single-version-externally-managed install_data --force

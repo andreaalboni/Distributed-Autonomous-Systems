@@ -1,0 +1,17 @@
+package.xml
+setup.cfg
+setup.py
+../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt
+../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+../../build/distributed_algs/distributed_algs.egg-info/zip-safe
+distributed_algs/__init__.py
+distributed_algs/the_agent.py
+launch_folder/param_launch.py
+resource/distributed_algs
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

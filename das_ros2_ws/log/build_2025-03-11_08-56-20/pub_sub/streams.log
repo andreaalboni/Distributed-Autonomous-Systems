@@ -1,0 +1,23 @@
+[0.467s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/pub_sub': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/pub_sub build --build-base /home/user/docker_ws/das_ros2_ws/build/pub_sub/build install --record /home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log --single-version-externally-managed install_data
+[0.603s] running egg_info
+[0.609s] writing ../../build/pub_sub/pub_sub.egg-info/PKG-INFO
+[0.609s] writing dependency_links to ../../build/pub_sub/pub_sub.egg-info/dependency_links.txt
+[0.609s] writing entry points to ../../build/pub_sub/pub_sub.egg-info/entry_points.txt
+[0.609s] writing requirements to ../../build/pub_sub/pub_sub.egg-info/requires.txt
+[0.609s] writing top-level names to ../../build/pub_sub/pub_sub.egg-info/top_level.txt
+[0.636s] ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+[0.636s] reading manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'
+[0.637s] writing manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'
+[0.637s] running build
+[0.637s] running build_py
+[0.637s] running install
+[0.641s] running install_lib
+[0.647s] running install_data
+[0.647s] running install_egg_info
+[0.653s] removing '/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub-0.0.0-py3.10.egg-info' (and everything under it)
+[0.653s] Copying ../../build/pub_sub/pub_sub.egg-info to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub-0.0.0-py3.10.egg-info
+[0.654s] running install_scripts
+[0.718s] Installing listener script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub
+[0.718s] Installing talker script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub
+[0.719s] writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log'
+[0.737s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/pub_sub' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/pub_sub build --build-base /home/user/docker_ws/das_ros2_ws/build/pub_sub/build install --record /home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log --single-version-externally-managed install_data

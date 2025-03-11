@@ -1,0 +1,39 @@
+/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options
+!!
+
+        ********************************************************************************
+        Usage of dash-separated 'script-dir' will not be supported in future
+        versions. Please use the underscore name 'script_dir' instead.
+
+        This deprecation is overdue, please update your project and remove deprecated
+        calls to avoid build errors in the future.
+
+        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+        ********************************************************************************
+
+!!
+  opt = self.warn_dash_deprecation(opt, section)
+running egg_info
+writing ../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+writing dependency_links to ../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+writing entry points to ../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+writing requirements to ../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+writing top-level names to ../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+reading manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+running build
+running build_py
+copying distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+running install
+running install_lib
+copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/the_agent.py to the_agent.cpython-310.pyc
+running install_data
+copying launch_folder/param_launch.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/distributed_algs
+running install_egg_info
+removing '/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info' (and everything under it)
+Copying ../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info
+running install_scripts
+Installing generic_agent script to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/distributed_algs
+writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log'

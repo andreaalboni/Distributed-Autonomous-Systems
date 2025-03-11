@@ -1,0 +1,54 @@
+[0.634s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --install-scripts $base/lib/distributed_algs --single-version-externally-managed install_data
+[0.702s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options
+[0.702s] !!
+[0.702s] 
+[0.702s]         ********************************************************************************
+[0.702s]         Usage of dash-separated 'script-dir' will not be supported in future
+[0.702s]         versions. Please use the underscore name 'script_dir' instead.
+[0.702s] 
+[0.702s]         This deprecation is overdue, please update your project and remove deprecated
+[0.702s]         calls to avoid build errors in the future.
+[0.702s] 
+[0.703s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[0.703s]         ********************************************************************************
+[0.703s] 
+[0.703s] !!
+[0.703s]   opt = self.warn_dash_deprecation(opt, section)
+[0.750s] running egg_info
+[0.750s] creating ../../build/distributed_algs/distributed_algs.egg-info
+[0.755s] writing ../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+[0.755s] writing dependency_links to ../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+[0.755s] writing entry points to ../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+[0.755s] writing requirements to ../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+[0.755s] writing top-level names to ../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+[0.755s] writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[0.781s] ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any
+[0.782s] reading manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[0.783s] writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[0.783s] running build
+[0.783s] running build_py
+[0.783s] creating /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build
+[0.783s] creating /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib
+[0.783s] creating /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+[0.783s] copying distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+[0.783s] copying distributed_algs/__init__.py -> /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+[0.783s] running install
+[0.787s] running install_lib
+[0.793s] creating /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[0.793s] copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[0.793s] copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/__init__.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[0.793s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/the_agent.py to the_agent.cpython-310.pyc
+[0.793s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/__init__.py to __init__.cpython-310.pyc
+[0.793s] running install_data
+[0.793s] creating /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/ament_index
+[0.793s] creating /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/ament_index/resource_index
+[0.794s] creating /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/ament_index/resource_index/packages
+[0.794s] copying resource/distributed_algs -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/ament_index/resource_index/packages
+[0.794s] copying package.xml -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/distributed_algs
+[0.794s] copying launch_folder/param_launch.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/distributed_algs
+[0.794s] running install_egg_info
+[0.799s] Copying ../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info
+[0.800s] running install_scripts
+[0.863s] Installing generic_agent script to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/distributed_algs
+[0.863s] writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log'
+[0.879s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --install-scripts $base/lib/distributed_algs --single-version-externally-managed install_data

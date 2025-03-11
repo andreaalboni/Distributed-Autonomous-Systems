@@ -1,0 +1,90 @@
+[0.000000] (-) TimerEvent: {}
+[0.000412] (distributed_algs) JobQueued: {'identifier': 'distributed_algs', 'dependencies': OrderedDict()}
+[0.000490] (pub_sub) JobQueued: {'identifier': 'pub_sub', 'dependencies': OrderedDict()}
+[0.000504] (distributed_algs) JobStarted: {'identifier': 'distributed_algs'}
+[0.005353] (pub_sub) JobStarted: {'identifier': 'pub_sub'}
+[0.100029] (-) TimerEvent: {}
+[0.200282] (-) TimerEvent: {}
+[0.300531] (-) TimerEvent: {}
+[0.400829] (-) TimerEvent: {}
+[0.477052] (distributed_algs) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/distributed_algs', 'build', '--build-base', '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/build', 'install', '--record', '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log', '--install-scripts', '$base/lib/distributed_algs', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/user/docker_ws/das_ros2_ws/src/distributed_algs', 'env': {'HOSTNAME': '99aebe509ad9', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/home/user', 'OLDPWD': '/home/user/docker_ws', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'DEV_NAME': 'user', 'TERM': 'xterm', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'DISPLAY': ':0', 'LANG': 'C.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '100', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'PWD': '/home/user/docker_ws/das_ros2_ws/build/distributed_algs', 'LC_ALL': 'C.UTF-8', 'WS_NAME': 'docker_ws', 'PYTHONPATH': '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[0.479761] (pub_sub) Command: {'cmd': ['/usr/bin/python3', '-W', 'ignore:setup.py install is deprecated', '-W', 'ignore:easy_install command is deprecated', 'setup.py', 'egg_info', '--egg-base', '../../build/pub_sub', 'build', '--build-base', '/home/user/docker_ws/das_ros2_ws/build/pub_sub/build', 'install', '--record', '/home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log', '--install-scripts', '$base/lib/pub_sub', '--single-version-externally-managed', 'install_data'], 'cwd': '/home/user/docker_ws/das_ros2_ws/src/pub_sub', 'env': {'HOSTNAME': '99aebe509ad9', 'SHLVL': '1', 'LD_LIBRARY_PATH': '/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib', 'HOME': '/home/user', 'OLDPWD': '/home/user/docker_ws', 'ROS_PYTHON_VERSION': '3', 'ROS_DISTRO': 'humble', '_': '/usr/bin/colcon', 'ROS_VERSION': '2', 'DEV_NAME': 'user', 'TERM': 'xterm', 'ROS_LOCALHOST_ONLY': '0', 'PATH': '/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin', 'DISPLAY': ':0', 'LANG': 'C.UTF-8', 'LS_COLORS': 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:', 'ROS_DOMAIN_ID': '100', 'AMENT_PREFIX_PATH': '/opt/ros/humble', 'PWD': '/home/user/docker_ws/das_ros2_ws/build/pub_sub', 'LC_ALL': 'C.UTF-8', 'WS_NAME': 'docker_ws', 'PYTHONPATH': '/home/user/docker_ws/das_ros2_ws/build/pub_sub/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages', 'COLCON': '1'}, 'shell': False}
+[0.500955] (-) TimerEvent: {}
+[0.551692] (distributed_algs) StderrLine: {'line': b'/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options\n'}
+[0.551945] (distributed_algs) StderrLine: {'line': b'!!\n'}
+[0.552001] (distributed_algs) StderrLine: {'line': b'\n'}
+[0.552041] (distributed_algs) StderrLine: {'line': b'        ********************************************************************************\n'}
+[0.552083] (distributed_algs) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[0.552117] (distributed_algs) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[0.552151] (distributed_algs) StderrLine: {'line': b'\n'}
+[0.552184] (distributed_algs) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[0.552226] (distributed_algs) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[0.552258] (distributed_algs) StderrLine: {'line': b'\n'}
+[0.552390] (distributed_algs) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[0.552424] (distributed_algs) StderrLine: {'line': b'        ********************************************************************************\n'}
+[0.552458] (distributed_algs) StderrLine: {'line': b'\n'}
+[0.552490] (distributed_algs) StderrLine: {'line': b'!!\n'}
+[0.552526] (distributed_algs) StderrLine: {'line': b'  opt = self.warn_dash_deprecation(opt, section)\n'}
+[0.552560] (pub_sub) StderrLine: {'line': b'/usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options\n'}
+[0.552609] (pub_sub) StderrLine: {'line': b'!!\n'}
+[0.552641] (pub_sub) StderrLine: {'line': b'\n'}
+[0.552672] (pub_sub) StderrLine: {'line': b'        ********************************************************************************\n'}
+[0.552706] (pub_sub) StderrLine: {'line': b"        Usage of dash-separated 'script-dir' will not be supported in future\n"}
+[0.552737] (pub_sub) StderrLine: {'line': b"        versions. Please use the underscore name 'script_dir' instead.\n"}
+[0.552769] (pub_sub) StderrLine: {'line': b'\n'}
+[0.552802] (pub_sub) StderrLine: {'line': b'        This deprecation is overdue, please update your project and remove deprecated\n'}
+[0.552834] (pub_sub) StderrLine: {'line': b'        calls to avoid build errors in the future.\n'}
+[0.552870] (pub_sub) StderrLine: {'line': b'\n'}
+[0.552902] (pub_sub) StderrLine: {'line': b'        See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.\n'}
+[0.552935] (pub_sub) StderrLine: {'line': b'        ********************************************************************************\n'}
+[0.552968] (pub_sub) StderrLine: {'line': b'\n'}
+[0.553005] (pub_sub) StderrLine: {'line': b'!!\n'}
+[0.553042] (pub_sub) StderrLine: {'line': b'  opt = self.warn_dash_deprecation(opt, section)\n'}
+[0.601054] (distributed_algs) StdoutLine: {'line': b'running egg_info\n'}
+[0.601325] (-) TimerEvent: {}
+[0.601399] (pub_sub) StdoutLine: {'line': b'running egg_info\n'}
+[0.606422] (distributed_algs) StdoutLine: {'line': b'writing ../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO\n'}
+[0.606783] (pub_sub) StdoutLine: {'line': b'writing ../../build/pub_sub/pub_sub.egg-info/PKG-INFO\n'}
+[0.607254] (distributed_algs) StdoutLine: {'line': b'writing dependency_links to ../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt\n'}
+[0.607332] (pub_sub) StdoutLine: {'line': b'writing dependency_links to ../../build/pub_sub/pub_sub.egg-info/dependency_links.txt\n'}
+[0.607389] (pub_sub) StdoutLine: {'line': b'writing entry points to ../../build/pub_sub/pub_sub.egg-info/entry_points.txt\n'}
+[0.607600] (distributed_algs) StdoutLine: {'line': b'writing entry points to ../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt\n'}
+[0.607683] (distributed_algs) StdoutLine: {'line': b'writing requirements to ../../build/distributed_algs/distributed_algs.egg-info/requires.txt\n'}
+[0.607754] (distributed_algs) StdoutLine: {'line': b'writing top-level names to ../../build/distributed_algs/distributed_algs.egg-info/top_level.txt\n'}
+[0.608105] (pub_sub) StdoutLine: {'line': b'writing requirements to ../../build/pub_sub/pub_sub.egg-info/requires.txt\n'}
+[0.608227] (pub_sub) StdoutLine: {'line': b'writing top-level names to ../../build/pub_sub/pub_sub.egg-info/top_level.txt\n'}
+[0.632879] (pub_sub) StderrLine: {'line': b"ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any\n"}
+[0.633202] (distributed_algs) StderrLine: {'line': b"ERROR setuptools_scm._file_finders.git listing git files failed - pretending there aren't any\n"}
+[0.633481] (pub_sub) StdoutLine: {'line': b"reading manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'\n"}
+[0.633839] (distributed_algs) StdoutLine: {'line': b"reading manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'\n"}
+[0.634402] (pub_sub) StdoutLine: {'line': b"writing manifest file '../../build/pub_sub/pub_sub.egg-info/SOURCES.txt'\n"}
+[0.634499] (pub_sub) StdoutLine: {'line': b'running build\n'}
+[0.634540] (pub_sub) StdoutLine: {'line': b'running build_py\n'}
+[0.634617] (distributed_algs) StdoutLine: {'line': b"writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'\n"}
+[0.634696] (pub_sub) StdoutLine: {'line': b'running install\n'}
+[0.634754] (distributed_algs) StdoutLine: {'line': b'running build\n'}
+[0.634791] (distributed_algs) StdoutLine: {'line': b'running build_py\n'}
+[0.634966] (distributed_algs) StdoutLine: {'line': b'running install\n'}
+[0.638300] (pub_sub) StdoutLine: {'line': b'running install_lib\n'}
+[0.638522] (distributed_algs) StdoutLine: {'line': b'running install_lib\n'}
+[0.644793] (pub_sub) StdoutLine: {'line': b'running install_data\n'}
+[0.644970] (pub_sub) StdoutLine: {'line': b'running install_egg_info\n'}
+[0.645079] (distributed_algs) StdoutLine: {'line': b'running install_data\n'}
+[0.645159] (distributed_algs) StdoutLine: {'line': b'running install_egg_info\n'}
+[0.651133] (pub_sub) StdoutLine: {'line': b"removing '/home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[0.651207] (distributed_algs) StdoutLine: {'line': b"removing '/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info' (and everything under it)\n"}
+[0.651314] (pub_sub) StdoutLine: {'line': b'Copying ../../build/pub_sub/pub_sub.egg-info to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/python3.10/site-packages/pub_sub-0.0.0-py3.10.egg-info\n'}
+[0.651379] (distributed_algs) StdoutLine: {'line': b'Copying ../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info\n'}
+[0.651810] (pub_sub) StdoutLine: {'line': b'running install_scripts\n'}
+[0.651847] (distributed_algs) StdoutLine: {'line': b'running install_scripts\n'}
+[0.701484] (-) TimerEvent: {}
+[0.713273] (pub_sub) StdoutLine: {'line': b'Installing listener script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub\n'}
+[0.713776] (pub_sub) StdoutLine: {'line': b'Installing talker script to /home/user/docker_ws/das_ros2_ws/install/pub_sub/lib/pub_sub\n'}
+[0.713851] (distributed_algs) StdoutLine: {'line': b'Installing generic_agent script to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/distributed_algs\n'}
+[0.713896] (pub_sub) StdoutLine: {'line': b"writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/pub_sub/install.log'\n"}
+[0.713932] (distributed_algs) StdoutLine: {'line': b"writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log'\n"}
+[0.731867] (distributed_algs) CommandEnded: {'returncode': 0}
+[0.738747] (distributed_algs) JobEnded: {'identifier': 'distributed_algs', 'rc': 0}
+[0.739613] (pub_sub) CommandEnded: {'returncode': 0}
+[0.743165] (pub_sub) JobEnded: {'identifier': 'pub_sub', 'rc': 0}
+[0.743694] (-) EventReactorShutdown: {}
