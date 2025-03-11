@@ -4,3 +4,6 @@ source;share/distributed_algs/hook/pythonpath.sh
 source;share/distributed_algs/hook/ament_prefix_path.ps1
 source;share/distributed_algs/hook/ament_prefix_path.dsv
 source;share/distributed_algs/hook/ament_prefix_path.sh
+source;../../build/distributed_algs/share/distributed_algs/hook/pythonpath_develop.ps1
+source;../../build/distributed_algs/share/distributed_algs/hook/pythonpath_develop.dsv
+source;../../build/distributed_algs/share/distributed_algs/hook/pythonpath_develop.sh

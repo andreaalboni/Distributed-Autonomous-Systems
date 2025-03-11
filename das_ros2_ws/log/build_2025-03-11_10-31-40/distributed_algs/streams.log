@@ -1,0 +1,38 @@
+[0.626s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --install-scripts $base/lib/distributed_algs --single-version-externally-managed install_data
+[0.713s] /usr/local/lib/python3.10/dist-packages/setuptools/dist.py:745: SetuptoolsDeprecationWarning: Invalid dash-separated options
+[0.714s] !!
+[0.714s] 
+[0.714s]         ********************************************************************************
+[0.714s]         Usage of dash-separated 'script-dir' will not be supported in future
+[0.714s]         versions. Please use the underscore name 'script_dir' instead.
+[0.714s] 
+[0.714s]         This deprecation is overdue, please update your project and remove deprecated
+[0.714s]         calls to avoid build errors in the future.
+[0.714s] 
+[0.714s]         See https://setuptools.pypa.io/en/latest/userguide/declarative_config.html for details.
+[0.714s]         ********************************************************************************
+[0.714s] 
+[0.714s] !!
+[0.714s]   opt = self.warn_dash_deprecation(opt, section)
+[0.777s] running egg_info
+[0.784s] writing ../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+[0.784s] writing dependency_links to ../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+[0.784s] writing entry points to ../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+[0.785s] writing requirements to ../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+[0.785s] writing top-level names to ../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+[0.828s] writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[0.829s] running build
+[0.829s] running build_py
+[0.829s] copying distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+[0.829s] running install
+[0.837s] running install_lib
+[0.846s] copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[0.846s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/the_agent.py to the_agent.cpython-310.pyc
+[0.848s] running install_data
+[0.848s] running install_egg_info
+[0.857s] removing '/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info' (and everything under it)
+[0.857s] Copying ../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info
+[0.858s] running install_scripts
+[0.929s] Installing generic_agent script to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/distributed_algs
+[0.929s] writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log'
+[0.961s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --install-scripts $base/lib/distributed_algs --single-version-externally-managed install_data
