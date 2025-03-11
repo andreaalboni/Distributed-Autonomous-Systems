@@ -1,0 +1,32 @@
+[0.808s] Invoking command in '/home/user/docker_ws/das_ros2_ws/build/distributed_algs': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build
+[1.015s] running develop
+[1.114s] Removing /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed-algs.egg-link (link to .)
+[1.138s] Invoked command in '/home/user/docker_ws/das_ros2_ws/build/distributed_algs' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --uninstall --editable --build-directory /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build
+[1.140s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --single-version-externally-managed install_data --force
+[1.302s] running egg_info
+[1.309s] writing ../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+[1.310s] writing dependency_links to ../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+[1.310s] writing entry points to ../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+[1.310s] writing requirements to ../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+[1.310s] writing top-level names to ../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+[1.375s] writing manifest file '../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[1.376s] running build
+[1.376s] running build_py
+[1.376s] copying distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs
+[1.376s] running install
+[1.381s] running install_lib
+[1.390s] creating /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[1.390s] copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/the_agent.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[1.390s] copying /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build/lib/distributed_algs/__init__.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs
+[1.390s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/the_agent.py to the_agent.cpython-310.pyc
+[1.390s] byte-compiling /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs/__init__.py to __init__.cpython-310.pyc
+[1.391s] running install_data
+[1.391s] copying resource/distributed_algs -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/ament_index/resource_index/packages
+[1.391s] copying package.xml -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/distributed_algs
+[1.391s] copying launch_folder/param_launch.py -> /home/user/docker_ws/das_ros2_ws/install/distributed_algs/share/distributed_algs
+[1.391s] running install_egg_info
+[1.400s] Copying ../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info
+[1.401s] running install_scripts
+[1.488s] Installing generic_agent script to /home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/distributed_algs
+[1.489s] writing list of installed files to '/home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log'
+[1.532s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs' returned '0': PYTHONPATH=/home/user/docker_ws/das_ros2_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/das_ros2_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/distributed_algs build --build-base /home/user/docker_ws/das_ros2_ws/build/distributed_algs/build install --record /home/user/docker_ws/das_ros2_ws/build/distributed_algs/install.log --single-version-externally-managed install_data --force

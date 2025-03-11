@@ -58,14 +58,18 @@ class Agent(Node):
             self.k += 1
 
             if self.k > 10:
-                print("Maximum iterations reached. Terminating.")
-                self.destroy_node()
+                #print("Maximum iterations reached. Terminating.")
+                #self.destroy_node()
+                raise SystemExit
 
 def main():
     rclpy.init()
     anAgent = Agent()
     sleep(1)
-    rclpy.spin(anAgent)
+    try:
+        rclpy.spin(anAgent)
+    except SystemExit:
+        print("Maximum iterations reached. Terminating.")
     anAgent.destroy_node()
     rclpy.shutdown()
 
