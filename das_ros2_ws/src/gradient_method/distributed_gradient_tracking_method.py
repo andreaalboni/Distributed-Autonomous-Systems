@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 np.random.seed(0)
 
-
 def create_graph(NN, p_er):
     ONES = np.ones((NN, NN))
     while 1:
@@ -16,19 +15,16 @@ def create_graph(NN, p_er):
 
     A = Adj + np.eye(NN)
 
-    while any(abs(np.sum(A, axis=1) - 1) > 1e-10):
-        A = A / (A @ ONES)
-        A = A / (ONES.T @ A)
+    while any(abs(np.sum(A, axis=0) - 1) > 1e-10):
+        #A = A / (A @ ONES)     # Guarantees row stochasticity
+        A = A / (ONES.T @ A)    # Guarantees column stochasticity
         A = np.abs(A)
-
     return Adj, A
-
 
 def cost_fcn(zz, QQ, rr):
     val = 0.5 * QQ * (zz**2) + rr * zz
     grad = QQ * zz + rr
     return val, grad
-
 
 NN = 10
 Q = []
@@ -85,9 +81,18 @@ for k in range(maxIters - 1):
 
 z_avg = np.mean(z, axis=1)
 
+# Working without ROW stochasticity - trying to find the average 
+cost_avg = np.zeros((maxIters))
+for k in range(maxIters - 1):
+    for i in range(NN):
+        ell_i, _ = cost_fcn(z[k,i], Q[i], r[i])
+        cost_avg[k] += ell_i
+
+
 fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
 ax = axes[0]
 ax.semilogy(np.arange(maxIters - 1), np.abs(cost[:-1] - cost_opt))
+ax.semilogy(np.arange(maxIters - 1), np.abs(cost_avg[:-1] - cost_opt))
 # ax.plot(np.arange(maxIters - 1), cost[:-1])
 # ax.plot(np.arange(maxIters - 1), cost_opt * np.ones((maxIters - 1)), "r--")
 
@@ -95,6 +100,5 @@ ax = axes[1]
 for i in range(NN):
     ax.semilogy(np.arange(maxIters), np.abs(z[:, i] - z_avg))
     # ax.plot(np.arange(maxIters), z[:, i] - z_avg)
-
 
 plt.show()
