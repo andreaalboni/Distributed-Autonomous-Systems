@@ -1,0 +1,26 @@
+running egg_info
+creating ../../../build/formation_control/formation_control_ros.egg-info
+writing ../../../build/formation_control/formation_control_ros.egg-info/PKG-INFO
+writing dependency_links to ../../../build/formation_control/formation_control_ros.egg-info/dependency_links.txt
+writing entry points to ../../../build/formation_control/formation_control_ros.egg-info/entry_points.txt
+writing requirements to ../../../build/formation_control/formation_control_ros.egg-info/requires.txt
+writing top-level names to ../../../build/formation_control/formation_control_ros.egg-info/top_level.txt
+writing manifest file '../../../build/formation_control/formation_control_ros.egg-info/SOURCES.txt'
+reading manifest file '../../../build/formation_control/formation_control_ros.egg-info/SOURCES.txt'
+writing manifest file '../../../build/formation_control/formation_control_ros.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/user/docker_ws/build/formation_control/build
+creating /home/user/docker_ws/build/formation_control/build/lib
+creating /home/user/docker_ws/build/formation_control/build/lib/formation_control_ros
+copying formation_control_ros/the_agent.py -> /home/user/docker_ws/build/formation_control/build/lib/formation_control_ros
+copying formation_control_ros/__init__.py -> /home/user/docker_ws/build/formation_control/build/lib/formation_control_ros
+running install
+running install_lib
+creating /home/user/docker_ws/install/formation_control/lib/python3.10/site-packages/formation_control_ros
+copying /home/user/docker_ws/build/formation_control/build/lib/formation_control_ros/the_agent.py -> /home/user/docker_ws/install/formation_control/lib/python3.10/site-packages/formation_control_ros
+copying /home/user/docker_ws/build/formation_control/build/lib/formation_control_ros/__init__.py -> /home/user/docker_ws/install/formation_control/lib/python3.10/site-packages/formation_control_ros
+byte-compiling /home/user/docker_ws/install/formation_control/lib/python3.10/site-packages/formation_control_ros/the_agent.py to the_agent.cpython-310.pyc
+error: can't copy 'resource/formation_control_ros': doesn't exist or not a regular file
+byte-compiling /home/user/docker_ws/install/formation_control/lib/python3.10/site-packages/formation_control_ros/__init__.py to __init__.cpython-310.pyc
+running install_data

@@ -1,0 +1,2 @@
+[console_scripts]
+generic_agent = distributed_algs.the_agent:main

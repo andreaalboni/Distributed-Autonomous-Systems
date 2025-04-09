@@ -1,0 +1,20 @@
+[0.776s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs': PYTHONPATH=/home/user/docker_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/distributed_algs build --build-base /home/user/docker_ws/build/distributed_algs/build install --record /home/user/docker_ws/build/distributed_algs/install.log --single-version-externally-managed install_data
+[0.907s] running egg_info
+[0.913s] writing ../../../build/distributed_algs/distributed_algs.egg-info/PKG-INFO
+[0.913s] writing dependency_links to ../../../build/distributed_algs/distributed_algs.egg-info/dependency_links.txt
+[0.913s] writing entry points to ../../../build/distributed_algs/distributed_algs.egg-info/entry_points.txt
+[0.913s] writing requirements to ../../../build/distributed_algs/distributed_algs.egg-info/requires.txt
+[0.914s] writing top-level names to ../../../build/distributed_algs/distributed_algs.egg-info/top_level.txt
+[0.964s] writing manifest file '../../../build/distributed_algs/distributed_algs.egg-info/SOURCES.txt'
+[0.964s] running build
+[0.964s] running build_py
+[0.964s] running install
+[0.968s] running install_lib
+[0.975s] running install_data
+[0.975s] running install_egg_info
+[0.981s] removing '/home/user/docker_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info' (and everything under it)
+[0.981s] Copying ../../../build/distributed_algs/distributed_algs.egg-info to /home/user/docker_ws/install/distributed_algs/lib/python3.10/site-packages/distributed_algs-0.0.0-py3.10.egg-info
+[0.981s] running install_scripts
+[1.050s] Installing generic_agent script to /home/user/docker_ws/install/distributed_algs/lib/distributed_algs
+[1.050s] writing list of installed files to '/home/user/docker_ws/build/distributed_algs/install.log'
+[1.087s] Invoked command in '/home/user/docker_ws/das_ros2_ws/src/distributed_algs' returned '0': PYTHONPATH=/home/user/docker_ws/build/distributed_algs/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/install/distributed_algs/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/distributed_algs build --build-base /home/user/docker_ws/build/distributed_algs/build install --record /home/user/docker_ws/build/distributed_algs/install.log --single-version-externally-managed install_data

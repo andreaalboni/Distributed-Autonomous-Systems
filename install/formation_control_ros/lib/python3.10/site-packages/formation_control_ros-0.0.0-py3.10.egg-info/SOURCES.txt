@@ -1,0 +1,17 @@
+package.xml
+setup.cfg
+setup.py
+../../../build/formation_control_ros/formation_control_ros.egg-info/PKG-INFO
+../../../build/formation_control_ros/formation_control_ros.egg-info/SOURCES.txt
+../../../build/formation_control_ros/formation_control_ros.egg-info/dependency_links.txt
+../../../build/formation_control_ros/formation_control_ros.egg-info/entry_points.txt
+../../../build/formation_control_ros/formation_control_ros.egg-info/requires.txt
+../../../build/formation_control_ros/formation_control_ros.egg-info/top_level.txt
+../../../build/formation_control_ros/formation_control_ros.egg-info/zip-safe
+formation_control_ros/__init__.py
+formation_control_ros/the_agent.py
+launch_folder/formation_launch.py
+resource/formation_control_ros
+test/test_copyright.py
+test/test_flake8.py
+test/test_pep257.py

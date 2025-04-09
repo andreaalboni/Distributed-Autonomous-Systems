@@ -1,0 +1,42 @@
+[0.882s] Invoking command in '/home/user/docker_ws/das_ros2_ws/src/containment': PYTHONPATH=/home/user/docker_ws/build/containment/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/user/docker_ws/install/containment/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../../build/containment build --build-base /home/user/docker_ws/build/containment/build install --record /home/user/docker_ws/build/containment/install.log --single-version-externally-managed install_data
+[1.014s] running egg_info
+[1.015s] creating ../../../build/containment/containment.egg-info
+[1.021s] writing ../../../build/containment/containment.egg-info/PKG-INFO
+[1.021s] writing dependency_links to ../../../build/containment/containment.egg-info/dependency_links.txt
+[1.021s] writing requirements to ../../../build/containment/containment.egg-info/requires.txt
+[1.021s] writing top-level names to ../../../build/containment/containment.egg-info/top_level.txt
+[1.021s] writing manifest file '../../../build/containment/containment.egg-info/SOURCES.txt'
+[1.194s] writing manifest file '../../../build/containment/containment.egg-info/SOURCES.txt'
+[1.194s] running build
+[1.194s] running build_py
+[1.195s] creating /home/user/docker_ws/build/containment/build
+[1.195s] creating /home/user/docker_ws/build/containment/build/lib
+[1.195s] creating /home/user/docker_ws/build/containment/build/lib/containment
+[1.195s] copying containment/functions.py -> /home/user/docker_ws/build/containment/build/lib/containment
+[1.195s] copying containment/time_varying_consensus.py -> /home/user/docker_ws/build/containment/build/lib/containment
+[1.196s] copying containment/__init__.py -> /home/user/docker_ws/build/containment/build/lib/containment
+[1.196s] copying containment/ct_containment.py -> /home/user/docker_ws/build/containment/build/lib/containment
+[1.196s] copying containment/dt_containment.py -> /home/user/docker_ws/build/containment/build/lib/containment
+[1.196s] running install
+[1.198s] running install_lib
+[1.205s] creating /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.205s] copying /home/user/docker_ws/build/containment/build/lib/containment/functions.py -> /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.205s] copying /home/user/docker_ws/build/containment/build/lib/containment/time_varying_consensus.py -> /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.205s] copying /home/user/docker_ws/build/containment/build/lib/containment/__init__.py -> /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.205s] copying /home/user/docker_ws/build/containment/build/lib/containment/ct_containment.py -> /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.205s] copying /home/user/docker_ws/build/containment/build/lib/containment/dt_containment.py -> /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment
+[1.206s] byte-compiling /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment/functions.py to functions.cpython-310.pyc
+[1.206s] byte-compiling /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment/time_varying_consensus.py to time_varying_consensus.cpython-310.pyc
+[1.207s] byte-compiling /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment/__init__.py to __init__.cpython-310.pyc
+[1.207s] byte-compiling /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment/ct_containment.py to ct_containment.cpython-310.pyc
+[1.207s] byte-compiling /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment/dt_containment.py to dt_containment.cpython-310.pyc
+[1.207s] running install_data
+[1.207s] creating /home/user/docker_ws/install/containment/share/ament_index
+[1.207s] creating /home/user/docker_ws/install/containment/share/ament_index/resource_index
+[1.207s] creating /home/user/docker_ws/install/containment/share/ament_index/resource_index/packages
+[1.207s] copying resource/containment -> /home/user/docker_ws/install/containment/share/ament_index/resource_index/packages
+[1.208s] copying package.xml -> /home/user/docker_ws/install/containment/share/containment
+[1.208s] running install_egg_info
+[1.214s] Copying ../../../build/containment/containment.egg-info to /home/user/docker_ws/install/containment/lib/python3.10/site-packages/containment-0.0.0-py3.10.egg-info
+[1.214s] running install_scripts
+[1.279s] writing list of installed files to '/home/user/docker_ws/build/containment/install.log'

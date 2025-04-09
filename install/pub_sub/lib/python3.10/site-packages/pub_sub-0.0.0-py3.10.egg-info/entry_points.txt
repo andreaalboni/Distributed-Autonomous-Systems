@@ -1,0 +1,3 @@
+[console_scripts]
+listener = pub_sub.subscriber:main
+talker = pub_sub.publisher:main

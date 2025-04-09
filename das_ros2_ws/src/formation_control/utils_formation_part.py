@@ -21,7 +21,7 @@ def formation_vect_field(xt, n_x, distances):
         N_i = np.where(distances[i] > 0)[0]    # Indexes of non-zeros elements in row i -> neighbors
         for j in N_i:
             xj = xt_reshaped[j]
-            dxt[i] += (np.linalg.norm(xi - xj)**2 - distances[i, j]**2) * (xi - xj)
+            dxt[i] -= (np.linalg.norm(xi - xj)**2 - distances[i, j]**2) * (xi - xj)
     return dxt.reshape(-1)
 
 

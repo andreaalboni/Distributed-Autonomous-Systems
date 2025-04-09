@@ -38,9 +38,10 @@ res = solve_ivp(
 XX = res.y.T
 
 fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(8, 6))
+fig.suptitle("Formation Control")
+
 ax = axes[0]
 ax.plot(horizon, XX)
-ax.set_title("Formation Control")
 ax.set_xlabel("Time")
 ax.set_ylabel("Position")
 ax.legend([f"Agent {i+1}" for i in range(NN)])
@@ -49,6 +50,8 @@ ax.grid()
 ax = axes[1]
 err = inter_distance_error(XX, NN, n_x, distances, horizon)
 ax.semilogy(horizon, err)
+ax.set_xlabel("Time")
+ax.set_ylabel("Err")
 ax.legend([f"Agent {i+1}" for i in range(NN)])
 ax.grid()
 
