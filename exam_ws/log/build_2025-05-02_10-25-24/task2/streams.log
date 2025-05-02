@@ -1,0 +1,33 @@
+[1.051s] Invoking command in '/home/andre/das_ws/docker_ws/exam_ws/src/task2': PYTHONPATH=/home/andre/das_ws/docker_ws/exam_ws/build/task2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/task2 build --build-base /home/andre/das_ws/docker_ws/exam_ws/build/task2/build install --record /home/andre/das_ws/docker_ws/exam_ws/build/task2/install.log --single-version-externally-managed install_data
+[1.293s] running egg_info
+[1.293s] creating ../../build/task2/task2.egg-info
+[1.293s] writing ../../build/task2/task2.egg-info/PKG-INFO
+[1.293s] writing dependency_links to ../../build/task2/task2.egg-info/dependency_links.txt
+[1.293s] writing entry points to ../../build/task2/task2.egg-info/entry_points.txt
+[1.293s] writing requirements to ../../build/task2/task2.egg-info/requires.txt
+[1.293s] writing top-level names to ../../build/task2/task2.egg-info/top_level.txt
+[1.293s] writing manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+[1.294s] reading manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+[1.294s] writing manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+[1.295s] running build
+[1.295s] running build_py
+[1.295s] creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build
+[1.295s] creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib
+[1.295s] creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2
+[1.295s] copying task2/__init__.py -> /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2
+[1.295s] running install
+[1.295s] running install_lib
+[1.295s] creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2
+[1.295s] copying /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2/__init__.py -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2
+[1.296s] byte-compiling /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2/__init__.py to __init__.cpython-310.pyc
+[1.296s] running install_data
+[1.296s] creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index
+[1.296s] creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index
+[1.296s] creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index/packages
+[1.296s] copying resource/task2 -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index/packages
+[1.296s] copying package.xml -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/task2
+[1.296s] running install_egg_info
+[1.298s] Copying ../../build/task2/task2.egg-info to /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2-0.0.0-py3.10.egg-info
+[1.298s] running install_scripts
+[1.314s] writing list of installed files to '/home/andre/das_ws/docker_ws/exam_ws/build/task2/install.log'
+[1.351s] Invoked command in '/home/andre/das_ws/docker_ws/exam_ws/src/task2' returned '0': PYTHONPATH=/home/andre/das_ws/docker_ws/exam_ws/build/task2/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/task2 build --build-base /home/andre/das_ws/docker_ws/exam_ws/build/task2/build install --record /home/andre/das_ws/docker_ws/exam_ws/build/task2/install.log --single-version-externally-managed install_data

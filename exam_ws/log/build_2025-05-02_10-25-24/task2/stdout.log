@@ -1,0 +1,31 @@
+running egg_info
+creating ../../build/task2/task2.egg-info
+writing ../../build/task2/task2.egg-info/PKG-INFO
+writing dependency_links to ../../build/task2/task2.egg-info/dependency_links.txt
+writing entry points to ../../build/task2/task2.egg-info/entry_points.txt
+writing requirements to ../../build/task2/task2.egg-info/requires.txt
+writing top-level names to ../../build/task2/task2.egg-info/top_level.txt
+writing manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+reading manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+writing manifest file '../../build/task2/task2.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build
+creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib
+creating /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2
+copying task2/__init__.py -> /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2
+running install
+running install_lib
+creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2
+copying /home/andre/das_ws/docker_ws/exam_ws/build/task2/build/lib/task2/__init__.py -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2
+byte-compiling /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2/__init__.py to __init__.cpython-310.pyc
+running install_data
+creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index
+creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index
+creating /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index/packages
+copying resource/task2 -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/ament_index/resource_index/packages
+copying package.xml -> /home/andre/das_ws/docker_ws/exam_ws/install/task2/share/task2
+running install_egg_info
+Copying ../../build/task2/task2.egg-info to /home/andre/das_ws/docker_ws/exam_ws/install/task2/lib/python3.10/site-packages/task2-0.0.0-py3.10.egg-info
+running install_scripts
+writing list of installed files to '/home/andre/das_ws/docker_ws/exam_ws/build/task2/install.log'
