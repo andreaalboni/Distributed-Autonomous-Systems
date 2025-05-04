@@ -6,21 +6,41 @@ def get_default_params():
         'num_targets': 3,
         'ratio_at': 5,
         'world_size': [10, 10],
-        'noise_level': 0.1
+        'noise_level': 0.1,
+        'bias': 0.0,
+        'radius_fov': np.inf,
     }
 
+_params = get_default_params()
 
-def generate_agents_and_targets(num_targets, ratio_at=5, world_size=[10,10]):
+def set_params(params_to_update):
+    global _params
+    valid_params = set(_params.keys())
+    invalid_params = set(params_to_update.keys()) - valid_params
+    
+    if invalid_params:
+        raise ValueError(f"Invalid parameters: {invalid_params}. Valid parameters are: {valid_params}")
+    
+    _params.update(params_to_update)
+
+
+def generate_agents_and_targets():
+    num_targets = _params['num_targets']
+    ratio_at = _params['ratio_at']
+    world_size = _params['world_size']
+    
     targets = np.random.randint(0, world_size[0], size=(num_targets, 2))
     num_agents = int(num_targets * ratio_at)
     while True:
         agents = np.random.randint(0, world_size[0], size=(num_agents, 2))
-        if not np.any(np.all(agents[:, None] == targets, axis=2)):
+        if not np.any(np.all(agents[:, None] == targets, axis=2)) and not np.any(np.all(targets[:, None] == agents, axis=2)):
             break
     return targets, agents
 
 
-def visualize_world(agents, targets, world_size=[10,10]):
+def visualize_world(agents, targets):
+    world_size = _params['world_size']
+    
     plt.figure(figsize=(8, 8))
     for agent in agents:
         plt.scatter(agent[0], agent[1], c='blue', marker='o', label='Agent')
@@ -30,24 +50,36 @@ def visualize_world(agents, targets, world_size=[10,10]):
     plt.ylim(0, world_size[1])
     plt.title('World Visualization')
     plt.show()
+
+
+def get_distances(agents, targets):
+    radius_fov = _params['radius_fov']
+    noise_level = _params['noise_level']
+    bias = _params['bias']
     
-    
-def get_distances(agents, targets, normal=True, noise_level=0.1, bias=0.0):
     distances = []
     for agent in agents:
         agent_distance = []
         for target in targets:
-            agent_distance.append(np.linalg.norm(agent - target))
+            dist = np.linalg.norm(agent - target)
+            if dist <= radius_fov:
+                agent_distance.append(dist)
+            else:
+                agent_distance.append(np.nan)
         distances.append(agent_distance)
     noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
-    return distances, noisy_distances
+    return np.array(distances), np.array(noisy_distances)
 
 
 def main():
-    t, a = generate_agents_and_targets(5)
+    set_params({
+        'num_targets': 1,
+        'world_size': [5, 5]
+    })
+    
+    t, a = generate_agents_and_targets()
     visualize_world(a, t)
-    distances, noisy_distances = get_distances(a, t, noise_level=0.1)
-    
-    
+    distances, noisy_distances = get_distances(a, t)
+
 if __name__ == "__main__":
     main()
