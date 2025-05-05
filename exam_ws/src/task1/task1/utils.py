@@ -1,85 +1,163 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import warnings
+import networkx as nx
+
 
 def get_default_params():
     return {
-        'num_targets': 3,
+        'num_targets': 5,
         'ratio_at': 5,
         'world_size': [10, 10],
+        'radius_fov': 3,
         'noise_level': 0.1,
-        'bias': 0.0,
-        'radius_fov': np.inf,
+        'bias': 0.0
     }
 
-_params = get_default_params()
 
-def set_params(params_to_update):
-    global _params
-    valid_params = set(_params.keys())
-    invalid_params = set(params_to_update.keys()) - valid_params
-    
-    if invalid_params:
-        raise ValueError(f"Invalid parameters: {invalid_params}. Valid parameters are: {valid_params}")
-    
-    _params.update(params_to_update)
-
-
-def generate_agents_and_targets():
-    num_targets = _params['num_targets']
-    ratio_at = _params['ratio_at']
-    world_size = _params['world_size']
-    
-    targets = np.random.randint(0, world_size[0], size=(num_targets, 2))
-    num_agents = int(num_targets * ratio_at)
+def is_in_fov(agent_pos, target_pos, radius_fov):
+    return np.linalg.norm(agent_pos - target_pos) <= radius_fov
+        
+def spawn_agent_near_target(target, world_size, radius_fov, existing_agents, existing_targets):
     while True:
-        agents = np.random.randint(0, world_size[0], size=(num_agents, 2))
-        if not np.any(np.all(agents[:, None] == targets, axis=2)) and not np.any(np.all(targets[:, None] == agents, axis=2)):
-            break
-    return targets, agents
+        candidate = np.random.uniform(0, world_size[0], size=2)
+        if (is_in_fov(candidate, target, radius_fov) and 
+            not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
+            not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
+            return candidate
+        
+def spawn_candidate(world_size, existing_agents, existing_targets):
+    while True:
+        candidate = np.random.uniform(0, world_size[0], size=2)
+        if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
+            not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
+            return candidate
 
 
-def visualize_world(agents, targets):
-    world_size = _params['world_size']
-    
-    plt.figure(figsize=(8, 8))
-    for agent in agents:
-        plt.scatter(agent[0], agent[1], c='blue', marker='o', label='Agent')
-    for target in targets:
-        plt.scatter(target[0], target[1], c='red', marker='+', label='Target')
-    plt.xlim(0, world_size[0])
-    plt.ylim(0, world_size[1])
-    plt.title('World Visualization')
-    plt.show()
 
+def generate_agents_and_targets(num_targets, ratio_at, world_size, radius_fov):
+    targets = []
+    agents = []
 
-def get_distances(agents, targets):
-    radius_fov = _params['radius_fov']
-    noise_level = _params['noise_level']
-    bias = _params['bias']
-    
+    # Spawn targets and required agents
+    for _ in range(num_targets):
+        target = spawn_candidate(world_size, agents, targets)
+        targets.append(target)
+        visible_agents = sum(is_in_fov(agent, target, radius_fov) for agent in agents)
+        for _ in range(3 - visible_agents):
+            agents.append(spawn_agent_near_target(target, world_size, radius_fov, agents, targets))
+
+        
+    # Add remaining agents randomly
+    total_agents_needed = int(num_targets * ratio_at)
+    while len(agents) < total_agents_needed:
+        candidate = spawn_candidate(world_size, agents, targets)
+        agents.append(candidate)
+        
+    if len(agents) > total_agents_needed:
+        warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
+        
+    return np.array(targets), np.array(agents)
+
+def get_distances(agents, targets, noise_level=0.0, bias=0.0):
     distances = []
     for agent in agents:
         agent_distance = []
         for target in targets:
-            dist = np.linalg.norm(agent - target)
-            if dist <= radius_fov:
-                agent_distance.append(dist)
-            else:
-                agent_distance.append(np.nan)
+            agent_distance.append(np.linalg.norm(agent - target))
         distances.append(agent_distance)
     noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
-    return np.array(distances), np.array(noisy_distances)
+    return np.array(distances), noisy_distances
+
+def ensure_Adj_doubly_stocasticity(num_agents, Adj):
+    A = Adj + np.eye(num_agents)
+    ONES = np.ones((num_agents, num_agents))
+    while any(abs(np.sum(A, axis=0) - 1) > 1e-10):
+        A = A / (A @ ONES)     # Guarantees row stochasticity
+        A = A / (ONES.T @ A)    # Guarantees column stochasticity
+        A = np.abs(A)
+    return A
+
+def generate_graph(num_agents, type, p_er=0.5):
+    if type == 'path':
+        G = nx.path_graph(num_agents)
+        Adj = nx.adjacency_matrix(G).toarray()
+    elif type == 'cycle':
+        G = nx.path_graph(num_agents)
+        G.add_edge(0, num_agents-1) # Add an edge between the first and last node
+        Adj = nx.adjacency_matrix(G).toarray()
+    elif type == 'star':
+        G = nx.star_graph(num_agents)
+        Adj = nx.adjacency_matrix(G).toarray()
+    elif type == 'erdos_renyi':
+        while True:
+            G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) # Create a random graph with N nodes and probability of edge creation 0.5
+            Adj = nx.adjacency_matrix(G).toarray()
+            test = np.linalg.matrix_power(Adj + np.eye(num_agents), num_agents)
+            if np.all(test > 0):
+                break
+    else:
+        raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
+    
+    A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
+    
+    return G, Adj, A
+
+def local_cost_function(z, p_i, distances_i):
+    # p_i position of the agent
+    # z position of the target
+    # distances_i distances to the targets
+    num_targets = len(distances_i)
+    local_cost = 0
+    for target in range(num_targets):
+        estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
+        measured_distance_squared = distances_i[target]**2
+        local_cost += (measured_distance_squared - estimated_distance_squared)**2
+        return local_cost
+
+    
+def visualize_graph(G):
+    plt.figure(figsize=(8, 8))
+    nx.draw(G, with_labels=True)
+    plt.show()
+    
+def visualize_world(agents, targets, world_size):
+    plt.figure(figsize=(8, 8))    
+    plt.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
+    plt.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
+    padding = 0.2 
+    x_min, x_max = 0, world_size[0]
+    y_min, y_max = 0, world_size[1]
+    plt.xlim(x_min - padding * x_max, x_max + padding * x_max)
+    plt.ylim(y_min - padding * y_max, y_max + padding * y_max)
+    plt.title('World Visualization')
+    plt.legend()
+    plt.grid(True)
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.show()
+
 
 
 def main():
-    set_params({
-        'num_targets': 1,
-        'world_size': [5, 5]
-    })
-    
-    t, a = generate_agents_and_targets()
-    visualize_world(a, t)
-    distances, noisy_distances = get_distances(a, t)
+    params = get_default_params()
+    targets, agents = generate_agents_and_targets(
+        num_targets=params['num_targets'],
+        ratio_at=params['ratio_at'],
+        world_size=params['world_size'],
+        radius_fov=params['radius_fov']
+    )
 
+    visualize_world(agents, targets, world_size=params['world_size'])
+
+    real_distances, noisy_distances = get_distances(agents, targets)
+
+    print("Distances:\n", real_distances)
+    
+    G, adj, A = generate_graph(len(agents), type='erdos_renyi', p_er=0.5)
+    visualize_graph(G)
+    
+    print("Adjacency Matrix:\n", adj)
+    print("Doubly Stochastic Matrix:\n", A)
+    
 if __name__ == "__main__":
     main()
