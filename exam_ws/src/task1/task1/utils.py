@@ -6,14 +6,13 @@ import networkx as nx
 
 def get_default_params():
     return {
-        'num_targets': 5,
-        'ratio_at': 5,
-        'world_size': [10, 10],
-        'radius_fov': 3,
+        'num_targets': 2,
+        'ratio_at': 3,
+        'world_size': [5, 5],
+        'radius_fov': np.inf,
         'noise_level': 0.1,
         'bias': 0.0
     }
-
 
 def is_in_fov(agent_pos, target_pos, radius_fov):
     return np.linalg.norm(agent_pos - target_pos) <= radius_fov
@@ -33,12 +32,9 @@ def spawn_candidate(world_size, existing_agents, existing_targets):
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
 
-
-
 def generate_agents_and_targets(num_targets, ratio_at, world_size, radius_fov):
     targets = []
     agents = []
-
     # Spawn targets and required agents
     for _ in range(num_targets):
         target = spawn_candidate(world_size, agents, targets)
@@ -46,17 +42,13 @@ def generate_agents_and_targets(num_targets, ratio_at, world_size, radius_fov):
         visible_agents = sum(is_in_fov(agent, target, radius_fov) for agent in agents)
         for _ in range(3 - visible_agents):
             agents.append(spawn_agent_near_target(target, world_size, radius_fov, agents, targets))
-
-        
     # Add remaining agents randomly
     total_agents_needed = int(num_targets * ratio_at)
     while len(agents) < total_agents_needed:
         candidate = spawn_candidate(world_size, agents, targets)
         agents.append(candidate)
-        
     if len(agents) > total_agents_needed:
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
-        
     return np.array(targets), np.array(agents)
 
 def get_distances(agents, targets, noise_level=0.0, bias=0.0):
@@ -73,7 +65,7 @@ def ensure_Adj_doubly_stocasticity(num_agents, Adj):
     A = Adj + np.eye(num_agents)
     ONES = np.ones((num_agents, num_agents))
     while any(abs(np.sum(A, axis=0) - 1) > 1e-10):
-        A = A / (A @ ONES)     # Guarantees row stochasticity
+        A = A / (A @ ONES)      # Guarantees row stochasticity
         A = A / (ONES.T @ A)    # Guarantees column stochasticity
         A = np.abs(A)
     return A
@@ -98,23 +90,27 @@ def generate_graph(num_agents, type, p_er=0.5):
                 break
     else:
         raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
-    
     A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
-    
     return G, Adj, A
 
+def get_targets_real_positions(targets):
+    return np.array([target for target in targets])
+
 def local_cost_function(z, p_i, distances_i):
-    # p_i position of the agent
-    # z position of the target
-    # distances_i distances to the targets
+    # p_i:  position of the agent
+    # z:    position of the target
+    # distances_i:  distances to the targets
     num_targets = len(distances_i)
     local_cost = 0
+    local_cost_gradient = np.zeros((num_targets, len(p_i)))
     for target in range(num_targets):
+        # Cost function evaluation
         estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
         measured_distance_squared = distances_i[target]**2
-        local_cost += (measured_distance_squared - estimated_distance_squared)**2
-        return local_cost
-
+        local_cost += (measured_distance_squared - estimated_distance_squared)**2 
+        # Gradient evaluation
+        local_cost_gradient[target, :] = 4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i)
+    return local_cost, local_cost_gradient
     
 def visualize_graph(G):
     plt.figure(figsize=(8, 8))
@@ -135,29 +131,3 @@ def visualize_world(agents, targets, world_size):
     plt.grid(True)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
-
-
-
-def main():
-    params = get_default_params()
-    targets, agents = generate_agents_and_targets(
-        num_targets=params['num_targets'],
-        ratio_at=params['ratio_at'],
-        world_size=params['world_size'],
-        radius_fov=params['radius_fov']
-    )
-
-    visualize_world(agents, targets, world_size=params['world_size'])
-
-    real_distances, noisy_distances = get_distances(agents, targets)
-
-    print("Distances:\n", real_distances)
-    
-    G, adj, A = generate_graph(len(agents), type='erdos_renyi', p_er=0.5)
-    visualize_graph(G)
-    
-    print("Adjacency Matrix:\n", adj)
-    print("Doubly Stochastic Matrix:\n", A)
-    
-if __name__ == "__main__":
-    main()

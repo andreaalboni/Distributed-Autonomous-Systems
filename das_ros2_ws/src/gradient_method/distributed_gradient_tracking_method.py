@@ -16,7 +16,7 @@ def create_graph(NN, p_er):
     A = Adj + np.eye(NN)
 
     while any(abs(np.sum(A, axis=0) - 1) > 1e-10):
-        #A = A / (A @ ONES)     # Guarantees row stochasticity
+        A = A / (A @ ONES)      # Guarantees row stochasticity
         A = A / (ONES.T @ A)    # Guarantees column stochasticity
         A = np.abs(A)
     return Adj, A
@@ -91,9 +91,9 @@ for k in range(maxIters - 1):
 
 fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
 ax = axes[0]
-ax.semilogy(np.arange(maxIters - 1), np.abs(cost[:-1] - cost_opt))
-ax.semilogy(np.arange(maxIters - 1), np.abs(cost_avg[:-1] - cost_opt))
-# ax.plot(np.arange(maxIters - 1), cost[:-1])
+# ax.semilogy(np.arange(maxIters - 1), np.abs(cost[:-1] - cost_opt))
+# ax.semilogy(np.arange(maxIters - 1), np.abs(cost_avg[:-1] - cost_opt))
+ax.plot(np.arange(maxIters - 1), cost[:-1])
 # ax.plot(np.arange(maxIters - 1), cost_opt * np.ones((maxIters - 1)), "r--")
 
 ax = axes[1]
