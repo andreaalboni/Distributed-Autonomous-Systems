@@ -45,8 +45,6 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
             _, grad_l_i_new = local_cost_function(z[k+1, i], agents[i], real_distances[i])
             l_i, grad_l_i_old = local_cost_function(z[k, i], agents[i], real_distances[i])
             s[k+1, i] += grad_l_i_new - grad_l_i_old
-            print(f"s[{k+1}, {i}] = {s[k+1,i]}")
-            print("-------------------\n")
             cost[k] += l_i
         
         #print(f"cost at iteration {k}: {cost[k]}")
@@ -56,7 +54,7 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
     ax.semilogy(np.arange(max_iters-1), cost[:-1])
-    ax.title('Cost vs Iteration')
+    ax.set_title('Cost vs Iteration')
     ax.set_xlabel('Iteration')
     ax = axes[1]
     for i in range(len(targets)):
@@ -64,12 +62,15 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
             errors = [np.linalg.norm(z[t, j, i] - z_opt[0, i]) for t in range(max_iters-1)]
             ax.semilogy(np.arange(max_iters-1), errors, label=f'Agent {j+1}, Target {i+1}')
     ax.legend()
-    ax.title('Estimation error vs Iteration')
+    ax.set_title('Estimation error vs Iteration')
     ax.set_xlabel('Iteration')
     ax.grid(True)
     plt.show()
+    
+    animate_world_evolution(agents, targets, world_size=params['world_size'], z_hystory=z)
+    return z, cost
 
-def doll_gradient_tracking_method(params, max_iters=100, alpha=0.1):
+def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
     targets, agents = generate_agents_and_targets(
         num_targets=params['num_targets'],
         ratio_at=params['ratio_at'],
@@ -92,7 +93,7 @@ def doll_gradient_tracking_method(params, max_iters=100, alpha=0.1):
     s = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     
     # Randomly initialize z[0]
-    z[0] = z_opt
+    z[0] = np.random.uniform(params['world_size'][0]/2, params['world_size'][1]/2, z[0].shape)
         
     for i in range(len(agents)):
         _, s[0, i] = doll_cost_function(z[0, i], Q[i], noisy_distances[i])
@@ -124,7 +125,7 @@ def doll_gradient_tracking_method(params, max_iters=100, alpha=0.1):
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
     ax.semilogy(np.arange(max_iters-1), cost[:-1])
-    ax.title('Cost vs Iteration')
+    ax.set_title('Cost vs Iteration')
     ax.set_xlabel('Iteration')
     ax = axes[1]
     for i in range(len(targets)):
@@ -132,7 +133,7 @@ def doll_gradient_tracking_method(params, max_iters=100, alpha=0.1):
             errors = [np.linalg.norm(z[t, j, i] - z_opt[0, i]) for t in range(max_iters-1)]
             ax.semilogy(np.arange(max_iters-1), errors, label=f'Agent {j+1}, Target {i+1}')
     ax.legend()
-    ax.title('Estimation error vs Iteration')
+    ax.set_title('Estimation error vs Iteration')
     ax.set_xlabel('Iteration')
     ax.grid(True)
     plt.show()
@@ -142,7 +143,7 @@ def doll_gradient_tracking_method(params, max_iters=100, alpha=0.1):
 
 def main():
     params = get_default_params()
-    doll_gradient_tracking_method(params)
+    gradient_tracking_method(params)
 
 if __name__ == "__main__":
     main()
