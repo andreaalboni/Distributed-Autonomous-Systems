@@ -6,3 +6,8 @@ But what we really care about is the asymptotic behaviour (not transient periods
 What happens if we lose COLUMN stochasticity? We still have consensus, but the algo doesn't converge to the minimum of the sum of the cost functions. If you compute the left eigenvector of the matrix, than you'll see the agents are cooperatively solving ... left eigenvectors. This is going to WEIGHTED average consensus (and the weights (left eigenvector) are not 1s). 
 
 What if we lose ROW stochasticity? Consensus is lost too, and what we reach makes no sense with respect to the optimality error. 
+
+
+## Quesitons
+* The field of view should apply also between agents?
+* is the norm correct? in the local cost funciton
