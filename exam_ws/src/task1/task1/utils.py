@@ -2,12 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import warnings
 import networkx as nx
+from matplotlib.animation import FuncAnimation
+
 
 
 def get_default_params():
     return {
         'num_targets': 2,
-        'ratio_at': 3,
+        'ratio_at': 5,
         'world_size': [5, 5],
         'radius_fov': np.inf,
         'noise_level': 0.1,
@@ -91,7 +93,8 @@ def generate_graph(num_agents, type, p_er=0.5):
         G = nx.path_graph(num_agents)
         G.add_edge(0, num_agents-1) # Add an edge between the first and last node
     elif type == 'star':
-        G = nx.star_graph(num_agents)
+        G = nx.star_graph(num_agents - 1)
+        visualize_graph(G)
     elif type == 'erdos_renyi':
         # Create a random graph with N nodes and probability of edge creation 0.5
         G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) 
@@ -140,4 +143,68 @@ def visualize_world(agents, targets, world_size):
     plt.legend()
     plt.grid(True)
     plt.gca().set_aspect('equal', adjustable='box')
+    plt.show()
+
+
+def animate_world_evolution(agents, targets, world_size, z_hystory, speed=0):
+    """
+    Animate the evolution of z_history showing the paths from agents to targets.
+
+    Parameters:
+        agents (numpy.ndarray): Initial positions of agents, shape (n_agents, 2).
+        targets (numpy.ndarray): Positions of targets, shape (n_targets, 2).
+        world_size (tuple): Size of the world as (width, height).
+        z_hystory (numpy.ndarray): Array with shape (T, n_agents, n_targets, 2).
+        speed (int): Speed factor for animation frame skipping.
+    """
+    T, n_agents, n_targets, _ = z_hystory.shape
+
+    frame_skip = int(speed)
+    frame_skip += 1
+    num_steps = T // frame_skip
+    positions = z_hystory[::frame_skip]  # Reduce data for animation
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_title("Agents to Targets Animation")
+    padding = 0.2
+    x_min, x_max = 0, world_size[0]
+    y_min, y_max = 0, world_size[1]
+    ax.set_xlim(x_min - padding * x_max, x_max + padding * x_max)
+    ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
+    ax.set_aspect('equal')
+    ax.grid(True)
+
+    # Plot static agents and targets
+    ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
+    ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
+    ax.legend()
+
+    # Create dynamic scatter objects for each agent-target pair
+    scatters = []
+    for _ in range(n_agents * n_targets):
+        scatter = ax.scatter([], [], c='green', s=10)
+        scatters.append(scatter)
+
+    def init():
+        for scatter in scatters:
+            scatter.set_offsets(np.empty((0, 2)))
+        return scatters
+
+    def update(frame):
+        pos = positions[frame]  # shape: (n_agents, n_targets, 2)
+        index = 0
+        for i in range(n_agents):
+            for j in range(n_targets):
+                scatters[index].set_offsets(pos[i, j])
+                index += 1
+        return scatters
+
+    animation = FuncAnimation(
+        fig, update,
+        frames=num_steps,
+        init_func=init,
+        blit=True,
+        interval=50
+    )
+
     plt.show()
