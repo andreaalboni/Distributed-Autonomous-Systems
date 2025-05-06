@@ -70,26 +70,36 @@ def ensure_Adj_doubly_stocasticity(num_agents, Adj):
         A = np.abs(A)
     return A
 
+def ensure_connected_graph(G):
+
+    if nx.is_connected(G):
+        return G
+
+    components = list(nx.connected_components(G))
+    
+    for i in range(len(components) - 1):
+        u = list(components[i])[0]
+        v = list(components[i + 1])[0]
+        G.add_edge(u, v)
+        
+    return G
+
 def generate_graph(num_agents, type, p_er=0.5):
     if type == 'path':
         G = nx.path_graph(num_agents)
-        Adj = nx.adjacency_matrix(G).toarray()
     elif type == 'cycle':
         G = nx.path_graph(num_agents)
         G.add_edge(0, num_agents-1) # Add an edge between the first and last node
-        Adj = nx.adjacency_matrix(G).toarray()
     elif type == 'star':
         G = nx.star_graph(num_agents)
-        Adj = nx.adjacency_matrix(G).toarray()
     elif type == 'erdos_renyi':
-        while True:
-            G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) # Create a random graph with N nodes and probability of edge creation 0.5
-            Adj = nx.adjacency_matrix(G).toarray()
-            test = np.linalg.matrix_power(Adj + np.eye(num_agents), num_agents)
-            if np.all(test > 0):
-                break
+        # Create a random graph with N nodes and probability of edge creation 0.5
+        G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) 
+        G = ensure_connected_graph(G)
     else:
         raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
+    
+    Adj = nx.adjacency_matrix(G).toarray()
     A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
     return G, Adj, A
 
