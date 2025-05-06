@@ -12,13 +12,19 @@ def get_default_params():
         'ratio_at': 5,
         'world_size': [5, 5],
         'radius_fov': np.inf,
-        'noise_level': 0.1,
+        'noise_level': 0.0,
         'bias': 0.0
     }
 
 def is_in_fov(agent_pos, target_pos, radius_fov):
     return np.linalg.norm(agent_pos - target_pos) <= radius_fov
         
+def doll_cost_function(z, Q, z_ref):
+    diff = z - z_ref
+    cost = np.linalg.norm(diff.T @ Q @ diff, 'fro')**2
+    grad = 2 * Q @ diff
+    return cost, grad
+
 def spawn_agent_near_target(target, world_size, radius_fov, existing_agents, existing_targets):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
@@ -73,17 +79,13 @@ def ensure_Adj_doubly_stocasticity(num_agents, Adj):
     return A
 
 def ensure_connected_graph(G):
-
     if nx.is_connected(G):
         return G
-
     components = list(nx.connected_components(G))
-    
     for i in range(len(components) - 1):
         u = list(components[i])[0]
         v = list(components[i + 1])[0]
         G.add_edge(u, v)
-        
     return G
 
 def generate_graph(num_agents, type, p_er=0.5):
