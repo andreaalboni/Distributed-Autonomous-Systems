@@ -1,18 +1,16 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import warnings
+import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
-
 
 def get_default_params():
     return {
-        'num_targets': 2,
+        'num_targets': 3,
         'ratio_at': 5,
         'world_size': [5, 5],
         'radius_fov': np.inf,
-        'noise_level': 0.0,
+        'noise_level': 0.1,
         'bias': 0.0
     }
 
@@ -66,7 +64,7 @@ def get_distances(agents, targets, noise_level=0.0, bias=0.0):
         for target in targets:
             agent_distance.append(np.linalg.norm(agent - target))
         distances.append(agent_distance)
-    noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
+    noisy_distances = np.array(distances)# + np.random.normal(bias, noise_level, np.array(distances).shape)
     return np.array(distances), noisy_distances
 
 def ensure_Adj_doubly_stocasticity(num_agents, Adj):
@@ -96,7 +94,6 @@ def generate_graph(num_agents, type, p_er=0.5):
         G.add_edge(0, num_agents-1) # Add an edge between the first and last node
     elif type == 'star':
         G = nx.star_graph(num_agents - 1)
-        visualize_graph(G)
     elif type == 'erdos_renyi':
         # Create a random graph with N nodes and probability of edge creation 0.5
         G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) 
@@ -105,7 +102,8 @@ def generate_graph(num_agents, type, p_er=0.5):
         raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
     
     Adj = nx.adjacency_matrix(G).toarray()
-    A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
+    #A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
+    A = metropolis_hastings_weights(G)
     return G, Adj, A
 
 def get_targets_real_positions(targets):
@@ -124,6 +122,7 @@ def local_cost_function(z, p_i, distances_i):
         measured_distance_squared = distances_i[target]**2
         local_cost += (measured_distance_squared - estimated_distance_squared)**2 
         # Gradient evaluation
+        #print(4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i))
         local_cost_gradient[target, :] = 4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i)
     return local_cost, local_cost_gradient
     
@@ -147,25 +146,62 @@ def visualize_world(agents, targets, world_size):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
+def Armijo_linesearch(dist, agent, f, search_direction: np.ndarray, z0: np.ndarray, fz0: float, directional_derivative_z0: float, alpha_init: float, beta=0.8, sigma=0.1):
+    alpha = alpha_init
+    c2 = 0.9
+    for iter in range(100):
+        trial_z = z0 + alpha * search_direction
+        f_trial = f(trial_z[0], dist, agent)[0]
+        armijo_condition = f_trial <= fz0 + alpha * sigma * directional_derivative_z0
+        if armijo_condition:
+            grad_l_i = f(trial_z, agent, dist)[1]
+            dir_deriv_trial = (- grad_l_i @ grad_l_i.T)[0][0]
+            curvature_condition = abs(dir_deriv_trial) <= c2 * abs(directional_derivative_z0)
+            if curvature_condition:
+                break
+        alpha = beta * alpha
+        if alpha < 1e-4:
+            alpha = 1e-4
+            break
+    return alpha
 
-def animate_world_evolution(agents, targets, world_size, z_hystory, speed=0):
+def metropolis_hastings_weights(G):
     """
-    Animate the evolution of z_history showing the paths from agents to targets.
+    A_ij = 1/(1 + max(d_i, d_j)) if (i,j) ∈ E and i ≠ j
+           1 - ∑(A_ih) for h ∈ N_i\{i} if i = j
+           0 otherwise
+    """
+    n = G.number_of_nodes()
+    nodes = list(G.nodes())
+    node_to_idx = {node: i for i, node in enumerate(nodes)}
+    degrees = {node: G.degree(node) for node in G.nodes()}
+    A = np.zeros((n, n))
+    
+    # Fill non-diagonal elements (i != j)
+    for i, node_i in enumerate(nodes):
+        for j, node_j in enumerate(nodes):
+            if i != j and G.has_edge(node_i, node_j):
+                d_i = degrees[node_i]
+                d_j = degrees[node_j]
+                A[i, j] = 1 / (1 + max(d_i, d_j))
+    
+    # Fill diagonal elements (i == j)
+    for i, node_i in enumerate(nodes):
+        neighbors = list(G.neighbors(node_i))
+        neighbor_indices = [node_to_idx[neigh] for neigh in neighbors]
+        A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
+    return A
 
-    Parameters:
-        agents (numpy.ndarray): Initial positions of agents, shape (n_agents, 2).
-        targets (numpy.ndarray): Positions of targets, shape (n_targets, 2).
-        world_size (tuple): Size of the world as (width, height).
-        z_hystory (numpy.ndarray): Array with shape (T, n_agents, n_targets, 2).
-        speed (int): Speed factor for animation frame skipping.
-    """
+def animate_world_evolution(agents, targets, world_size, z_hystory, speed=4):
     T, n_agents, n_targets, _ = z_hystory.shape
-
     frame_skip = int(speed)
     frame_skip += 1
     num_steps = T // frame_skip
     positions = z_hystory[::frame_skip]  # Reduce data for animation
-
+    # Add pause frames at the end
+    pause_frames = int(3 * 20)  # 3 seconds at 20 fps
+    positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
+    num_steps = len(positions)
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_title("Agents to Targets Animation")
     padding = 0.2
@@ -175,23 +211,19 @@ def animate_world_evolution(agents, targets, world_size, z_hystory, speed=0):
     ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
     ax.set_aspect('equal')
     ax.grid(True)
-
     # Plot static agents and targets
     ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
     ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
     ax.legend()
-
     # Create dynamic scatter objects for each agent-target pair
     scatters = []
     for _ in range(n_agents * n_targets):
         scatter = ax.scatter([], [], c='green', s=10)
         scatters.append(scatter)
-
     def init():
         for scatter in scatters:
             scatter.set_offsets(np.empty((0, 2)))
         return scatters
-
     def update(frame):
         pos = positions[frame]  # shape: (n_agents, n_targets, 2)
         index = 0
@@ -200,13 +232,12 @@ def animate_world_evolution(agents, targets, world_size, z_hystory, speed=0):
                 scatters[index].set_offsets(pos[i, j])
                 index += 1
         return scatters
-
     animation = FuncAnimation(
         fig, update,
         frames=num_steps,
         init_func=init,
         blit=True,
-        interval=50
+        interval=1,
+        repeat=True
     )
-
     plt.show()

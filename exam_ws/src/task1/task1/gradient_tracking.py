@@ -1,19 +1,19 @@
 import numpy as np
-import networkx as nx
+from utils import *
 import matplotlib.pyplot as plt
 
-from utils import *
-
-def gradient_tracking_method(params, max_iters=400, alpha=0.001):
+def gradient_tracking_method(params, max_iters=1000, alpha=0.001):
     targets, agents = generate_agents_and_targets(
         num_targets=params['num_targets'],
         ratio_at=params['ratio_at'],
         world_size=params['world_size'],
         radius_fov=params['radius_fov']
     )
-    #visualize_world(agents, targets, world_size=params['world_size'])
+    # alpha = alpha / params['world_size'][0]
+    # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
-    G, adj, A = generate_graph(len(agents), type='cycle', p_er=0.5)
+    _, adj, A = generate_graph(len(agents), type='erdos_renyi', p_er=0.5)
+    # visualize_graph(G)
     
     z_opt = get_targets_real_positions(targets)
     
@@ -22,7 +22,8 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
     s = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     
     # Randomly initialize z[0]
-    z[0] = np.random.uniform(params['world_size'][0]/2, params['world_size'][1]/2, z[0].shape)
+    # z[0] = params['world_size'][0]/2 * np.ones((z[0].shape))
+    z[0] = np.random.uniform(0.0, params['world_size'][0], z[0].shape)
         
     for i in range(len(agents)):
         _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
@@ -33,7 +34,20 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
             z[k+1, i] = A[i, i] * z[k, i]
             N_i = np.nonzero(adj[i])[0]
             for j in N_i:
-                z[k+1, i] += A[i, j] * z[k, j]
+                z[k+1, i] += A[i, j] * z[k, j]    
+            
+            #l_i, grad_l_i = local_cost_function(z[k, i], agents[i], real_distances[i])
+            #dir_der = - grad_l_i @ grad_l_i.T
+            #alpha = Armijo_linesearch(
+            #    noisy_distances[i],
+            #    agents[i],
+            #    local_cost_function,
+            #    -grad_l_i,
+            #    z[k, i],
+            #    l_i,
+            #    dir_der[0][0]
+            #)
+            
             z[k+1, i] -= alpha * s[k, i]
         
         for i in range(len(agents)):
@@ -46,10 +60,6 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
             l_i, grad_l_i_old = local_cost_function(z[k, i], agents[i], real_distances[i])
             s[k+1, i] += grad_l_i_new - grad_l_i_old
             cost[k] += l_i
-        
-        #print(f"cost at iteration {k}: {cost[k]}")
-        if cost[k] > 1e5: 
-            break
     
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
@@ -59,18 +69,20 @@ def gradient_tracking_method(params, max_iters=400, alpha=0.001):
     ax = axes[1]
     for i in range(len(targets)):
         for j in range(len(agents)):
-            errors = [np.linalg.norm(z[t, j, i] - z_opt[0, i]) for t in range(max_iters-1)]
-            ax.semilogy(np.arange(max_iters-1), errors, label=f'Agent {j+1}, Target {i+1}')
-    ax.legend()
+            errors = [np.linalg.norm(z[t, j, i] - z_opt[i]) for t in range(max_iters-1)]
+            ax.semilogy(np.arange(max_iters-1), errors)
+    #ax.legend()
     ax.set_title('Estimation error vs Iteration')
     ax.set_xlabel('Iteration')
-    ax.grid(True)
     plt.show()
     
+    # print(f"z optimal: {z_opt}")
+    # print(f"estimated positions of targets: {z[-1, :, :, :]}")
     animate_world_evolution(agents, targets, world_size=params['world_size'], z_hystory=z)
     return z, cost
 
 def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
+    # -------------- Not working yet ------------------
     targets, agents = generate_agents_and_targets(
         num_targets=params['num_targets'],
         ratio_at=params['ratio_at'],
@@ -92,7 +104,6 @@ def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
     z = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     s = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     
-    # Randomly initialize z[0]
     z[0] = np.random.uniform(params['world_size'][0]/2, params['world_size'][1]/2, z[0].shape)
         
     for i in range(len(agents)):
@@ -119,9 +130,6 @@ def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
             l_i, _ = doll_cost_function(z[k, i], Q[i], noisy_distances[i])
             cost[k] += l_i
     
-    print(f"z optimal: {z_opt}")
-    print(f"estimated positions of targets: {z[-1, :, :, :]}")
-    
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
     ax.semilogy(np.arange(max_iters-1), cost[:-1])
@@ -132,7 +140,7 @@ def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
         for j in range(len(agents)):
             errors = [np.linalg.norm(z[t, j, i] - z_opt[0, i]) for t in range(max_iters-1)]
             ax.semilogy(np.arange(max_iters-1), errors, label=f'Agent {j+1}, Target {i+1}')
-    ax.legend()
+    #ax.legend()
     ax.set_title('Estimation error vs Iteration')
     ax.set_xlabel('Iteration')
     ax.grid(True)
