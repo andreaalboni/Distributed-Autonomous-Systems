@@ -5,7 +5,7 @@ PARAMETERS = {
     'ratio_at': 7,
     'world_size': [5, 5],
     'radius_fov': np.inf,
-    'noise_level': 0.5,
-    'bias': 1.0,
+    'noise_level': 0.1,
+    'bias': 0.0,
     'p_er': 0.5,
 }

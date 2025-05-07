@@ -2,6 +2,7 @@ import numpy as np
 from utils import *
 from config import PARAMETERS
 import matplotlib.pyplot as plt
+from save_and_load import save_evolution_data
 
 
 def gradient_tracking_method(max_iters=1500, alpha=0.001):
@@ -93,6 +94,7 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
     
     # print(f"z optimal: {z_opt}")
     # print(f"estimated positions of targets: {z[-1, :, :, :]}")
+    save_evolution_data(agents, targets, z, type=graph_type)
     animate_world_evolution(agents, targets, type=graph_type, z_hystory=z)
     return z, cost
 
