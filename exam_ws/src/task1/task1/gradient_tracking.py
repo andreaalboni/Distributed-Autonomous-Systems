@@ -3,9 +3,9 @@ from utils import *
 from config import PARAMETERS
 import matplotlib.pyplot as plt
 
+
 def gradient_tracking_method(max_iters=1500, alpha=0.001):
     targets, agents = generate_agents_and_targets()
-    # alpha = alpha / params['world_size'][0]
     # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
     graph_type = 'erdos_renyi'
@@ -20,31 +20,49 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
     
     # Randomly initialize z[0]
     # z[0] = params['world_size'][0]/2 * np.ones((z[0].shape))
-    z[0] = np.random.uniform(0.0, PARAMETERS['world_size'][0], z[0].shape)
+    z[0] = np.random.uniform(0.0, min(PARAMETERS['world_size']), z[0].shape)
         
     for i in range(len(agents)):
         _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
 
+    # alpha = alpha / params['world_size'][0]
     # Ch 6 p 14
     for k in range(max_iters - 1):
+        # ------------------ Armijo Linesearch: ------------------
+        # def evaluate_total_cost_function(z_k):
+        #     total_cost = 0
+        #     for i in range(len(agents)):
+        #         l_i, _ = local_cost_function(z_k[i], agents[i], real_distances[i])
+        #         total_cost += l_i
+        #     return total_cost
+        # 
+        # first_comp = second_comp = 0
+        # for i in range(len(agents)):
+        #     first_comp += s[k, i][0][0]
+        #     second_comp += s[k, i][0][1] 
+        # 
+        # grad_total_cost = np.array([first_comp, second_comp]) / len(agents)
+        # dir_der = - grad_total_cost.T @ grad_total_cost
+        # 
+        # if k > max_iters / 5:    
+        #     alpha = Armijo_linesearch(
+        #         f = evaluate_total_cost_function,
+        #         search_direction = -grad_total_cost,
+        #         z0 = z[k],
+        #         fz0 = evaluate_total_cost_function(z[k]),
+        #         directional_derivative_z0 = dir_der,
+        #         alpha_init = 1e-3
+        #     )
+        # --------------------------------------------------------
+        
+        if k > max_iters /5:
+            print(f"alpha: {alpha}")
+        
         for i in range(len(agents)):
             z[k+1, i] = A[i, i] * z[k, i]
             N_i = np.nonzero(adj[i])[0]
             for j in N_i:
                 z[k+1, i] += A[i, j] * z[k, j]    
-            
-            #l_i, grad_l_i = local_cost_function(z[k, i], agents[i], real_distances[i])
-            #dir_der = - grad_l_i @ grad_l_i.T
-            #alpha = Armijo_linesearch(
-            #    noisy_distances[i],
-            #    agents[i],
-            #    local_cost_function,
-            #    -grad_l_i,
-            #    z[k, i],
-            #    l_i,
-            #    dir_der[0][0]
-            #)
-            
             z[k+1, i] -= alpha * s[k, i]
         
         for i in range(len(agents)):
@@ -52,7 +70,7 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
             N_i = np.nonzero(adj[i])[0]
             for j in N_i:
                 s[k+1, i] += A[i, j] * s[k, j]
-            
+                
             _, grad_l_i_new = local_cost_function(z[k+1, i], agents[i], real_distances[i])
             l_i, grad_l_i_old = local_cost_function(z[k, i], agents[i], real_distances[i])
             s[k+1, i] += grad_l_i_new - grad_l_i_old
@@ -68,7 +86,7 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
         for j in range(len(agents)):
             errors = [np.linalg.norm(z[t, j, i] - z_opt[i]) for t in range(max_iters-1)]
             ax.semilogy(np.arange(max_iters-1), errors)
-    #ax.legend()
+    # ax.legend()
     ax.set_title('Estimation error vs Iteration')
     ax.set_xlabel('Iteration')
     plt.show()
