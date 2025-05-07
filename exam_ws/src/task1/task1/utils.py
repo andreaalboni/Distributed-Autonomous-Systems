@@ -1,20 +1,15 @@
 import warnings
 import numpy as np
 import networkx as nx
+from config import PARAMETERS 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-def get_default_params():
-    return {
-        'num_targets': 3,
-        'ratio_at': 5,
-        'world_size': [5, 5],
-        'radius_fov': np.inf,
-        'noise_level': 0.1,
-        'bias': 0.0
-    }
 
-def is_in_fov(agent_pos, target_pos, radius_fov):
+def get_default_params():
+    return PARAMETERS
+
+def is_in_fov(agent_pos, target_pos, radius_fov=PARAMETERS['radius_fov']):
     return np.linalg.norm(agent_pos - target_pos) <= radius_fov
         
 def doll_cost_function(z, Q, z_ref):
@@ -23,58 +18,49 @@ def doll_cost_function(z, Q, z_ref):
     grad = 2 * Q @ diff
     return cost, grad
 
-def spawn_agent_near_target(target, world_size, radius_fov, existing_agents, existing_targets):
+def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
-        if (is_in_fov(candidate, target, radius_fov) and 
+        if (is_in_fov(candidate, target) and 
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
         
-def spawn_candidate(world_size, existing_agents, existing_targets):
+def spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
 
-def generate_agents_and_targets(num_targets, ratio_at, world_size, radius_fov):
+def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=PARAMETERS['ratio_at'], world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
     targets = []
     agents = []
     # Spawn targets and required agents
     for _ in range(num_targets):
-        target = spawn_candidate(world_size, agents, targets)
+        target = spawn_candidate(agents, targets)
         targets.append(target)
-        visible_agents = sum(is_in_fov(agent, target, radius_fov) for agent in agents)
+        visible_agents = sum(is_in_fov(agent, target) for agent in agents)
         for _ in range(3 - visible_agents):
-            agents.append(spawn_agent_near_target(target, world_size, radius_fov, agents, targets))
+            agents.append(spawn_agent_near_target(target, agents, targets))
     # Add remaining agents randomly
     total_agents_needed = int(num_targets * ratio_at)
     while len(agents) < total_agents_needed:
-        candidate = spawn_candidate(world_size, agents, targets)
+        candidate = spawn_candidate(agents, targets)
         agents.append(candidate)
     if len(agents) > total_agents_needed:
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
     return np.array(targets), np.array(agents)
 
-def get_distances(agents, targets, noise_level=0.0, bias=0.0):
+def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias=PARAMETERS['bias']):
     distances = []
     for agent in agents:
         agent_distance = []
         for target in targets:
             agent_distance.append(np.linalg.norm(agent - target))
         distances.append(agent_distance)
-    noisy_distances = np.array(distances)# + np.random.normal(bias, noise_level, np.array(distances).shape)
+    noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
     return np.array(distances), noisy_distances
-
-def ensure_Adj_doubly_stocasticity(num_agents, Adj):
-    A = Adj + np.eye(num_agents)
-    ONES = np.ones((num_agents, num_agents))
-    while any(abs(np.sum(A, axis=0) - 1) > 1e-10):
-        A = A / (A @ ONES)      # Guarantees row stochasticity
-        A = A / (ONES.T @ A)    # Guarantees column stochasticity
-        A = np.abs(A)
-    return A
 
 def ensure_connected_graph(G):
     if nx.is_connected(G):
@@ -86,7 +72,7 @@ def ensure_connected_graph(G):
         G.add_edge(u, v)
     return G
 
-def generate_graph(num_agents, type, p_er=0.5):
+def generate_graph(num_agents, type, p_er=PARAMETERS['p_er']):
     if type == 'path':
         G = nx.path_graph(num_agents)
     elif type == 'cycle':
@@ -102,7 +88,6 @@ def generate_graph(num_agents, type, p_er=0.5):
         raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
     
     Adj = nx.adjacency_matrix(G).toarray()
-    #A = ensure_Adj_doubly_stocasticity(num_agents, Adj)
     A = metropolis_hastings_weights(G)
     return G, Adj, A
 
@@ -131,7 +116,7 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def visualize_world(agents, targets, world_size):
+def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
     plt.figure(figsize=(8, 8))    
     plt.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
     plt.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
@@ -192,7 +177,7 @@ def metropolis_hastings_weights(G):
         A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
     return A
 
-def animate_world_evolution(agents, targets, world_size, z_hystory, speed=4):
+def animate_world_evolution(agents, targets, z_hystory, type, world_size=PARAMETERS['world_size'], speed=4):
     T, n_agents, n_targets, _ = z_hystory.shape
     frame_skip = int(speed)
     frame_skip += 1
@@ -203,7 +188,7 @@ def animate_world_evolution(agents, targets, world_size, z_hystory, speed=4):
     positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
     num_steps = len(positions)
     fig, ax = plt.subplots(figsize=(8, 8))
-    ax.set_title("Agents to Targets Animation")
+    ax.set_title(f'Agents to Targets Animation - {type} Graph')
     padding = 0.2
     x_min, x_max = 0, world_size[0]
     y_min, y_max = 0, world_size[1]
@@ -232,7 +217,7 @@ def animate_world_evolution(agents, targets, world_size, z_hystory, speed=4):
                 scatters[index].set_offsets(pos[i, j])
                 index += 1
         return scatters
-    animation = FuncAnimation(
+    _ = FuncAnimation(
         fig, update,
         frames=num_steps,
         init_func=init,

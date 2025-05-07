@@ -1,18 +1,15 @@
 import numpy as np
 from utils import *
+from config import PARAMETERS
 import matplotlib.pyplot as plt
 
-def gradient_tracking_method(params, max_iters=1000, alpha=0.001):
-    targets, agents = generate_agents_and_targets(
-        num_targets=params['num_targets'],
-        ratio_at=params['ratio_at'],
-        world_size=params['world_size'],
-        radius_fov=params['radius_fov']
-    )
+def gradient_tracking_method(max_iters=1500, alpha=0.001):
+    targets, agents = generate_agents_and_targets()
     # alpha = alpha / params['world_size'][0]
     # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
-    _, adj, A = generate_graph(len(agents), type='erdos_renyi', p_er=0.5)
+    graph_type = 'erdos_renyi'
+    _, adj, A = generate_graph(len(agents), type=graph_type)
     # visualize_graph(G)
     
     z_opt = get_targets_real_positions(targets)
@@ -23,7 +20,7 @@ def gradient_tracking_method(params, max_iters=1000, alpha=0.001):
     
     # Randomly initialize z[0]
     # z[0] = params['world_size'][0]/2 * np.ones((z[0].shape))
-    z[0] = np.random.uniform(0.0, params['world_size'][0], z[0].shape)
+    z[0] = np.random.uniform(0.0, PARAMETERS['world_size'][0], z[0].shape)
         
     for i in range(len(agents)):
         _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
@@ -78,10 +75,10 @@ def gradient_tracking_method(params, max_iters=1000, alpha=0.001):
     
     # print(f"z optimal: {z_opt}")
     # print(f"estimated positions of targets: {z[-1, :, :, :]}")
-    animate_world_evolution(agents, targets, world_size=params['world_size'], z_hystory=z)
+    animate_world_evolution(agents, targets, type=graph_type, z_hystory=z)
     return z, cost
 
-def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
+def doll_gradient_tracking_method(max_iters=400, alpha=0.001):
     # -------------- Not working yet ------------------
     targets, agents = generate_agents_and_targets(
         num_targets=params['num_targets'],
@@ -150,8 +147,7 @@ def doll_gradient_tracking_method(params, max_iters=400, alpha=0.001):
     return z, cost
 
 def main():
-    params = get_default_params()
-    gradient_tracking_method(params)
+    gradient_tracking_method()
 
 if __name__ == "__main__":
     main()
