@@ -131,23 +131,14 @@ def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
 
-def Armijo_linesearch(dist, agent, f, search_direction: np.ndarray, z0: np.ndarray, fz0: float, directional_derivative_z0: float, alpha_init: float, beta=0.8, sigma=0.1):
+def Armijo_linesearch(f, search_direction, z0, fz0, directional_derivative_z0, alpha_init, beta=0.8, sigma=0.1):
     alpha = alpha_init
-    c2 = 0.9
-    for iter in range(100):
+    for iter in range(500):
         trial_z = z0 + alpha * search_direction
-        f_trial = f(trial_z[0], dist, agent)[0]
-        armijo_condition = f_trial <= fz0 + alpha * sigma * directional_derivative_z0
-        if armijo_condition:
-            grad_l_i = f(trial_z, agent, dist)[1]
-            dir_deriv_trial = (- grad_l_i @ grad_l_i.T)[0][0]
-            curvature_condition = abs(dir_deriv_trial) <= c2 * abs(directional_derivative_z0)
-            if curvature_condition:
-                break
-        alpha = beta * alpha
-        if alpha < 1e-4:
-            alpha = 1e-4
+        f_trial = f(trial_z)
+        if f_trial <= fz0 + alpha * sigma * directional_derivative_z0:
             break
+        alpha = beta * alpha
     return alpha
 
 def metropolis_hastings_weights(G):
