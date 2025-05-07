@@ -2,7 +2,7 @@ import os
 import pickle
 from utils import animate_world_evolution
 
-file_to_load = 'evolution_1.pkl'
+file_to_load = 'evolution_3.pkl'
 
 def get_next_id(save_dir):
     os.makedirs(save_dir, exist_ok=True)
@@ -12,8 +12,6 @@ def get_next_id(save_dir):
 
 def save_evolution_data(agents, targets, z_history, type, save_dir='evolution_data'):
     run_id = get_next_id(save_dir)
-    filename = f"evolution_{run_id}.pkl"
-    filepath = os.path.join(save_dir, filename)
 
     data = {
         'agents': agents,
@@ -21,6 +19,9 @@ def save_evolution_data(agents, targets, z_history, type, save_dir='evolution_da
         'z_history': z_history,
         'type': type
     }
+    
+    filename = f"id-{run_id}-{len(data['targets'])}-{data['type']}.pkl"
+    filepath = os.path.join(save_dir, filename)
 
     with open(filepath, 'wb') as f:
         pickle.dump(data, f)

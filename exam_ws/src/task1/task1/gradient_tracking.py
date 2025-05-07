@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from save_and_load import save_evolution_data
 
 
-def gradient_tracking_method(max_iters=1500, alpha=0.001):
+def gradient_tracking_method(max_iters=1500, alpha=0.001, save=False):
     targets, agents = generate_agents_and_targets()
     # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
@@ -56,9 +56,6 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
         #     )
         # --------------------------------------------------------
         
-        if k > max_iters /5:
-            print(f"alpha: {alpha}")
-        
         for i in range(len(agents)):
             z[k+1, i] = A[i, i] * z[k, i]
             N_i = np.nonzero(adj[i])[0]
@@ -94,7 +91,8 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001):
     
     # print(f"z optimal: {z_opt}")
     # print(f"estimated positions of targets: {z[-1, :, :, :]}")
-    save_evolution_data(agents, targets, z, type=graph_type)
+    if save:
+        save_evolution_data(agents, targets, z, type=graph_type)
     animate_world_evolution(agents, targets, type=graph_type, z_hystory=z)
     return z, cost
 
