@@ -8,9 +8,7 @@ from utils import *
 
 def aggregative_tracking_method(): 
     targets, agents = generate_agents_and_targets()
-    visualize_world(agents, targets)
     print(get_distances(agents, targets))
-    return
 
 
     G, Adj, A = generate_graph(len(agents), type='cycle')
@@ -19,10 +17,13 @@ def aggregative_tracking_method():
     print("Graph:")
     print(G)
 
-    visualize_world(agents, targets)
+    sigma = compute_aggregative_variale(agents)
+    visualize_world(agents, targets, sigma)
 
     plot_graph_with_connections(G)
-
+    local_cost, gradient = local_cost_function(agents[0], targets[0], sigma)
+    print("Local Cost:", local_cost)
+    print("Gradient:", gradient)
 
 def main(): 
     aggregative_tracking_method()
