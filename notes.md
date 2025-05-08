@@ -7,7 +7,8 @@ What happens if we lose COLUMN stochasticity? We still have consensus, but the a
 
 What if we lose ROW stochasticity? Consensus is lost too, and what we reach makes no sense with respect to the optimality error. 
 
-
 ## Quesitons
+
 * The field of view should apply also between agents?
-* is the norm correct? in the local cost funciton
+* How to handle the field of view between agents?
+* is the total norm of the gradient computed correctly? (we made the average between the s_k)
