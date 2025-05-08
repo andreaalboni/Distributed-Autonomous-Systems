@@ -9,14 +9,32 @@ from matplotlib.animation import FuncAnimation
 def get_default_params():
     return PARAMETERS
 
-def is_in_fov(agent_pos, target_pos, radius_fov=PARAMETERS['radius_fov']):
-    return np.linalg.norm(agent_pos - target_pos) <= radius_fov
-        
-
-def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
+def debug_spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], radius_spawn_target=PARAMETERS['radius_spawn_target']):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
-        if (is_in_fov(candidate, target) and 
+        center = np.array([world_size[0]/2, world_size[1]/2])
+        if (np.linalg.norm(candidate - target) <= radius_spawn_target and
+            np.linalg.norm(candidate - center) < np.linalg.norm(target - center) - 3 and
+            not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
+            not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
+            return candidate
+
+def debug_spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['world_size'], target_radius=PARAMETERS['target_radius']):
+    while True:
+        angle = np.random.uniform(0, 2 * np.pi)
+        noise = 0
+        candidate = np.array([
+            target_radius * np.sin(angle) + world_size[0]/2 + noise * np.sin(angle),
+            target_radius * np.cos(angle) + world_size[0]/2 + noise * np.cos(angle)
+        ])
+        if (not any(np.allclose(candidate, a, atol=2) for a in existing_agents) and 
+            not any(np.allclose(candidate, t, atol=2) for t in existing_targets)):
+            return candidate
+
+def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], radius_spawn_target=PARAMETERS['radius_spawn_target']):
+    while True:
+        candidate = np.random.uniform(0, world_size[0], size=2)
+        if (np.linalg.norm(candidate - target) <= radius_spawn_target and
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
@@ -28,30 +46,24 @@ def spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['wo
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
 
-def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=PARAMETERS['ratio_at'], world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
+def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], world_size=PARAMETERS['world_size']):
     targets = []
     agents = []
-
     for _ in range(num_targets):
         # Genera un nuovo target
-        target = spawn_candidate(agents, targets, world_size=world_size)
+        target = debug_spawn_candidate(agents, targets, world_size=world_size)
         targets.append(target)
-        
         # Genera un agente vicino al proprio target
-        agent = spawn_agent_near_target(target, agents, targets, world_size=world_size)
+        agent = debug_spawn_agent_near_target(target, agents, targets, world_size=world_size)
         agents.append(agent)
-
     return np.array(targets), np.array(agents)
 
-def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias=PARAMETERS['bias']):
+def get_distances(agents, targets):
     distances = []
-    for agent in agents:
-        agent_distance = []
-        for target in targets:
-            agent_distance.append(np.linalg.norm(agent - target))
-        distances.append(agent_distance)
-    noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
-    return np.array(distances), noisy_distances
+    for agent in range(len(agents)):
+        distances.append(np.linalg.norm(agents[agent] - targets[agent]))
+    return np.array(distances)
+
 def get_default_params():
     return PARAMETERS
 
@@ -85,11 +97,6 @@ def generate_graph(num_agents, type, p_er=PARAMETERS['p_er']):
     return G, Adj, A
 
 def metropolis_hastings_weights(G):
-    """
-    A_ij = 1/(1 + max(d_i, d_j)) if (i,j) ∈ E and i ≠ j
-           1 - ∑(A_ih) for h ∈ N_i\{i} if i = j
-           0 otherwise
-    """
     n = G.number_of_nodes()
     nodes = list(G.nodes())
     node_to_idx = {node: i for i, node in enumerate(nodes)}
@@ -165,4 +172,3 @@ def plot_graph_with_connections(G):
     plt.title("Grafo con Connessioni")
     plt.axis('off')  
     plt.show()
-
