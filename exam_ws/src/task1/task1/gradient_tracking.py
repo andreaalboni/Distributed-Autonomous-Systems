@@ -27,8 +27,9 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001, save=False):
         _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
 
     # alpha = alpha / params['world_size'][0]
-    # Ch 6 p 14
+    # Ch 6 p 14 
     for k in range(max_iters - 1):
+        '''
         # ------------------ Armijo Linesearch: ------------------
         # def evaluate_total_cost_function(z_k):
         #     total_cost = 0
@@ -55,6 +56,7 @@ def gradient_tracking_method(max_iters=1500, alpha=0.001, save=False):
         #         alpha_init = 1e-3
         #     )
         # --------------------------------------------------------
+        '''
         
         for i in range(len(agents)):
             z[k+1, i] = A[i, i] * z[k, i]

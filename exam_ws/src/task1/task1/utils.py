@@ -52,12 +52,16 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
     return np.array(targets), np.array(agents)
 
-def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias=PARAMETERS['bias']):
+def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov']):
     distances = []
     for agent in agents:
         agent_distance = []
         for target in targets:
-            agent_distance.append(np.linalg.norm(agent - target))
+            dist = np.linalg.norm(agent - target)
+            if dist > radius_fov:
+                agent_distance.append(np.nan)
+            else:
+                agent_distance.append(dist)
         distances.append(agent_distance)
     noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
     return np.array(distances), noisy_distances
@@ -93,6 +97,15 @@ def generate_graph(num_agents, type, p_er=PARAMETERS['p_er']):
 
 def get_targets_real_positions(targets):
     return np.array([target for target in targets])
+
+def get_useful_agents(agents, distances):
+    useful_agents = np.array([])
+    actual_distances = np.array([])
+    for agent in range(len(agents)):
+        if not np.all(np.isnan(distances[agent])):
+            useful_agents = np.append(useful_agents, [agents[agent]], axis=0) if useful_agents.size else np.array([agents[agent]])
+            actual_distances = np.append(actual_distances, [distances[agent]], axis=0) if actual_distances.size else np.array([distances[agent]])
+    return useful_agents, actual_distances
 
 def local_cost_function(z, p_i, distances_i):
     # p_i:  position of the agent
