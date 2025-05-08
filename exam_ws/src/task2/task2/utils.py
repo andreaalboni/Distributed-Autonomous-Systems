@@ -111,15 +111,39 @@ def metropolis_hastings_weights(G):
         A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
     return A
 
+def compute_aggregative_variale(agents):
+    print(f"agents: {agents}")
+    sigma = np.mean(agents, axis=0)
+    return sigma
+
+def local_cost_function(agents, targets, sigma, distances_i):
+    for i in range(agents.shape[0]):
+        print(f"z_i: {agents[i]}")
+
+    # num_targets = len(distances_i)
+    # local_cost = 0
+    # local_cost_gradient = np.zeros((num_targets, len(p_i)))
+    # for target in range(num_targets):
+    #     # Cost function evaluation
+    #     estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
+    #     measured_distance_squared = distances_i[target]**2
+    #     local_cost += (measured_distance_squared - estimated_distance_squared)**2 
+    #     # Gradient evaluation
+    #     #print(4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i))
+    #     local_cost_gradient[target, :] = 4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i)
+    # return local_cost, local_cost_gradient
+        
+
 def visualize_graph(G):
     plt.figure(figsize=(8, 8))
     nx.draw(G, with_labels=True)
     plt.show()
     
-def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
+def visualize_world(agents, targets, sigma, world_size=PARAMETERS['world_size']):
     plt.figure(figsize=(8, 8))    
     plt.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
     plt.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
+    plt.scatter(sigma[0], sigma[1], c='magenta', marker='^', s=200, label='Sigma')
     padding = 0.2 
     x_min, x_max = 0, world_size[0]
     y_min, y_max = 0, world_size[1]
