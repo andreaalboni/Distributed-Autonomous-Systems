@@ -155,7 +155,7 @@ def Armijo_linesearch(f, search_direction, z0, fz0, directional_derivative_z0, a
     return alpha
 
 def metropolis_hastings_weights(G):
-    """
+    r"""
     A_ij = 1/(1 + max(d_i, d_j)) if (i,j) ∈ E and i ≠ j
            1 - ∑(A_ih) for h ∈ N_i\{i} if i = j
            0 otherwise
