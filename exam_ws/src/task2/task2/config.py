@@ -6,5 +6,4 @@ PARAMETERS = {
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'p_er': 0.5,
-    'weight_ratio': 2
 }
