@@ -15,37 +15,42 @@ def aggregative_tracking_method(max_iters=200, alpha=0.01):
     
     cost = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(agents[0])))
-    s = np.zeros((max_iters, ))
+    s = np.zeros((max_iters, len(agents), len(agents[0])))
     v = np.zeros((max_iters, ))
     
     # Initialization
     z[0] = agents
-        
+    s[0] = agents   # phi_i(z_i) = z_i: regular barycenter
     for i in range(len(agents)):
-        _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
+        _, _, v[0, i] = local_cost_function()
+    r_0 = compute_r_0(intruders)
 
-    # alpha = alpha / params['world_size'][0]
-    # Ch 6 p 14 
+    # Ch 8 p 7/11 
     for k in range(max_iters - 1):
         for i in range(len(agents)):
-            z[k+1, i] = A[i, i] * z[k, i]
-            N_i = np.nonzero(adj[i])[0]
-            for j in N_i:
-                z[k+1, i] += A[i, j] * z[k, j]    
-            z[k+1, i] -= alpha * s[k, i]
+            _, grad_1_l_i, _ = local_cost_function()    # in z_i^{k}, s_i^{k}
+            grad_phi_i = grad_phi_i(z[k, i])
+            z[k+1, i] = z[k, i] - alpha * ( grad_1_l_i + grad_phi_i @ v[k, i] )
         
         for i in range(len(agents)):
             s[k+1, i] = A[i, i] * s[k, i]
             N_i = np.nonzero(adj[i])[0]
             for j in N_i:
                 s[k+1, i] += A[i, j] * s[k, j]
-                
-            _, grad_l_i_new = local_cost_function(z[k+1, i], agents[i], real_distances[i])
-            l_i, grad_l_i_old = local_cost_function(z[k, i], agents[i], real_distances[i])
-            s[k+1, i] += grad_l_i_new - grad_l_i_old
+            # phi_i(z_i^{k+1})
+            s[k+1, i] += z[k+1, i] - z[k, i]
             
-            total_grad += s[k+1,i]
-            cost[k] += l_i
+        for i in range(len(agents)):
+            v[k+1, i] = A[i, i] * v[k, i]
+            N_i = np.nonzero(adj[i])[0]
+            for j in N_i:
+                v[k+1, i] += A[i, j] * v[k, j]
+            _, _, grad_2_l_i_new = local_cost_function()    # in z_i^{k+1}, s_i^{k+1}
+            _, _, grad_2_l_i_old = local_cost_function()    # in z_i^{k}, s_i^{k}
+            v[k+1, i] += grad_2_l_i_new - grad_2_l_i_old
+            
+    
+    plt.show()
 
 def main(): 
     aggregative_tracking_method()

@@ -117,9 +117,19 @@ def metropolis_hastings_weights(G):
         A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
     return A
 
-def compute_aggregative_variable(agents):
+def compute_agents_barycenter(agents):
     sigma = np.mean(agents, axis=0)
     return sigma
+
+def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARAMETERS['world_size']):
+    barycenter_intruders = compute_agents_barycenter(intruders)
+    if (noise_radius == 0.0):
+        return barycenter_intruders
+    while True:
+        r_0_candidate = np.random.uniform(0, world_size[0], size=2)
+        if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
+            np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
+                return r_0_candidate
 
 def local_cost_function(z, p_i, sigma, weight_ratio=PARAMETERS['weight_ratio']):
     
@@ -129,7 +139,7 @@ def local_cost_function(z, p_i, sigma, weight_ratio=PARAMETERS['weight_ratio']):
             gamma_bar_i * (norma della distanza agente - baricentro)**2 +               --> garantisce formazione sia il più possibile compatta
             norma della distanza baricentro - intruder (che io farei che sia il baricentro degli intruder)
     sigma(z) = sum (phi_i(z_i)) / N     --> calcolo baricentro
-    phi_i(z_i): per calcolo baricentro normale: = z_i, per weighted barycentre: = weight_i * z_i
+    phi_i(z_i): per calcolo baricentro normale: = z_i, per weighted barycenter: = weight_i * z_i
     '''
     
     agent_to_sigma_distance_squared = np.linalg.norm(z - sigma)**2
@@ -139,7 +149,6 @@ def local_cost_function(z, p_i, sigma, weight_ratio=PARAMETERS['weight_ratio']):
     
     return local_cost, local_cost_gradient
         
-
 def visualize_graph(G):
     plt.figure(figsize=(8, 8))
     nx.draw(G, with_labels=True)
@@ -149,10 +158,13 @@ def visualize_world(agents, intruders, world_size=PARAMETERS['world_size']):
     plt.figure(figsize=(8, 8))    
     plt.scatter(agents[:, 0], agents[:, 1], c='black', marker='o', s=50, label='Agent')
     plt.scatter(intruders[:, 0], intruders[:, 1], c='none', marker='s', s=50, label='Intruder', edgecolors='cyan')
-    sigma = compute_aggregative_variable(agents)
+    sigma = compute_agents_barycenter(agents)
     plt.scatter(sigma[0], sigma[1], c='none', marker='^', s=50, label='Sigma', edgecolors='mediumseagreen')
-    intruder = compute_aggregative_variable(intruders)
-    plt.scatter(intruder[0], intruder[1], c='red', marker='x', s=50, label=r'$r_0$')
+    target = compute_r_0(intruders)
+    intruders_barycenter = compute_agents_barycenter(intruders)
+    if not np.array_equal(intruders_barycenter, target):
+        plt.scatter(intruders_barycenter[0], intruders_barycenter[1], c='purple', alpha=0.35, marker='x', s=50, label='Intruders\' CoG')
+    plt.scatter(target[0], target[1], c='red', marker='x', s=50, label=r'$r_0$')
     padding = 0.2 
     x_min, x_max = 0, world_size[0]
     y_min, y_max = 0, world_size[1]
@@ -174,3 +186,46 @@ def plot_graph_with_connections(G):
     plt.title("Grafo con Connessioni")
     plt.axis('off')  
     plt.show()
+
+def animation(XX, NN, n_x, horizon, Adj, ax, wait_time=0.05):
+    axes_lim = (np.min(XX) - 1, np.max(XX) + 1)
+    for tt in range(len(horizon)):
+        # plot 2d-trajectories
+        ax.plot(
+            XX[:, 0 : n_x * NN : n_x],
+            XX[:, 1 : n_x * NN : n_x],
+            color="tab:gray",
+            linestyle="dashed",
+            alpha=0.5,
+        )
+        # plot 2d-formation
+        xx_tt = XX[tt].reshape((NN, n_x))
+        for ii in range(NN):
+            p_prev = xx_tt[ii]
+            ax.plot(
+                p_prev[0],
+                p_prev[1],
+                marker="o",
+                markersize=15,
+                fillstyle="full",
+                color="tab:red",
+            )
+            for jj in range(NN):
+                if Adj[ii, jj] & (jj > ii):
+                    p_curr = xx_tt[jj]
+                    ax.plot(
+                        [p_prev[0], p_curr[0]],
+                        [p_prev[1], p_curr[1]],
+                        linewidth=1,
+                        color="steelblue",
+                        linestyle="solid",
+                    )
+        ax.set_xlim(axes_lim)
+        ax.set_ylim(axes_lim)
+        ax.axis("equal")
+        ax.set_xlabel("first component")
+        ax.set_ylabel("second component")
+        ax.set_title(f"Simulation time = {horizon[tt]:.2f} s")
+        plt.show(block=False)
+        plt.pause(wait_time)
+        ax.cla()
