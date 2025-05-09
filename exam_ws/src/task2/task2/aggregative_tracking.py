@@ -6,7 +6,7 @@ from config import PARAMETERS
 from utils import *
 
 
-def aggregative_tracking_method(max_iters=200, alpha=0.01): 
+def aggregative_tracking_method(max_iters=2000, alpha=0.0001): 
     intruders, agents = generate_agents_and_intruders()
     # visualize_world(agents, intruders)
     graph_type = 'cycle'
@@ -17,8 +17,8 @@ def aggregative_tracking_method(max_iters=200, alpha=0.01):
     z = np.zeros((max_iters, len(agents), len(agents[0])))
     s = np.zeros((max_iters, len(agents), len(agents[0])))
     v = np.zeros((max_iters, len(agents), len(agents[0])))
-    gamma = 5 * np.ones(len(agents))
-    gamma_bar = 3 * np.ones(len(agents))
+    gamma = 50 * np.ones(len(agents))
+    gamma_bar = 50 * np.ones(len(agents))
 
     r_0 = compute_r_0(intruders)
     sigma = compute_agents_barycenter(agents)
@@ -55,15 +55,13 @@ def aggregative_tracking_method(max_iters=200, alpha=0.01):
             
             cost[k] += l_i
     
-    fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
-    ax = axes[0]
+    fig, ax = plt.subplots(figsize=(8, 6), nrows=1, ncols=1)
     ax.semilogy(np.arange(max_iters-1), cost[:-1], color='violet')
     ax.set_title('Cost vs Iteration')
     ax.set_xlabel('Iteration')
-    
-    ax = axes[1]
-    animation(z=z, N=len(agents), n_x=len(agents[0]), horizon=max_iters, ax=axes[1])
     plt.show()
+    
+    animate_world_evolution(intruders, z, s, sigma, r_0)
 
 def main(): 
     aggregative_tracking_method()
