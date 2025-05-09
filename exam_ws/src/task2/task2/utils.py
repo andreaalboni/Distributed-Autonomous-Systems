@@ -160,6 +160,11 @@ def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
     grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
     
     return local_cost, grad_1, grad_2
+
+def local_phi_function(agent_i):
+    phi_i = agent_i
+    grad_phi_i = 1
+    return phi_i, grad_phi_i
         
 
 def visualize_graph(G):
