@@ -160,7 +160,6 @@ def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
     grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
     
     return local_cost, grad_1, grad_2
-        
 
 def visualize_graph(G):
     plt.figure(figsize=(8, 8))
@@ -200,20 +199,20 @@ def plot_graph_with_connections(G):
     plt.axis('off')  
     plt.show()
 
-def animation(XX, NN, n_x, horizon, Adj, ax, wait_time=0.05):
-    axes_lim = (np.min(XX) - 1, np.max(XX) + 1)
+def animation(z, N, n_x, horizon, ax, wait_time=0.05):
+    axes_lim = (np.min(z) - 1, np.max(z) + 1)
     for tt in range(len(horizon)):
         # plot 2d-trajectories
         ax.plot(
-            XX[:, 0 : n_x * NN : n_x],
-            XX[:, 1 : n_x * NN : n_x],
+            z[:, 0 : n_x * N : n_x],
+            z[:, 1 : n_x * N : n_x],
             color="tab:gray",
             linestyle="dashed",
             alpha=0.5,
         )
         # plot 2d-formation
-        xx_tt = XX[tt].reshape((NN, n_x))
-        for ii in range(NN):
+        xx_tt = z[tt].reshape((N, n_x))
+        for ii in range(N):
             p_prev = xx_tt[ii]
             ax.plot(
                 p_prev[0],
@@ -223,16 +222,6 @@ def animation(XX, NN, n_x, horizon, Adj, ax, wait_time=0.05):
                 fillstyle="full",
                 color="tab:red",
             )
-            for jj in range(NN):
-                if Adj[ii, jj] & (jj > ii):
-                    p_curr = xx_tt[jj]
-                    ax.plot(
-                        [p_prev[0], p_curr[0]],
-                        [p_prev[1], p_curr[1]],
-                        linewidth=1,
-                        color="steelblue",
-                        linestyle="solid",
-                    )
         ax.set_xlim(axes_lim)
         ax.set_ylim(axes_lim)
         ax.axis("equal")
