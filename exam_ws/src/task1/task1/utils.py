@@ -201,8 +201,8 @@ def animate_world_evolution(agents, targets, z_hystory, type, world_size=PARAMET
     ax.set_aspect('equal')
     ax.grid(True)
     # Plot static agents and targets
-    ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
-    ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
+    ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', s=50, label='Agent')
+    ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', s=50, label='Target')
     ax.legend()
     # Create dynamic scatter objects for each agent-target pair
     scatters = []
