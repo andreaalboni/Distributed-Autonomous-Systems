@@ -50,10 +50,10 @@ def generate_agents_and_intruders(num_intruders=PARAMETERS['num_intruders'], wor
     agents = []
     for _ in range(num_intruders):
         # Genera un nuovo intruder
-        intruder = spawn_candidate(agents, intruders, world_size=world_size)
+        intruder = debug_spawn_candidate(agents, intruders, world_size=world_size)
         intruders.append(intruder)
         # Genera un agente vicino al proprio intruder
-        agent = spawn_agent_near_intruder(intruder, agents, intruders, world_size=world_size)
+        agent = debug_spawn_agent_near_intruder(intruder, agents, intruders, world_size=world_size)
         agents.append(agent)
     return np.array(intruders), np.array(agents)
 
@@ -204,19 +204,15 @@ def plot_graph_with_connections(G):
     plt.axis('off')  
     plt.show()
     
-def animate_world_evolution(intruders, z_hystory, s, sigma, r_0,
-                            world_size=PARAMETERS['world_size'], speed=1):
-    T, n_agents, _ = z_hystory.shape
+def animate_world_evolution(intruders, z_history, s, sigma, r_0, world_size=PARAMETERS['world_size'], speed=10):
+    T, n_agents, *_ = z_history.shape
     frame_skip = int(speed) + 1
-    positions = z_hystory[::frame_skip]  # shape: (steps, n_agents, 2)
-    s_positions = s[::frame_skip]        # shape: (steps, n_agents, 2)
-
-    # Add pause frames at the end
-    pause_frames = int(3 * 20)  # 3 seconds at 20 fps
+    positions = z_history[::frame_skip]
+    s_positions = s[::frame_skip]
+    pause_frames = int(3 * 20)
     positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
     s_positions = np.concatenate([s_positions, np.repeat(s_positions[-1:], pause_frames, axis=0)])
     num_steps = len(positions)
-
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.set_title('Agents to Targets Animation')
     padding = 0.2
@@ -226,37 +222,39 @@ def animate_world_evolution(intruders, z_hystory, s, sigma, r_0,
     ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
     ax.set_aspect('equal')
     ax.grid(True)
-
-    # Plot static elements
     ax.scatter(intruders[:, 0], intruders[:, 1], c='red', marker='x', s=50, label='Intruder')
-    ax.scatter(sigma[0], sigma[1], c='black', marker='s', s=50, label=r'$\sigma$')
-    ax.scatter(r_0[0], r_0[1], c='purple', marker='^', s=50, label=r'$r_0$')
+    # ax.scatter(sigma[0], sigma[1], c='black', marker='s', s=50, label=r'$\sigma$')
+    ax.scatter(r_0[0], r_0[1], c='none', marker='o', s=50, edgecolors='purple', label=r'$r_0$')
+    path_lines = [[] for _ in range(n_agents)]
     ax.legend()
-
-    # Create dynamic scatter objects
     z_scatters = [ax.scatter([], [], c='blue', s=50) for _ in range(n_agents)]
-    s_scatters = [ax.scatter([], [], c='orange', s=50) for _ in range(n_agents)]
-
+    s_scatters = [ax.scatter([], [], c='orange', marker='x', s=35) for _ in range(n_agents)]
     def init():
         for scatter in z_scatters + s_scatters:
             scatter.set_offsets(np.empty((0, 2)))
-        return z_scatters + s_scatters
-
+        return z_scatters + s_scatters + sum(path_lines, [])
     def update(frame):
-        pos = positions[frame]      # shape: (n_agents, 2)
-        s_pos = s_positions[frame]  # shape: (n_agents, 2)
+        pos = positions[frame]
+        s_pos = s_positions[frame]
         for i in range(n_agents):
             z_scatters[i].set_offsets(pos[i])
             s_scatters[i].set_offsets(s_pos[i])
-        return z_scatters + s_scatters
-
-    _ = FuncAnimation(
+            if len(path_lines[i]) > 0:
+                for line in path_lines[i]:
+                    line.remove()
+                path_lines[i] = []
+            if frame > 0:
+                line, = ax.plot(positions[:frame+1, i, 0], positions[:frame+1, i, 1], 
+                               'gray', linestyle='--', alpha=0.5)
+                path_lines[i].append(line)
+        return z_scatters + s_scatters + sum(path_lines, [])
+    anim = FuncAnimation(
         fig, update,
         frames=num_steps,
         init_func=init,
         blit=True,
-        interval=1,
+        interval=50,
         repeat=True
     )
     plt.show()
-
+    return anim

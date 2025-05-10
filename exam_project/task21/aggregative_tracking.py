@@ -1,9 +1,7 @@
 import numpy as np
-import networkx as nx
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from config import PARAMETERS
 from utils import *
+from config import PARAMETERS
+import matplotlib.pyplot as plt
 
 
 def aggregative_tracking_method(max_iters=2000, alpha=0.0001): 
@@ -17,8 +15,8 @@ def aggregative_tracking_method(max_iters=2000, alpha=0.0001):
     z = np.zeros((max_iters, len(agents), len(agents[0])))
     s = np.zeros((max_iters, len(agents), len(agents[0])))
     v = np.zeros((max_iters, len(agents), len(agents[0])))
-    gamma = 50 * np.ones(len(agents))
-    gamma_bar = 50 * np.ones(len(agents))
+    gamma = 15 * np.ones(len(agents))
+    gamma_bar = 3 * np.ones(len(agents))
 
     r_0 = compute_r_0(intruders)
     sigma = compute_agents_barycenter(agents)
