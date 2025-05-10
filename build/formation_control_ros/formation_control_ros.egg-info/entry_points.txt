@@ -1,2 +1,0 @@
-[console_scripts]
-generic_agent = formation_control_ros.the_agent:main
