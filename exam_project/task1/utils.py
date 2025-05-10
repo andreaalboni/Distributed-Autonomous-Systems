@@ -52,19 +52,23 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
     return np.array(targets), np.array(agents)
 
-def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov']):
+def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov']):
     distances = []
+    noisy_distances = []
     for agent in agents:
         agent_distance = []
+        noisy_distance_to_target = []
         for target in targets:
             dist = np.linalg.norm(agent - target)
             if dist > radius_fov:
                 agent_distance.append(np.nan)
             else:
                 agent_distance.append(dist)
+                bias = np.random.uniform(-bias_param, bias_param)
+                noisy_distance_to_target.append(dist + np.random.normal(bias, noise_level))
         distances.append(agent_distance)
-    noisy_distances = np.array(distances) + np.random.normal(bias, noise_level, np.array(distances).shape)
-    return np.array(distances), noisy_distances
+        noisy_distances.append(noisy_distance_to_target)
+    return np.array(distances), np.array(noisy_distances)
 
 def ensure_connected_graph(G):
     if nx.is_connected(G):
