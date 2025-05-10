@@ -18,7 +18,7 @@ def doll_cost_function(z, Q, z_ref):
     grad = 2 * Q @ diff
     return cost, grad
 
-def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
+def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
         if (is_in_fov(candidate, target) and 
@@ -98,15 +98,6 @@ def generate_graph(num_agents, type, p_er=PARAMETERS['p_er']):
 def get_targets_real_positions(targets):
     return np.array([target for target in targets])
 
-def get_useful_agents(agents, distances):
-    useful_agents = np.array([])
-    actual_distances = np.array([])
-    for agent in range(len(agents)):
-        if not np.all(np.isnan(distances[agent])):
-            useful_agents = np.append(useful_agents, [agents[agent]], axis=0) if useful_agents.size else np.array([agents[agent]])
-            actual_distances = np.append(actual_distances, [distances[agent]], axis=0) if actual_distances.size else np.array([distances[agent]])
-    return useful_agents, actual_distances
-
 def local_cost_function(z, p_i, distances_i):
     # p_i:  position of the agent
     # z:    position of the target
@@ -115,13 +106,17 @@ def local_cost_function(z, p_i, distances_i):
     local_cost = 0
     local_cost_gradient = np.zeros((num_targets, len(p_i)))
     for target in range(num_targets):
-        # Cost function evaluation
-        estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
-        measured_distance_squared = distances_i[target]**2
-        local_cost += (measured_distance_squared - estimated_distance_squared)**2 
-        # Gradient evaluation
-        #print(4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i))
-        local_cost_gradient[target, :] = 4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i)
+        if np.isnan(distances_i[target]):
+            local_cost += 0
+            local_cost_gradient[target, :] = np.nan * np.zeros_like(p_i)
+        else:
+            estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
+            measured_distance_squared = distances_i[target]**2
+            local_cost += (measured_distance_squared - estimated_distance_squared)**2 
+            
+            # Gradient evaluation
+            #print(4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i))
+            local_cost_gradient[target, :] = 4 * (estimated_distance_squared - measured_distance_squared) * (z[target] - p_i)
     return local_cost, local_cost_gradient
     
 def visualize_graph(G):
