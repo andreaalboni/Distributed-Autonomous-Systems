@@ -73,9 +73,6 @@ def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_p
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
     
-    # Normalization:
-    distances = np.array(distances) / world_size[0]
-    noisy_distances = np.array(noisy_distances) / world_size[0]
     return np.array(distances), np.array(noisy_distances)
 
 def ensure_connected_graph(G):
