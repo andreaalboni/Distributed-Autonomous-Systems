@@ -9,9 +9,9 @@ from std_msgs.msg import Float32MultiArray as MsgFloat
 class Agent(Node):
     def __init__(self):
         super().__init__(
-            "formation_control_ros_agent",
-            allow_undeclared_parameters=True,
-            automatically_declare_parameters_from_overrides=True,
+            "aggregative_tracking_agent",
+            allow_undeclared_parameters = True,
+            automatically_declare_parameters_from_overrides = True,
         )
 
         # Get parameters from the launch file
@@ -24,6 +24,7 @@ class Agent(Node):
         self.intruder = np.array(self.get_parameter("intruder").value)
         communication_time = self.get_parameter("communication_time").value
         self.delta_T = communication_time / 10       # Discretization step, it may be decoupled from communication time
+        
         self.k = 0
 
         print(f"I am agent: {self.agent_id:d}")
@@ -35,7 +36,6 @@ class Agent(Node):
         print(f"Intruder position: {self.intruder}")
         print(f"Communication time: {communication_time}")
         print(f"Time step delta_T: {self.delta_T}")
-        return
 
         # Subscribe to topic_j
         for j in self.neighbors:
@@ -46,9 +46,10 @@ class Agent(Node):
 
         # Create topic_i
         self.publisher = self.create_publisher(MsgFloat, f"/topic_{self.agent_id}", 10)
+        
         self.timer = self.create_timer(communication_time, self.timer_callback)
-
         print(f"Agent {self.agent_id}: setup completed!")
+
 
     def listener_callback(self, msg):
         pass
@@ -59,14 +60,12 @@ class Agent(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-
     aggregative_tracking_agent = Agent()
     aggregative_tracking_agent.get_logger().info(
         f"Agent {aggregative_tracking_agent.agent_id:d}: Waiting for sync..."
     )
     sleep(1)
     aggregative_tracking_agent.get_logger().info("GO!")
-
     try:
         rclpy.spin(aggregative_tracking_agent)
     except SystemExit:  # <--- process the exception
