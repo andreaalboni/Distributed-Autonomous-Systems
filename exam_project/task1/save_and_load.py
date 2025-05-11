@@ -11,7 +11,7 @@ def get_next_id(save_dir):
     return max(ids, default=0) + 1
 
 def save_evolution_data(agents, targets, z_history, type, world_size, save_dir='./exam_project/task1/evolution_data'):
-    # Anti-Normalization:
+    # De-Normalization:
     agents = agents * world_size[0]
     targets = targets * world_size[0]
     z_hystory = z_hystory * world_size[0]

@@ -69,10 +69,11 @@ def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_p
             else:
                 agent_distance.append(dist)
                 bias = np.random.uniform(-bias_param, bias_param)
-                noisy_distance_to_target.append( (dist + np.random.normal(bias, noise_level)))
+                var = np.random.normal(0, noise_level)
+                noise = (bias + var) / world_size[0]
+                noisy_distance_to_target.append(dist + noise)
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
-    
     return np.array(distances), np.array(noisy_distances)
 
 def ensure_connected_graph(G):
@@ -184,10 +185,6 @@ def animate_world_evolution(agents, targets, z_history, type, world_size=PARAMET
     agents = agents * world_size[0]
     targets = targets * world_size[0]
     z_history = z_history * world_size[0]
-
-    print("De-Normalized values:")
-    print(f"estimates: {z_history[-1,0]}")
-    print(f"targets: {targets}")
 
     T, n_agents, n_targets, _ = z_history.shape
     frame_skip = int(speed)

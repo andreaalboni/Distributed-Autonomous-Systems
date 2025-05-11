@@ -8,7 +8,7 @@ from save_and_load import save_evolution_data
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
 
-def gradient_tracking_method(max_iters=2000, alpha=0.035, save=False):
+def gradient_tracking_method(max_iters=2250, alpha=0.025, save=False):
     targets, agents = generate_agents_and_targets()
     # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
@@ -63,10 +63,6 @@ def gradient_tracking_method(max_iters=2000, alpha=0.035, save=False):
         norm_grad_cost[k] = np.linalg.norm(total_grad / len(agents))
         prova[k] = np.linalg.norm(s[k,0])
 
-    print("Normalized values:")
-    print(f"estimates: {z[-1,0]}")
-    print(f"targets: {targets}")
-
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
     ax.semilogy(np.arange(max_iters-1), cost[:-1], color='violet')
@@ -96,6 +92,8 @@ def gradient_tracking_method(max_iters=2000, alpha=0.035, save=False):
     if save:
         save_evolution_data(agents, targets, z, type=graph_type, world_size=PARAMETERS['world_size'])
     animate_world_evolution(agents, targets, type=graph_type, z_history=z)
+    
+    print(f"Norm: {np.linalg.norm(PARAMETERS['world_size'] * z[-1,0] - PARAMETERS['world_size'] * targets)}")
     return z, cost
 
 
