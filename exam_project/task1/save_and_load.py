@@ -10,7 +10,12 @@ def get_next_id(save_dir):
     ids = [int(f.split('_')[1].split('.')[0]) for f in existing if f.split('_')[1].split('.')[0].isdigit()]
     return max(ids, default=0) + 1
 
-def save_evolution_data(agents, targets, z_history, type, save_dir='./exam_project/task1/evolution_data'):
+def save_evolution_data(agents, targets, z_history, type, world_size, save_dir='./exam_project/task1/evolution_data'):
+    # Anti-Normalization:
+    agents = agents * world_size[0]
+    targets = targets * world_size[0]
+    z_hystory = z_hystory * world_size[0]
+
     run_id = get_next_id(save_dir)
 
     data = {
