@@ -21,6 +21,7 @@ def generate_launch_description():
     package_name = "task22"
 
     for i in range(N):
+        A_i = A[i]
         z_0_i = z_0[i]
         intruder_i = intruders[i]
         N_i = np.nonzero(adj[:, i])[0].tolist()
@@ -33,6 +34,7 @@ def generate_launch_description():
                 parameters=[
                     {
                         "id": i,
+                        "A_i": A_i,
                         "z0": z_0_i,
                         "alpha": ALPHA,
                         "neighbors": N_i,

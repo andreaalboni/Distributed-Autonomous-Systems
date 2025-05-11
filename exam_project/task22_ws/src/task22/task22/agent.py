@@ -1,8 +1,8 @@
-import numpy as np
 import rclpy
+import numpy as np
+from time import sleep
 from rclpy.node import Node
 from std_msgs.msg import Float32MultiArray as MsgFloat
-from time import sleep
 
 # Can be improved - especially the casting part
 
@@ -16,15 +16,26 @@ class Agent(Node):
 
         # Get parameters from the launch file
         self.agent_id = self.get_parameter("id").value
-        self.neighbors = self.get_parameter("neighbors").value
-        self.z_i = np.array(self.get_parameter("z0").value)
-        self.max_iters = self.get_parameter("max_iters").value
         self.alpah = self.get_parameter("alpha").value
+        self.z_i = np.array(self.get_parameter("z0").value)
+        self.A_i = np.array(self.get_parameter("A_i").value)
+        self.neighbors = self.get_parameter("neighbors").value
+        self.max_iters = self.get_parameter("max_iters").value
+        self.intruder = np.array(self.get_parameter("intruder").value)
         communication_time = self.get_parameter("communication_time").value
         self.delta_T = communication_time / 10       # Discretization step, it may be decoupled from communication time
         self.k = 0
 
         print(f"I am agent: {self.agent_id:d}")
+        print(f"alpha: {self.alpah}")
+        print(f"Initial position z0: {self.z_i}")
+        print(f"Adjacency matrix row A_i: {self.A_i}")
+        print(f"Neighbors: {self.neighbors}")
+        print(f"Max iterations: {self.max_iters}")
+        print(f"Intruder position: {self.intruder}")
+        print(f"Communication time: {communication_time}")
+        print(f"Time step delta_T: {self.delta_T}")
+        return
 
         # Subscribe to topic_j
         for j in self.neighbors:
