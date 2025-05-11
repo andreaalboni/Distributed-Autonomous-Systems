@@ -1,1 +1,0 @@
-/home/user/docker_ws/das_ros2_ws/src/pub_sub/launch_folder/pub_sub_launch.py
