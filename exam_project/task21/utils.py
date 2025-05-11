@@ -63,9 +63,6 @@ def get_distances(agents, intruders):
         distances.append(np.linalg.norm(agents[agent] - intruders[agent]))
     return np.array(distances)
 
-def get_default_params():
-    return PARAMETERS
-
 def ensure_connected_graph(G):
     if nx.is_connected(G):
         return G

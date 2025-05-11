@@ -1,9 +1,7 @@
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 from launch_ros.actions import Node
 from launch import LaunchDescription
-from matplotlib.animation import FuncAnimation
 
 
 PARAMETERS = {
@@ -15,9 +13,6 @@ PARAMETERS = {
     'p_er': 0.5,
 }
 
-
-def get_default_params():
-    return PARAMETERS
 
 def debug_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent']):
     while True:
@@ -72,9 +67,6 @@ def get_distances(agents, intruders):
     for agent in range(len(agents)):
         distances.append(np.linalg.norm(agents[agent] - intruders[agent]))
     return np.array(distances)
-
-def get_default_params():
-    return PARAMETERS
 
 def ensure_connected_graph(G):
     if nx.is_connected(G):
@@ -141,139 +133,10 @@ def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARA
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
 
-def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
-    
-    '''
-    Cost function a lezione:
-    l_i = gamma_i * (norma della distanza agente - intruder)**2 +                       --> garantisce agente vada sull'intruder
-            gamma_bar_i * (norma della distanza agente - sigma)**2 +               --> garantisce formazione sia il più possibile compatta
-            norma della distanza r_0 - intruder (che io farei che sia il baricentro degli intruder)
-    sigma(z) = sum (phi_i(z_i)) / N     --> calcolo sigma
-    phi_i(z_i): per calcolo sigma normale: = z_i, per weighted barycenter: = weight_i * z_i
-    
-    # agents has shape (2,)
-    # intruder has shape (2,)
-    # sigma has shape (2,)
-    
-    # grad_1 is the gradient of the cost function with respect to the intruder
-    # grad_2 is the gradient of the cost function with respect to the barycenter
-    '''
-    agent_to_intruder = np.linalg.norm(agent_i - intruder_i)**2  
-    agent_to_sigma = np.linalg.norm(agent_i - sigma)**2
-    intruder_to_r_0 = np.linalg.norm(intruder_i - r_0)**2
-    
-    local_cost = gamma_i * agent_to_intruder + gamma_bar_i * agent_to_sigma + intruder_to_r_0
-    
-    # grad_1 is the gradient of the cost function with respect to the agent
-    grad_1 = 2 * (gamma_i * (agent_i - intruder_i) + gamma_bar_i * (agent_i - sigma))
-    # grad_2 is the gradient of the cost function with respect to sigma
-    grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
-    
-    return local_cost, grad_1, grad_2
-
-def local_phi_function(agent_i):
-    phi_i = agent_i
-    grad_phi_i = 1
-    return phi_i, grad_phi_i
-
-def visualize_graph(G):
-    plt.figure(figsize=(8, 8))
-    nx.draw(G, with_labels=True)
-    plt.show()
-    
-def visualize_world(agents, intruders, world_size=PARAMETERS['world_size']):
-    plt.figure(figsize=(8, 8))    
-    plt.scatter(agents[:, 0], agents[:, 1], c='black', marker='o', s=50, label='Agent')
-    plt.scatter(intruders[:, 0], intruders[:, 1], c='none', marker='s', s=50, label='Intruder', edgecolors='cyan')
-    sigma = compute_agents_barycenter(agents)
-    plt.scatter(sigma[0], sigma[1], c='none', marker='^', s=50, label='Sigma', edgecolors='mediumseagreen')
-    target = compute_r_0(intruders)
-    intruders_barycenter = compute_agents_barycenter(intruders)
-    if not np.array_equal(intruders_barycenter, target):
-        plt.scatter(intruders_barycenter[0], intruders_barycenter[1], c='purple', alpha=0.35, marker='x', s=50, label='Intruders\' CoG')
-    plt.scatter(target[0], target[1], c='red', marker='x', s=50, label=r'$r_0$')
-    padding = 0.2 
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
-    plt.xlim(x_min - padding * x_max, x_max + padding * x_max)
-    plt.ylim(y_min - padding * y_max, y_max + padding * y_max)
-    plt.title('World Visualization')
-    plt.legend()
-    plt.grid(True)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.show()
-
-def plot_graph_with_connections(G):
-    pos = nx.spring_layout(G)  
-    plt.figure(figsize=(8, 8))
-    nx.draw_networkx_nodes(G, pos, node_color='skyblue', node_size=500)
-    nx.draw_networkx_edges(G, pos, edge_color='gray', width=1.5)
-    nx.draw_networkx_labels(G, pos, font_size=12, font_color='black')
-    # Mostriamo il titolo
-    plt.title("Grafo con Connessioni")
-    plt.axis('off')  
-    plt.show()
-    
-def animate_world_evolution(intruders, z_history, s, sigma, r_0, world_size=PARAMETERS['world_size'], speed=10):
-    T, n_agents, *_ = z_history.shape
-    frame_skip = int(speed) + 1
-    positions = z_history[::frame_skip]
-    s_positions = s[::frame_skip]
-    pause_frames = int(3 * 20)
-    positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
-    s_positions = np.concatenate([s_positions, np.repeat(s_positions[-1:], pause_frames, axis=0)])
-    num_steps = len(positions)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.set_title('Agents to Targets Animation')
-    padding = 0.2
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
-    ax.set_xlim(x_min - padding * x_max, x_max + padding * x_max)
-    ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
-    ax.set_aspect('equal')
-    ax.grid(True)
-    ax.scatter(intruders[:, 0], intruders[:, 1], c='red', marker='x', s=50, label='Intruder')
-    # ax.scatter(sigma[0], sigma[1], c='black', marker='s', s=50, label=r'$\sigma$')
-    ax.scatter(r_0[0], r_0[1], c='none', marker='o', s=50, edgecolors='purple', label=r'$r_0$')
-    path_lines = [[] for _ in range(n_agents)]
-    ax.legend()
-    z_scatters = [ax.scatter([], [], c='blue', s=50) for _ in range(n_agents)]
-    s_scatters = [ax.scatter([], [], c='orange', marker='x', s=35) for _ in range(n_agents)]
-    def init():
-        for scatter in z_scatters + s_scatters:
-            scatter.set_offsets(np.empty((0, 2)))
-        return z_scatters + s_scatters + sum(path_lines, [])
-    def update(frame):
-        pos = positions[frame]
-        s_pos = s_positions[frame]
-        for i in range(n_agents):
-            z_scatters[i].set_offsets(pos[i])
-            s_scatters[i].set_offsets(s_pos[i])
-            if len(path_lines[i]) > 0:
-                for line in path_lines[i]:
-                    line.remove()
-                path_lines[i] = []
-            if frame > 0:
-                line, = ax.plot(positions[:frame+1, i, 0], positions[:frame+1, i, 1], 
-                               'gray', linestyle='--', alpha=0.5)
-                path_lines[i].append(line)
-        return z_scatters + s_scatters + sum(path_lines, [])
-    anim = FuncAnimation(
-        fig, update,
-        frames=num_steps,
-        init_func=init,
-        blit=True,
-        interval=50,
-        repeat=True
-    )
-    plt.show()
-    return anim
-
-
 
 def generate_launch_description():
     ALPHA = 0.0001
-    MAXITERS = 2000
+    MAX_ITERS = 2000
     COMM_TIME = 5e-2
     N = PARAMETERS['num_intruders']
 
@@ -281,14 +144,20 @@ def generate_launch_description():
     _, adj, A = generate_graph(N, type=graph_type)
 
     intruders, agents = generate_agents_and_intruders()
+    r_0 = compute_r_0(intruders).tolist()
     z_0 = agents
+
+    gamma = 15 * np.ones(len(agents))
+    gamma_bar = 3 * np.ones(len(agents))
 
     node_list = []
     package_name = "task22"
 
     for i in range(N):
+        gamma_i = gamma[i]
         A_i = A[i].tolist()
         z_0_i = z_0[i].tolist()
+        gamma_bar_i = gamma_bar[i]
         intruder_i = intruders[i].tolist()
         N_i = np.nonzero(adj[:, i])[0].tolist()
 
@@ -301,11 +170,14 @@ def generate_launch_description():
                     {
                         "id": i,
                         "A_i": A_i,
+                        "r_0": r_0,
                         "z0": z_0_i,
                         "alpha": ALPHA,
+                        "gamma": gamma_i,
                         "neighbors": N_i,
-                        "max_iters": MAXITERS,
+                        "max_iters": MAX_ITERS,
                         "intruder": intruder_i,
+                        "gamma_bar": gamma_bar_i,
                         "communication_time": COMM_TIME,
                     }
                 ],
