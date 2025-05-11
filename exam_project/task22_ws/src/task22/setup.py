@@ -1,5 +1,6 @@
 from glob import glob
 from setuptools import find_packages, setup
+import os
 
 package_name = 'task22'
 
@@ -10,7 +11,8 @@ setup(
     data_files=[
         ('share/ament_index/resource_index/packages', ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ("share/" + package_name, glob("launch_folder/launch.py")),
+        ('share/' + package_name, glob('launch_folder/*.py')),        
+        (os.path.join('share', package_name, 'urdf'), glob('urdf/*.urdf')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -22,6 +24,9 @@ setup(
     entry_points={
         'console_scripts': [
             "agent = task22.agent:main",
+            # debug 
+            'point_visualizer = task22.point_visualizer_node:main',
+            'drone_state_publisher = task22.drone_state_publisher:main',
         ],
     },
 )

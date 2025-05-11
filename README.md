@@ -34,8 +34,13 @@ docker-compose up
 docker exec -it das_ros2 /bin/bash
 ```
 
-## to run GUI app in the docker container on wayland run at each boot of you PC
+in order to run GUI app in the docker container on wayland systems 
+run at each boot outside of the docker container:
 
 ```bash
 xhost +local:docker
 ```
+
+### External sources
+
+- [drone urdf model](https://github.com/ricardodeazambuja/simple_quad_gazebo/blob/main/src/simple_quad/src/description/simple_quad.urdf)

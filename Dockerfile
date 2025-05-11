@@ -20,6 +20,8 @@ RUN apt-get update -q && \
      apt install -yq \
           ros-${ROS_DISTRO}-rqt-graph \
           ros-${ROS_DISTRO}-foxglove-bridge \
+          ros-${ROS_DISTRO}-joint-state-publisher \
+          ros-${ROS_DISTRO}-xacro \
      && rm -rf /var/lib/apt/lists/*
 
 ##########################################################
