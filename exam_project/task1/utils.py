@@ -50,9 +50,11 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
         agents.append(candidate)
     if len(agents) > total_agents_needed:
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
+    # Normalizartion:
+    
     return np.array(targets), np.array(agents)
 
-def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov']):
+def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov'], world_size=PARAMETERS['world_size']):
     distances = []
     noisy_distances = []
     for agent in agents:
@@ -63,9 +65,9 @@ def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_p
             if dist > radius_fov:
                 agent_distance.append(np.nan)
             else:
-                agent_distance.append(dist)
+                agent_distance.append(dist / world_size[0])
                 bias = np.random.uniform(-bias_param, bias_param)
-                noisy_distance_to_target.append(dist + np.random.normal(bias, noise_level))
+                noisy_distance_to_target.append( (dist + np.random.normal(bias, noise_level)) / world_size[0])
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
     return np.array(distances), np.array(noisy_distances)

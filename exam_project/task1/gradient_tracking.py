@@ -8,7 +8,7 @@ from save_and_load import save_evolution_data
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
 
-def gradient_tracking_method(max_iters=1500, alpha=0.001, save=False):
+def gradient_tracking_method(max_iters=1500, alpha=0.05, save=False):
     targets, agents = generate_agents_and_targets()
     # visualize_world(agents, targets, world_size=params['world_size'])
     real_distances, noisy_distances = get_distances(agents, targets)
