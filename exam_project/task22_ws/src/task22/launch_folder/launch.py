@@ -154,10 +154,10 @@ def generate_launch_description():
     package_name = "task22"
 
     for i in range(N):
-        gamma_i = gamma[i]
+        gamma_i = float(gamma[i])
         A_i = A[i].tolist()
         z_0_i = z_0[i].tolist()
-        gamma_bar_i = gamma_bar[i]
+        gamma_bar_i = float(gamma_bar[i])
         intruder_i = intruders[i].tolist()
         N_i = np.nonzero(adj[:, i])[0].tolist()
 
@@ -172,13 +172,13 @@ def generate_launch_description():
                         "A_i": A_i,
                         "r_0": r_0,
                         "z0": z_0_i,
-                        "alpha": ALPHA,
                         "gamma": gamma_i,
+                        "alpha": float(ALPHA),
                         "neighbors": N_i,
-                        "max_iters": MAX_ITERS,
+                        "max_iters": int(MAX_ITERS),
                         "intruder": intruder_i,
                         "gamma_bar": gamma_bar_i,
-                        "communication_time": COMM_TIME,
+                        "communication_time": float(COMM_TIME),
                     }
                 ],
                 output="screen",
@@ -186,5 +186,3 @@ def generate_launch_description():
             )
         )
     return LaunchDescription(node_list)
-
-generate_launch_description()
