@@ -5,7 +5,7 @@ from launch import LaunchDescription
 
 
 PARAMETERS = {
-    'num_intruders': 5,
+    'num_intruders': 3,
     'world_size': [20, 20],
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
@@ -135,8 +135,8 @@ def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARA
 
 
 def generate_launch_description():
-    ALPHA = 0.0001
-    MAX_ITERS = 2000
+    ALPHA = 0.001
+    MAX_ITERS = 100
     COMM_TIME = 5e-2
     N = PARAMETERS['num_intruders']
 

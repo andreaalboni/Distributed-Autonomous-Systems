@@ -111,7 +111,8 @@ class Agent(Node):
                 all_received = all(
                     self.k - 1 == self.received_data[j][0][0] for j in self.neighbors
                 )
-
+                print(self.received_data)
+                sleep(3)
             if all_received:
                 self.x_i = formation_vect_field(
                     self.DeltaT,
