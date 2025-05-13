@@ -50,9 +50,11 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
         agents.append(candidate)
     if len(agents) > total_agents_needed:
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
-    # Normalizartion:
     
-    return np.array(targets), np.array(agents)
+    # Normalization:
+    targets = np.array(targets) / world_size[0]
+    agents = np.array(agents) / world_size[0]
+    return targets, agents
 
 def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov'], world_size=PARAMETERS['world_size']):
     distances = []
@@ -65,9 +67,11 @@ def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_p
             if dist > radius_fov:
                 agent_distance.append(np.nan)
             else:
-                agent_distance.append(dist / world_size[0])
+                agent_distance.append(dist)
                 bias = np.random.uniform(-bias_param, bias_param)
-                noisy_distance_to_target.append( (dist + np.random.normal(bias, noise_level)) / world_size[0])
+                var = np.random.normal(0, noise_level)
+                noise = (bias + var) / world_size[0]
+                noisy_distance_to_target.append(dist + noise)
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
     return np.array(distances), np.array(noisy_distances)
@@ -131,6 +135,10 @@ def visualize_graph(G):
     plt.show()
     
 def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
+    # De-Normalization:
+    agents = agents * world_size[0]
+    targets = targets * world_size[0]
+    
     plt.figure(figsize=(8, 8))    
     plt.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
     plt.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
@@ -144,16 +152,6 @@ def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
     plt.grid(True)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.show()
-
-def Armijo_linesearch(f, search_direction, z0, fz0, directional_derivative_z0, alpha_init, beta=0.8, sigma=0.1):
-    alpha = alpha_init
-    for iter in range(500):
-        trial_z = z0 + alpha * search_direction
-        f_trial = f(trial_z)
-        if f_trial <= fz0 + alpha * sigma * directional_derivative_z0:
-            break
-        alpha = beta * alpha
-    return alpha
 
 def metropolis_hastings_weights(G):
     r"""
@@ -182,12 +180,17 @@ def metropolis_hastings_weights(G):
         A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
     return A
 
-def animate_world_evolution(agents, targets, z_hystory, type, world_size=PARAMETERS['world_size'], speed=4):
-    T, n_agents, n_targets, _ = z_hystory.shape
+def animate_world_evolution(agents, targets, z_history, type, world_size=PARAMETERS['world_size'], speed=4):
+    # De-Normalization:
+    agents = agents * world_size[0]
+    targets = targets * world_size[0]
+    z_history = z_history * world_size[0]
+
+    T, n_agents, n_targets, _ = z_history.shape
     frame_skip = int(speed)
     frame_skip += 1
     num_steps = T // frame_skip
-    positions = z_hystory[::frame_skip]  # Reduce data for animation
+    positions = z_history[::frame_skip]  # Reduce data for animation
     # Add pause frames at the end
     pause_frames = int(3 * 20)  # 3 seconds at 20 fps
     positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
