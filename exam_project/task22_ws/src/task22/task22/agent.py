@@ -67,12 +67,11 @@ class Agent(Node):
             if self._check_messages_received(self.k - 1):
                 self._process_iteration()
                 self._publish_current_state()
-                print(f"Agent {self.agent_id}: Iter {self.k:3d} - Published state: s={self.s[self.k]}")
+                print(f"Agent {self.agent_id}: Iter {self.k:3d} \n z={self.z[self.k]}, s={self.s[self.k]}")
                 self.k += 1
                 
                 if self.k >= self.max_iters:
                     print(f"\nAgent {self.agent_id}: Max iterations reached")
-                    sleep(3)
                     raise SystemExit
             else:
                 missing = [j for j in self.neighbors if self.k - 1 not in self.received_data[j]]

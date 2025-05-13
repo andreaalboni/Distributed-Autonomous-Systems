@@ -3,13 +3,13 @@
     "3D!2ymwvek": {
       "cameraState": {
         "perspective": true,
-        "distance": 5.839780486774608,
-        "phi": 51.498973305954166,
-        "thetaOffset": 45.36960985626317,
+        "distance": 75.89554049200596,
+        "phi": 51.49897330595226,
+        "thetaOffset": 89.90486257929504,
         "targetOffset": [
-          0.42045344828324405,
-          0.038223040753033996,
-          4.7260795076997547e-17
+          25.96281002575086,
+          4.7651739369783925,
+          -14.7002828524277
         ],
         "target": [
           0,
@@ -26,7 +26,7 @@
         "near": 0.5,
         "far": 5000
       },
-      "followMode": "follow-pose",
+      "followMode": "follow-position",
       "scene": {
         "transforms": {
           "editable": false,
@@ -39,6 +39,9 @@
         },
         "frame:world": {
           "visible": true
+        },
+        "frame:arm1_link": {
+          "visible": true
         }
       },
       "topics": {
@@ -46,13 +49,25 @@
           "visible": true
         },
         "/robot_description": {
-          "visible": true
+          "visible": true,
+          "displayMode": "auto",
+          "showOutlines": true,
+          "showAxis": false
         },
         "/initialpose": {
-          "visible": false
+          "visible": true
         },
         "/move_base_simple/goal": {
-          "visible": false
+          "visible": true
+        },
+        "/agent_trajectories": {
+          "visible": true,
+          "namespaces": {
+            "agent_trajectories": {
+              "visible": true
+            }
+          },
+          "showOutlines": true
         }
       },
       "layers": {
@@ -76,6 +91,71 @@
             0,
             0
           ]
+        },
+        "3e9b270e-879a-4680-b054-357cbeb49b20": {
+          "displayMode": "auto",
+          "showAxis": false,
+          "axisScale": 1,
+          "showOutlines": true,
+          "opacity": 1,
+          "visible": true,
+          "frameLocked": true,
+          "instanceId": "3e9b270e-879a-4680-b054-357cbeb49b20",
+          "label": "URDF",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "topic",
+          "url": "",
+          "filePath": "",
+          "parameter": "",
+          "topic": "/agent_0/robot_description",
+          "framePrefix": "agent_0/",
+          "order": 1,
+          "links": {
+            "agent_0/arm1_link": {
+              "visible": true
+            },
+            "agent_0/arm1_motor_link": {
+              "visible": true
+            }
+          }
+        },
+        "981b498c-1caf-463b-b257-6795648a4979": {
+          "displayMode": "auto",
+          "showAxis": false,
+          "axisScale": 1,
+          "showOutlines": true,
+          "opacity": 1,
+          "visible": true,
+          "frameLocked": true,
+          "instanceId": "981b498c-1caf-463b-b257-6795648a4979",
+          "label": "URDF",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "topic",
+          "url": "",
+          "filePath": "",
+          "parameter": "",
+          "topic": "/agent_0/robot_description",
+          "framePrefix": "agent_1/",
+          "order": 1
+        },
+        "5c4d61d6-dcfc-4611-8574-7e51c5aec844": {
+          "displayMode": "auto",
+          "showAxis": false,
+          "axisScale": 1,
+          "showOutlines": true,
+          "opacity": 1,
+          "visible": true,
+          "frameLocked": true,
+          "instanceId": "5c4d61d6-dcfc-4611-8574-7e51c5aec844",
+          "label": "URDF",
+          "layerId": "foxglove.Urdf",
+          "sourceType": "topic",
+          "url": "",
+          "filePath": "",
+          "parameter": "",
+          "topic": "/agent_2/robot_description",
+          "framePrefix": "agent_2/",
+          "order": 1
         }
       },
       "publish": {
@@ -89,6 +169,43 @@
       },
       "imageMode": {},
       "followTf": "world"
+    },
+    "Plot!3eeaug6": {
+      "paths": [
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/topic_0.z[:]",
+          "enabled": true,
+          "color": "#4e98e2",
+          "label": "z",
+          "timestampPath": "/topic_0.k",
+          "showLine": true
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/topic_0.s[:]",
+          "enabled": true,
+          "color": "#f5774d",
+          "label": "s"
+        },
+        {
+          "timestampMethod": "receiveTime",
+          "value": "/topic_0.v[:]",
+          "enabled": true,
+          "color": "#f7df71",
+          "label": "v"
+        }
+      ],
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "showLegend": true,
+      "legendDisplay": "floating",
+      "showPlotValuesInLegend": false,
+      "isSynced": true,
+      "xAxisVal": "timestamp",
+      "sidebarDimension": 240,
+      "xAxisLabel": "time",
+      "minXValue": 0
     }
   },
   "globalVariables": {},
@@ -96,5 +213,10 @@
   "playbackConfig": {
     "speed": 1
   },
-  "layout": "3D!2ymwvek"
+  "layout": {
+    "first": "3D!2ymwvek",
+    "second": "Plot!3eeaug6",
+    "direction": "column",
+    "splitPercentage": 75.4601226993865
+  }
 }
