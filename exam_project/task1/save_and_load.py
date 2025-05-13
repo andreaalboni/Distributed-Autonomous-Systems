@@ -1,6 +1,7 @@
 import os
 import pickle
-from utils import animate_world_evolution
+from utils_visualization import animate_world_evolution
+from config import PARAMETERS
 
 file_to_load = 'evolution_3.pkl'
 
@@ -10,7 +11,7 @@ def get_next_id(save_dir):
     ids = [int(f.split('_')[1].split('.')[0]) for f in existing if f.split('_')[1].split('.')[0].isdigit()]
     return max(ids, default=0) + 1
 
-def save_evolution_data(agents, targets, z_history, type, world_size, save_dir='./exam_project/task1/evolution_data'):
+def save_evolution_data(agents, targets, z_history, type, world_size=PARAMETERS['world_size'], save_dir='./exam_project/task1/evolution_data'):
     # De-Normalization:
     agents = agents * world_size[0]
     targets = targets * world_size[0]
