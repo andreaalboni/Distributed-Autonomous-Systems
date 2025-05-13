@@ -1,7 +1,7 @@
 import numpy as np
 
 PARAMETERS = {
-    'num_targets': 1,
+    'num_targets': 3,
     'ratio_at': 7,              # ratio of agents to targets
     'world_size': [5, 5],
     'radius_fov': np.inf,
