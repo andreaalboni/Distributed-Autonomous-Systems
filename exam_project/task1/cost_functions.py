@@ -2,7 +2,8 @@ import numpy as np
 import sys
 
 def local_cost_function_task1(z, z_ref, distances=None):
-    Q = np.eye(len(z))
+    #Q = np.eye(len(z)) # The identity is not correct since it is not convex
+    Q = np.eye(len(z)) * 10
     diff = z - z_ref
     cost = np.linalg.norm(diff.T @ Q @ diff, 'fro')**2
     grad = 2 * Q @ diff

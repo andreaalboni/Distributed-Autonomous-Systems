@@ -1,11 +1,10 @@
 import warnings
 import numpy as np
-from config import PARAMETERS 
 
-def is_in_fov(agent_pos, target_pos, radius_fov=PARAMETERS['radius_fov']):
+def is_in_fov(agent_pos, target_pos, radius_fov):
     return np.linalg.norm(agent_pos - target_pos) <= radius_fov
 
-def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
+def spawn_agent_near_target(target, existing_agents, existing_targets, world_size):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
         if (is_in_fov(candidate, target) and 
@@ -13,19 +12,19 @@ def spawn_agent_near_target(target, existing_agents, existing_targets, world_siz
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
         
-def spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
+def spawn_candidate(existing_agents, existing_targets, world_size):
     while True:
         candidate = np.random.uniform(0, world_size[0], size=2)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
 
-def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=PARAMETERS['ratio_at'], world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
+def generate_agents_and_targets(num_targets, ratio_at, world_size):
     targets = []
     agents = []
     # Spawn targets and required agents
     for _ in range(num_targets):
-        target = spawn_candidate(agents, targets)
+        target = spawn_candidate(agents, targets, world_size)
         targets.append(target)
         visible_agents = sum(is_in_fov(agent, target) for agent in agents)
         for _ in range(3 - visible_agents):
@@ -43,7 +42,7 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
     agents = np.array(agents) / world_size[0]
     return targets, agents
 
-def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov'], world_size=PARAMETERS['world_size']):
+def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_size):
     distances = []
     noisy_distances = []
     for agent in agents:
