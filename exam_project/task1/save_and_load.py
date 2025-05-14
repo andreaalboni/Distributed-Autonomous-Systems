@@ -1,6 +1,6 @@
 import os
 import pickle
-from utils import animate_world_evolution
+from utils_visualization import animate_world_evolution
 
 file_to_load = 'evolution_3.pkl'
 

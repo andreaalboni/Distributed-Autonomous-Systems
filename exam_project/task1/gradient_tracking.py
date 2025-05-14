@@ -1,21 +1,12 @@
 import numpy as np
-from utils import *
-from config import PARAMETERS
 import matplotlib.pyplot as plt
-from save_and_load import save_evolution_data
 
 # extend the length of the print of numpy arrays
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
 
-def gradient_tracking_method(max_iters=2250, alpha=0.025, save=False):
-    targets, agents = generate_agents_and_targets()
-    visualize_world(agents, targets, world_size=PARAMETERS['world_size'])
-    real_distances, noisy_distances = get_distances(agents, targets)
-    graph_type = 'cycle'
-    G, adj, A = generate_graph(len(agents), type=graph_type)
-    # visualize_graph(G)
-
+def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=2250, alpha=0.025):
+    # TODO: remove prova
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters, len(targets)))
     norm_error = np.zeros((max_iters, len(agents), len(targets)))
@@ -66,58 +57,5 @@ def gradient_tracking_method(max_iters=2250, alpha=0.025, save=False):
                 norm_error[k, i, j] += np.linalg.norm(z[k, i, j] - targets[j])
         norm_grad_cost[k] = np.linalg.norm(total_grad / len(agents))
         prova[k] = np.linalg.norm(s[k,0])
-
-    fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
-    ax = axes[0]
-    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='magenta')
-    ax.set_title('Cost function')
-    ax.set_xlabel('Iteration')
     
-    ax = axes[1]
-    ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='cyan')
-    ax.semilogy(np.arange(max_iters-1), prova[:-1], color='purple')
-    ax.set_title('Gradient of the cost')
-    ax.set_xlabel('Iteration')
-    plt.show()
-    
-    fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=len(targets))
-    fig.suptitle('Norm of the error for each target', fontsize=14)
-    # Create a color list for consistent colors across subplots
-    colors = plt.cm.rainbow(np.linspace(0, 1, len(agents)))
-    for j in range(len(targets)):
-        ax = axes[j]
-        for i in range(len(agents)):
-            ax.semilogy(np.arange(max_iters-1), norm_error[:-1, i, j], 
-                       color=colors[i],
-                       label=f'Agent {i}' if j==0 else None)
-            if j == 0: ax.legend()
-        ax.set_title(f'Target {j}')
-        ax.set_xlabel('Iteration')
-    
-    """
-    ax = axes[1]
-    for i in range(len(targets)):
-        for j in range(len(agents)):
-            errors = [np.linalg.norm(z[t, j, i] - z_opt[i]) for t in range(max_iters-1)]
-            ax.semilogy(np.arange(max_iters-1), errors)
-    # ax.legend()
-    ax.set_title('Estimation error vs Iteration')
-    ax.set_xlabel('Iteration') 
-    """
-    plt.show()
-    
-    # print(f"z optimal: {z_opt}")
-    # print(f"estimated positions of targets: {z[-1, :, :, :]}")
-    if save:
-        save_evolution_data(agents, targets, z, type=graph_type, world_size=PARAMETERS['world_size'])
-    animate_world_evolution(agents, targets, type=graph_type, z_history=z)
-    
-    print(f"Norm: {np.linalg.norm(PARAMETERS['world_size'] * z[-1,0] - PARAMETERS['world_size'] * targets)}")
-    return z, cost
-
-
-def main():
-    gradient_tracking_method()
-
-if __name__ == "__main__":
-    main()
+    return z, cost, norm_grad_cost, prova, norm_error
