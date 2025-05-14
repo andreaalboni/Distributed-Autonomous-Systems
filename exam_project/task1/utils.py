@@ -2,8 +2,10 @@ import warnings
 import numpy as np
 import networkx as nx
 from config import PARAMETERS 
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+matplotlib.use('TkAgg')
 
 
 def get_default_params():
@@ -18,22 +20,22 @@ def doll_cost_function(z, Q, z_ref):
     grad = 2 * Q @ diff
     return cost, grad
 
-def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
+def spawn_agent_near_target(target, existing_agents, existing_targets, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (is_in_fov(candidate, target) and 
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
         
-def spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['world_size']):
+def spawn_candidate(existing_agents, existing_targets, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_targets)):
             return candidate
 
-def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=PARAMETERS['ratio_at'], world_size=PARAMETERS['world_size'], radius_fov=PARAMETERS['radius_fov']):
+def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=PARAMETERS['ratio_at'], world_size=PARAMETERS['world_size']):
     targets = []
     agents = []
     # Spawn targets and required agents
@@ -52,8 +54,8 @@ def generate_agents_and_targets(num_targets=PARAMETERS['num_targets'], ratio_at=
         warnings.warn(f"\033[38;5;214mNumber of agents ({len(agents)}) exceeds the required number ({total_agents_needed}).\033[0m")
     
     # Normalization:
-    targets = np.array(targets) / world_size[0]
-    agents = np.array(agents) / world_size[0]
+    targets = np.array(targets) / world_size
+    agents = np.array(agents) / world_size
     return targets, agents
 
 def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_param=PARAMETERS['bias'], radius_fov=PARAMETERS['radius_fov'], world_size=PARAMETERS['world_size']):
@@ -70,7 +72,7 @@ def get_distances(agents, targets, noise_level=PARAMETERS['noise_level'], bias_p
                 agent_distance.append(dist)
                 bias = np.random.uniform(-bias_param, bias_param)
                 var = np.random.normal(0, noise_level)
-                noise = (bias + var) / world_size[0]
+                noise = (bias + var) / world_size
                 noisy_distance_to_target.append(dist + noise)
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
@@ -134,24 +136,85 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def visualize_world(agents, targets, world_size=PARAMETERS['world_size']):
-    # De-Normalization:
-    agents = agents * world_size[0]
-    targets = targets * world_size[0]
-    
-    plt.figure(figsize=(8, 8))    
-    plt.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', label='Agent')
-    plt.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', label='Target')
-    padding = 0.2 
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
-    plt.xlim(x_min - padding * x_max, x_max + padding * x_max)
-    plt.ylim(y_min - padding * y_max, y_max + padding * y_max)
-    plt.title('World Visualization')
-    plt.legend()
-    plt.grid(True)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.show()
+def visualize_world(agents, targets, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
+    if d <= 3 and d > 0:
+        # De-Normalization:
+        agents = agents * world_size
+        targets = targets * world_size
+        
+        fig = plt.figure(figsize=(8, 8))
+        if d == 3:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+            
+        ax.set_title('World visualization')
+        padding = 0.2
+        
+        if d == 1:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_yticks([])  # Hide y-axis ticks
+            ax.scatter(agents, np.zeros_like(agents), c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets, np.zeros_like(targets), c='red', marker='x', s=50, label='Target')
+            ax.grid(False)
+            ax.set_aspect('equal')
+            
+        elif d == 2:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', s=50, label='Target')
+            ax.grid(True)
+            ax.set_aspect('equal')
+            
+        elif d == 3:
+            # Set limits for all three axes with equal range
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.set_zlim(-padding * world_size, world_size * (1 + padding))
+            
+            # Plot agents and targets
+            ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets[:, 0], targets[:, 1], targets[:, 2], c='red', marker='x', s=50, label='Target')
+            
+            # Set equal aspect ratio for 3D plots
+            # This is the key fix - we need to set equal scaling for all three axes
+            # Get the limits for normalization
+            x_limits = ax.get_xlim3d()
+            y_limits = ax.get_ylim3d()
+            z_limits = ax.get_zlim3d()
+            
+            # Get the range of each dimension
+            x_range = abs(x_limits[1] - x_limits[0])
+            y_range = abs(y_limits[1] - y_limits[0])
+            z_range = abs(z_limits[1] - z_limits[0])
+            
+            # Find the greatest range for normalization
+            max_range = max(x_range, y_range, z_range)
+            
+            # Set the axes centrally in the figure using the max range
+            mid_x = np.mean(x_limits)
+            mid_y = np.mean(y_limits)
+            mid_z = np.mean(z_limits)
+            
+            # Update the limits
+            ax.set_xlim3d([mid_x - max_range/2, mid_x + max_range/2])
+            ax.set_ylim3d([mid_y - max_range/2, mid_y + max_range/2])
+            ax.set_zlim3d([mid_z - max_range/2, mid_z + max_range/2])
+            
+            # Enable grid
+            ax.grid(True)
+            
+            # Add axis labels for better orientation
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            
+        ax.legend()
+        plt.show()
+    else:
+        print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
+        return None
 
 def metropolis_hastings_weights(G):
     r"""
@@ -180,57 +243,109 @@ def metropolis_hastings_weights(G):
         A[i, i] = 1 - sum(A[i, j] for j in neighbor_indices)
     return A
 
-def animate_world_evolution(agents, targets, z_history, type, world_size=PARAMETERS['world_size'], speed=4):
-    # De-Normalization:
-    agents = agents * world_size[0]
-    targets = targets * world_size[0]
-    z_history = z_history * world_size[0]
+def animate_world_evolution(agents, targets, z_history, type, world_size=PARAMETERS['world_size'], d=PARAMETERS['d'], speed=4):
+    if d > 0 and d <= 3:
+        agents = agents * world_size
+        targets = targets * world_size
 
-    T, n_agents, n_targets, _ = z_history.shape
-    frame_skip = int(speed)
-    frame_skip += 1
-    num_steps = T // frame_skip
-    positions = z_history[::frame_skip]  # Reduce data for animation
-    # Add pause frames at the end
-    pause_frames = int(3 * 20)  # 3 seconds at 20 fps
-    positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
-    num_steps = len(positions)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    ax.set_title(f'Agents to Targets Animation - {type} Graph')
-    padding = 0.2
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
-    ax.set_xlim(x_min - padding * x_max, x_max + padding * x_max)
-    ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
-    ax.set_aspect('equal')
-    ax.grid(True)
-    # Plot static agents and targets
-    ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', s=50, label='Agent')
-    ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', s=50, label='Target')
-    ax.legend()
-    # Create dynamic scatter objects for each agent-target pair
-    scatters = []
-    for _ in range(n_agents * n_targets):
-        scatter = ax.scatter([], [], c='green', s=10)
-        scatters.append(scatter)
-    def init():
-        for scatter in scatters:
-            scatter.set_offsets(np.empty((0, 2)))
-        return scatters
-    def update(frame):
-        pos = positions[frame]  # shape: (n_agents, n_targets, 2)
-        index = 0
-        for i in range(n_agents):
-            for j in range(n_targets):
-                scatters[index].set_offsets(pos[i, j])
-                index += 1
-        return scatters
-    _ = FuncAnimation(
-        fig, update,
-        frames=num_steps,
-        init_func=init,
-        blit=True,
-        interval=1,
-        repeat=True
-    )
-    plt.show()
+        z_history = z_history * world_size
+        T, n_agents, n_targets, _ = z_history.shape
+        frame_skip = int(speed)
+        frame_skip += 1
+        num_steps = T // frame_skip
+        positions = z_history[::frame_skip]
+        pause_frames = int(3 * 20)
+        positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
+        num_steps = len(positions)
+        fig = plt.figure(figsize=(8, 8))
+        if d == 3:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+        ax.set_title(f'Agents to Targets Animation - {type} Graph')
+        padding = 0.2
+        if d == 1:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_yticks([])
+            ax.scatter(agents, np.zeros_like(agents), c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets, np.zeros_like(targets), c='red', marker='x', s=50, label='Target')
+            ax.grid(False)
+        elif d == 2:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.scatter(agents[:, 0], agents[:, 1], c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', s=50, label='Target')
+            ax.grid(True)
+        elif d == 3:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.set_zlim(-padding * world_size, world_size * (1 + padding))
+            ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='blue', marker='o', s=50, label='Agent')
+            ax.scatter(targets[:, 0], targets[:, 1], targets[:, 2], c='red', marker='x', s=50, label='Target')
+            ax.grid(True)
+            ax.scatter([], [], [], c='green', s=20, label='Estimation')
+        ax.legend()
+        if d != 3:
+            ax.set_aspect('equal')
+        if d == 3:
+            estimation_points = None
+            def update(frame):
+                nonlocal estimation_points
+                if estimation_points is not None:
+                    for point in estimation_points:
+                        point.remove()
+                
+                pos = positions[frame]
+                x_data = []
+                y_data = []
+                z_data = []
+                for i in range(n_agents):
+                    for j in range(n_targets):
+                        x_data.append(pos[i, j, 0])
+                        y_data.append(pos[i, j, 1])
+                        z_data.append(pos[i, j, 2])
+                
+                estimation_points = [ax.scatter(x_data, y_data, z_data, c='green', s=20)]
+                return estimation_points
+            anim = FuncAnimation(
+                fig, update,
+                frames=num_steps,
+                interval=50,
+                repeat=True
+            )
+        else:
+            scatters = []
+            for _ in range(n_agents * n_targets):
+                if d == 1:
+                    scatter = ax.scatter([], [], c='green', s=20)
+                elif d == 2:
+                    scatter = ax.scatter([], [], c='green', s=20)
+                scatters.append(scatter)
+            def init():
+                for scatter in scatters:
+                    scatter.set_offsets(np.empty((0, 2)))
+                return scatters
+            def update(frame):
+                pos = positions[frame]
+                index = 0
+                for i in range(n_agents):
+                    for j in range(n_targets):
+                        if d == 1:
+                            scatters[index].set_offsets(np.column_stack((pos[i, j], 0)))
+                        elif d == 2:
+                            scatters[index].set_offsets(pos[i, j])
+                        index += 1
+                return scatters
+            anim = FuncAnimation(
+                fig, update,
+                frames=num_steps,
+                init_func=init,
+                blit=True,
+                interval=50,
+                repeat=True
+            )
+        plt.show()
+        return anim
+    else:
+        print(f"Animation only supports dimensions 1-3. Current dimension: {d}")
+        return None
