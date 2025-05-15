@@ -11,7 +11,7 @@ def visualize_graph(G):
     plt.show()
     
 # TODO: remove prova
-def plot_gradient_traking_results(z, cost, norm_grad_cost, prova, agents, targets, norm_error):
+def plot_gradient_tracking_results(z, cost, norm_grad_cost, prova, agents, targets, norm_error):
     """
     Visualizes the results of the gradient tracking algorithm.
     """
@@ -57,7 +57,6 @@ def plot_gradient_traking_results(z, cost, norm_grad_cost, prova, agents, target
     
 def visualize_world(agents, targets, world_size, d):
     if d <= 3 and d > 0:
-        # De-Normalization:
         agents = agents * world_size
         targets = targets * world_size
         
@@ -72,7 +71,7 @@ def visualize_world(agents, targets, world_size, d):
         
         if d == 1:
             ax.set_xlim(-padding * world_size, world_size * (1 + padding))
-            ax.set_yticks([])  # Hide y-axis ticks
+            ax.set_yticks([])
             ax.scatter(agents, np.zeros_like(agents), c='blue', marker='o', s=50, label='Agent')
             ax.scatter(targets, np.zeros_like(targets), c='red', marker='x', s=50, label='Target')
             ax.grid(False)
@@ -87,44 +86,33 @@ def visualize_world(agents, targets, world_size, d):
             ax.set_aspect('equal')
             
         elif d == 3:
-            # Set limits for all three axes with equal range
             ax.set_xlim(-padding * world_size, world_size * (1 + padding))
             ax.set_ylim(-padding * world_size, world_size * (1 + padding))
             ax.set_zlim(-padding * world_size, world_size * (1 + padding))
             
-            # Plot agents and targets
             ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='blue', marker='o', s=50, label='Agent')
             ax.scatter(targets[:, 0], targets[:, 1], targets[:, 2], c='red', marker='x', s=50, label='Target')
             
-            # Set equal aspect ratio for 3D plots
-            # This is the key fix - we need to set equal scaling for all three axes
-            # Get the limits for normalization
             x_limits = ax.get_xlim3d()
             y_limits = ax.get_ylim3d()
             z_limits = ax.get_zlim3d()
             
-            # Get the range of each dimension
             x_range = abs(x_limits[1] - x_limits[0])
             y_range = abs(y_limits[1] - y_limits[0])
             z_range = abs(z_limits[1] - z_limits[0])
             
-            # Find the greatest range for normalization
             max_range = max(x_range, y_range, z_range)
             
-            # Set the axes centrally in the figure using the max range
             mid_x = np.mean(x_limits)
             mid_y = np.mean(y_limits)
             mid_z = np.mean(z_limits)
             
-            # Update the limits
             ax.set_xlim3d([mid_x - max_range/2, mid_x + max_range/2])
             ax.set_ylim3d([mid_y - max_range/2, mid_y + max_range/2])
             ax.set_zlim3d([mid_z - max_range/2, mid_z + max_range/2])
             
-            # Enable grid
             ax.grid(True)
             
-            # Add axis labels for better orientation
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             ax.set_zlabel('Z')

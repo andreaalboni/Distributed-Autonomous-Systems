@@ -1,46 +1,57 @@
-import warnings
+import matplotlib
 import numpy as np
 import networkx as nx
 from config import PARAMETERS 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
+matplotlib.use('TkAgg')
 
 def get_default_params():
     return PARAMETERS
 
-def debug_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent']):
+def debug_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
-        center = np.array([world_size[0]/2, world_size[1]/2])
+        candidate = np.random.uniform(0, world_size, size=d)
+        center = world_size/2 * np.ones_like(candidate)
         if (np.linalg.norm(candidate - intruder) <= radius_spawn_agent and
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
 
-def debug_spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], intruder_radius=PARAMETERS['intruder_radius']):
+def debug_spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], intruder_radius=PARAMETERS['intruder_radius'], d=PARAMETERS['d']):
     while True:
-        angle = np.random.uniform(0, 2 * np.pi)
-        noise = 0
-        candidate = np.array([
-            intruder_radius * np.sin(angle) + world_size[0]/2 + noise * np.sin(angle),
-            intruder_radius * np.cos(angle) + world_size[0]/2 + noise * np.cos(angle)
-        ])
+        if d == 2:
+            theta = np.random.uniform(0, 2 * np.pi)
+            candidate = np.array([
+                intruder_radius * np.cos(theta),
+                intruder_radius * np.sin(theta)
+            ])
+        elif d == 3:
+            theta = np.random.uniform(0, 2 * np.pi)  # azimuthal angle
+            phi = np.random.uniform(0, np.pi)        # polar angle
+            candidate = np.array([
+                intruder_radius * np.sin(phi) * np.cos(theta),
+                intruder_radius * np.sin(phi) * np.sin(theta),
+                intruder_radius * np.cos(phi)
+            ])
+        else:
+            raise ValueError("Only 2D and 3D spaces are supported")
+        candidate += world_size/2
         if (not any(np.allclose(candidate, a, atol=3.0) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=3.0) for t in existing_intruders)):
             return candidate
 
-def spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent']):
+def spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (np.linalg.norm(candidate - intruder) <= radius_spawn_agent and
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
         
-def spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size']):
+def spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
@@ -49,19 +60,11 @@ def generate_agents_and_intruders(num_intruders=PARAMETERS['num_intruders'], wor
     intruders = []
     agents = []
     for _ in range(num_intruders):
-        # Genera un nuovo intruder
         intruder = debug_spawn_candidate(agents, intruders, world_size=world_size)
         intruders.append(intruder)
-        # Genera un agente vicino al proprio intruder
         agent = debug_spawn_agent_near_intruder(intruder, agents, intruders, world_size=world_size)
         agents.append(agent)
     return np.array(intruders), np.array(agents)
-
-def get_distances(agents, intruders):
-    distances = []
-    for agent in range(len(agents)):
-        distances.append(np.linalg.norm(agents[agent] - intruders[agent]))
-    return np.array(distances)
 
 def ensure_connected_graph(G):
     if nx.is_connected(G):
@@ -118,18 +121,17 @@ def compute_agents_barycenter(agents):
     sigma = np.mean(agents, axis=0)
     return sigma
 
-def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARAMETERS['world_size']):
+def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     barycenter_intruders = compute_agents_barycenter(intruders)
     if (noise_radius == 0.0):
         return barycenter_intruders
     while True:
-        r_0_candidate = np.random.uniform(0, world_size[0], size=2)
+        r_0_candidate = np.random.uniform(0, world_size, size=d)
         if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
 
-def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
-    
+def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i, gamma_hat_i):
     '''
     Cost function a lezione:
     l_i = gamma_i * (norma della distanza agente - intruder)**2 +                       --> garantisce agente vada sull'intruder
@@ -149,7 +151,7 @@ def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
     agent_to_sigma = np.linalg.norm(agent_i - sigma)**2
     intruder_to_r_0 = np.linalg.norm(intruder_i - r_0)**2
     
-    local_cost = gamma_i * agent_to_intruder + gamma_bar_i * agent_to_sigma + intruder_to_r_0
+    local_cost = gamma_i * agent_to_intruder + gamma_bar_i * agent_to_sigma + gamma_hat_i * intruder_to_r_0
     
     # grad_1 is the gradient of the cost function with respect to the agent
     grad_1 = 2 * (gamma_i * (agent_i - intruder_i) + gamma_bar_i * (agent_i - sigma))
@@ -168,27 +170,97 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def visualize_world(agents, intruders, world_size=PARAMETERS['world_size']):
-    plt.figure(figsize=(8, 8))    
-    plt.scatter(agents[:, 0], agents[:, 1], c='black', marker='o', s=50, label='Agent')
-    plt.scatter(intruders[:, 0], intruders[:, 1], c='none', marker='s', s=50, label='Intruder', edgecolors='cyan')
-    sigma = compute_agents_barycenter(agents)
-    plt.scatter(sigma[0], sigma[1], c='none', marker='^', s=50, label='Sigma', edgecolors='mediumseagreen')
-    target = compute_r_0(intruders)
-    intruders_barycenter = compute_agents_barycenter(intruders)
-    if not np.array_equal(intruders_barycenter, target):
-        plt.scatter(intruders_barycenter[0], intruders_barycenter[1], c='purple', alpha=0.35, marker='x', s=50, label='Intruders\' CoG')
-    plt.scatter(target[0], target[1], c='red', marker='x', s=50, label=r'$r_0$')
-    padding = 0.2 
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
-    plt.xlim(x_min - padding * x_max, x_max + padding * x_max)
-    plt.ylim(y_min - padding * y_max, y_max + padding * y_max)
-    plt.title('World Visualization')
-    plt.legend()
-    plt.grid(True)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.show()
+def visualize_world(agents, intruders, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
+    if d <= 3 and d > 1:
+        fig = plt.figure(figsize=(10, 8))
+        if d == 3:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
+
+        ax.set_title('World visualization')
+        padding = 0.2
+        
+        if d == 2:
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.scatter(agents[:, 0], agents[:, 1], c='black', marker='o', s=50, label='Agent')
+            ax.scatter(intruders[:, 0], intruders[:, 1], c='cyan', marker='s', s=50, label='Intruder', edgecolors='cyan', facecolors='none')
+            
+            sigma = compute_agents_barycenter(agents)
+            ax.scatter(sigma[0], sigma[1], c='green', marker='^', s=50, label='Sigma', edgecolors='mediumseagreen', facecolors='none')
+            
+            target = compute_r_0(intruders)
+            intruders_barycenter = compute_agents_barycenter(intruders)
+            
+            if not np.array_equal(intruders_barycenter, target):
+                ax.scatter(intruders_barycenter[0], intruders_barycenter[1], c='purple', alpha=0.35, marker='x', s=50, label='Intruders\' CoG')
+            
+            ax.scatter(target[0], target[1], c='red', marker='x', s=50, label=r'$r_0$')
+            ax.grid(True)
+            ax.set_aspect('equal')
+            
+        elif d == 3:
+            # Set limits for all three axes with equal range
+            ax.set_xlim(-padding * world_size, world_size * (1 + padding))
+            ax.set_ylim(-padding * world_size, world_size * (1 + padding))
+            ax.set_zlim(-padding * world_size, world_size * (1 + padding))
+            
+            # Plot agents as black circles
+            ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='black', marker='o', s=50, label='Agent')
+            
+            # Plot intruders as cyan squares with transparent fill
+            ax.scatter(intruders[:, 0], intruders[:, 1], intruders[:, 2], facecolors='none', edgecolors='cyan', marker='s', s=50, label='Intruder')
+            
+            # Calculate and plot the center of gravity of agents (sigma)
+            sigma = compute_agents_barycenter(agents)
+            ax.scatter(sigma[0], sigma[1], sigma[2], facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma')
+            
+            # Calculate and plot the target point (r_0)
+            target = compute_r_0(intruders)
+            intruders_barycenter = compute_agents_barycenter(intruders)
+            
+            # Plot the barycenter of intruders if different from target
+            if not np.allclose(intruders_barycenter, target):  # Using allclose instead of array_equal for floating point comparison
+                ax.scatter(intruders_barycenter[0], intruders_barycenter[1], intruders_barycenter[2], 
+                           c='purple', alpha=0.35, marker='x', s=50, label='Intruders\' CoG')
+            
+            # Plot the target point
+            ax.scatter(target[0], target[1], target[2], c='red', marker='x', s=50, label=r'$r_0$')
+            
+            # Set equal aspect ratio for 3D plots
+            # Get the limits for normalization
+            x_limits = ax.get_xlim3d()
+            y_limits = ax.get_ylim3d()
+            z_limits = ax.get_zlim3d()
+            
+            # Get the range of each dimension
+            x_range = abs(x_limits[1] - x_limits[0])
+            y_range = abs(y_limits[1] - y_limits[0])
+            z_range = abs(z_limits[1] - z_limits[0])
+            
+            # Find the greatest range for normalization
+            max_range = max(x_range, y_range, z_range)
+            
+            # Set the axes centrally in the figure using the max range
+            mid_x = np.mean(x_limits)
+            mid_y = np.mean(y_limits)
+            mid_z = np.mean(z_limits)            
+            ax.set_xlim3d([mid_x - max_range/2, mid_x + max_range/2])
+            ax.set_ylim3d([mid_y - max_range/2, mid_y + max_range/2])
+            ax.set_zlim3d([mid_z - max_range/2, mid_z + max_range/2])
+            
+            ax.grid(True)            
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+            
+        ax.legend()
+        plt.tight_layout()
+        plt.show()
+    else:
+        print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
+        return None
 
 def plot_graph_with_connections(G):
     pos = nx.spring_layout(G)  
@@ -201,57 +273,214 @@ def plot_graph_with_connections(G):
     plt.axis('off')  
     plt.show()
     
-def animate_world_evolution(intruders, z_history, s, sigma, r_0, world_size=PARAMETERS['world_size'], speed=10):
+def animate_world_evolution(intruders, z_history, s, sigma, r_0, world_size, d, speed=10):
+    """
+    Animate the evolution of agents in the world.
+    
+    Parameters:
+    - intruders: Array of intruder positions
+    - z_history: History of agent positions (T, n_agents, d)
+    - s: History of target positions
+    - sigma: Initial sigma (not used, will be computed from agents)
+    - r_0: Reference point
+    - world_size: Size of the world
+    - d: Dimensionality of the space (2 or 3)
+    - speed: Animation speed
+    """
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.animation import FuncAnimation
+    
+    # Compute barycenter for each timestep
+    def compute_agents_barycenter(positions):
+        return np.mean(positions, axis=0)
+    
     T, n_agents, *_ = z_history.shape
     frame_skip = int(speed) + 1
     positions = z_history[::frame_skip]
     s_positions = s[::frame_skip]
+    
+    # Calculate sigma (barycenter) for each frame
+    sigma_positions = np.array([compute_agents_barycenter(pos) for pos in positions])
+    
+    # Add pause at the end
     pause_frames = int(3 * 20)
     positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
     s_positions = np.concatenate([s_positions, np.repeat(s_positions[-1:], pause_frames, axis=0)])
+    sigma_positions = np.concatenate([sigma_positions, np.repeat(sigma_positions[-1:], pause_frames, axis=0)])
+    
     num_steps = len(positions)
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig = plt.figure(figsize=(10, 8))
+    
+    if d == 3:
+        ax = fig.add_subplot(111, projection='3d')
+        ax.set_zlabel('Z')
+    else:
+        ax = fig.add_subplot(111)
+        
     ax.set_title('Agents to Targets Animation')
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    
     padding = 0.2
-    x_min, x_max = 0, world_size[0]
-    y_min, y_max = 0, world_size[1]
+    x_min, x_max = 0, world_size
+    y_min, y_max = 0, world_size
+    z_min, z_max = 0, world_size if d == 3 else 0
+    
     ax.set_xlim(x_min - padding * x_max, x_max + padding * x_max)
     ax.set_ylim(y_min - padding * y_max, y_max + padding * y_max)
-    ax.set_aspect('equal')
-    ax.grid(True)
-    ax.scatter(intruders[:, 0], intruders[:, 1], c='red', marker='x', s=50, label='Intruder')
-    # ax.scatter(sigma[0], sigma[1], c='black', marker='s', s=50, label=r'$\sigma$')
-    ax.scatter(r_0[0], r_0[1], c='none', marker='o', s=50, edgecolors='purple', label=r'$r_0$')
-    path_lines = [[] for _ in range(n_agents)]
-    ax.legend()
-    z_scatters = [ax.scatter([], [], c='blue', s=50) for _ in range(n_agents)]
-    s_scatters = [ax.scatter([], [], c='orange', marker='x', s=35) for _ in range(n_agents)]
-    def init():
-        for scatter in z_scatters + s_scatters:
-            scatter.set_offsets(np.empty((0, 2)))
-        return z_scatters + s_scatters + sum(path_lines, [])
-    def update(frame):
-        pos = positions[frame]
-        s_pos = s_positions[frame]
+    if d == 3:
+        ax.set_zlim(z_min - padding * z_max, z_max + padding * z_max)
+
+    # Initial plots
+    if d == 3:
+        # Plot intruders
+        intruder_plot = ax.scatter(
+            intruders[:, 0], intruders[:, 1], intruders[:, 2], 
+            c='cyan', marker='s', s=50, label='Intruder', 
+            edgecolors='cyan', facecolors='none'
+        )
+        
+        # Plot reference point
+        ref_point = ax.scatter(
+            r_0[0], r_0[1], r_0[2], 
+            c='red', marker='x', s=50, label=r'$r_0$'
+        )
+        
+        # Plot initial sigma (barycenter)
+        sigma_scatter = ax.scatter(
+            sigma_positions[0, 0], sigma_positions[0, 1], sigma_positions[0, 2],
+            facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma'
+        )
+        
+        # Plot agents
+        agent_scatter = ax.scatter(
+            positions[0, :, 0], positions[0, :, 1], positions[0, :, 2], 
+            c='black', marker='o', s=50, label='Agent'
+        )
+        
+        # Create path lines for agents
+        path_lines = []
         for i in range(n_agents):
-            z_scatters[i].set_offsets(pos[i])
-            s_scatters[i].set_offsets(s_pos[i])
-            if len(path_lines[i]) > 0:
-                for line in path_lines[i]:
-                    line.remove()
-                path_lines[i] = []
-            if frame > 0:
-                line, = ax.plot(positions[:frame+1, i, 0], positions[:frame+1, i, 1], 
-                               'gray', linestyle='--', alpha=0.5)
-                path_lines[i].append(line)
-        return z_scatters + s_scatters + sum(path_lines, [])
+            line = ax.plot(
+                [positions[0, i, 0]], [positions[0, i, 1]], [positions[0, i, 2]],
+                'gray', linestyle='--', alpha=0.5
+            )[0]
+            path_lines.append(line)
+            
+        # Create path line for sigma
+        sigma_path = ax.plot(
+            [sigma_positions[0, 0]], [sigma_positions[0, 1]], [sigma_positions[0, 2]],
+            'mediumseagreen', linestyle='--', alpha=0.5
+        )[0]
+        
+        # Update function
+        def update(frame):
+            # Update agent positions
+            agent_scatter._offsets3d = (
+                positions[frame, :, 0], 
+                positions[frame, :, 1], 
+                positions[frame, :, 2]
+            )
+            
+            # Update sigma position
+            sigma_scatter._offsets3d = (
+                [sigma_positions[frame, 0]], 
+                [sigma_positions[frame, 1]], 
+                [sigma_positions[frame, 2]]
+            )
+            
+            # Update agent path lines
+            for i, line in enumerate(path_lines):
+                x_data = positions[:frame+1, i, 0]
+                y_data = positions[:frame+1, i, 1]
+                z_data = positions[:frame+1, i, 2]
+                line.set_data(x_data, y_data)
+                line.set_3d_properties(z_data)
+                
+            # Update sigma path line
+            x_data = sigma_positions[:frame+1, 0]
+            y_data = sigma_positions[:frame+1, 1]
+            z_data = sigma_positions[:frame+1, 2]
+            sigma_path.set_data(x_data, y_data)
+            sigma_path.set_3d_properties(z_data)
+            
+            return [agent_scatter, sigma_scatter, sigma_path] + path_lines
+            
+    else:  # 2D case
+        # Plot intruders
+        intruder_plot = ax.scatter(
+            intruders[:, 0], intruders[:, 1], 
+            c='cyan', marker='s', s=50, label='Intruder', 
+            edgecolors='cyan', facecolors='none'
+        )
+        
+        # Plot reference point
+        ref_point = ax.scatter(
+            r_0[0], r_0[1], 
+            c='red', marker='x', s=50, label=r'$r_0$'
+        )
+        
+        # Plot initial sigma (barycenter)
+        sigma_scatter = ax.scatter(
+            sigma_positions[0, 0], sigma_positions[0, 1],
+            facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma'
+        )
+        
+        # Plot agents
+        agent_scatter = ax.scatter(
+            positions[0, :, 0], positions[0, :, 1], 
+            c='black', marker='o', s=50, label='Agent'
+        )
+        
+        # Create path lines for agents
+        path_lines = []
+        for i in range(n_agents):
+            line = ax.plot(
+                [positions[0, i, 0]], [positions[0, i, 1]],
+                'gray', linestyle='--', alpha=0.5
+            )[0]
+            path_lines.append(line)
+            
+        # Create path line for sigma
+        sigma_path = ax.plot(
+            [sigma_positions[0, 0]], [sigma_positions[0, 1]],
+            'mediumseagreen', linestyle='--', alpha=0.5
+        )[0]
+        
+        # Update function
+        def update(frame):
+            # Update agent positions
+            agent_scatter.set_offsets(positions[frame])
+            
+            # Update sigma position
+            sigma_scatter.set_offsets([sigma_positions[frame]])
+            
+            # Update agent path lines
+            for i, line in enumerate(path_lines):
+                x_data = positions[:frame+1, i, 0]
+                y_data = positions[:frame+1, i, 1]
+                line.set_data(x_data, y_data)
+                
+            # Update sigma path line
+            x_data = sigma_positions[:frame+1, 0]
+            y_data = sigma_positions[:frame+1, 1]
+            sigma_path.set_data(x_data, y_data)
+            
+            return [agent_scatter, sigma_scatter, sigma_path] + path_lines
+    
+    ax.legend()
+    
+    # Create animation
     anim = FuncAnimation(
-        fig, update,
-        frames=num_steps,
-        init_func=init,
-        blit=True,
-        interval=50,
-        repeat=True
+        fig, update, frames=num_steps, 
+        blit=True, interval=50, repeat=True
     )
+    
+    if d == 3:
+        ax.view_init(elev=30, azim=45)
+        
+    plt.tight_layout()
     plt.show()
+    
     return anim

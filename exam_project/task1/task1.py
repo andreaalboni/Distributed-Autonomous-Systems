@@ -1,8 +1,12 @@
 import json
 import numpy as np
-from utils import *
 import tkinter as tk
+from utils_graph import *
+from cost_functions import *
+from utils_visualization import *
 from tkinter import ttk, messagebox
+from utils_world_generation import *
+from gradient_tracking import gradient_tracking_method
 
 class Task1:
     def __init__(self, root):
@@ -20,6 +24,7 @@ class Task1:
             'noise_level': 0.0,
             'bias': 0.0,
             'p_er': 0.5,
+            'graph_type': 'cycle',
         }
         self.params = self.default_params.copy()
         self.task_has_run = False
@@ -128,9 +133,7 @@ class Task1:
     
     def visualize_world(self):
         """Visualize the world using current parameters"""
-        # Placeholder for visualization functionality
         messagebox.showinfo("Visualize World", f"Visualizing world with parameters:\n{json.dumps(self.get_display_params(), indent=2)}")
-        # Here you would add the actual visualization code
     
     def visualize_graph(self):
         """Visualize the graph using current parameters"""
@@ -139,16 +142,63 @@ class Task1:
         # Here you would add the actual graph visualization code
         
     def run_task_1_1(self):
-        """Run task 1.1 using current parameters"""
-        # Placeholder for task 1.1 functionality
         messagebox.showinfo("Task 1.1", f"Running Task 1.1 with parameters:\n{json.dumps(self.get_display_params(), indent=2)}")
-        # Here you would add the actual task 1.1 code
+        targets, agents = generate_agents_and_targets(self.params['num_targets'],
+                                                  self.params['ratio_at'],
+                                                  self.params['world_size'],
+                                                  self.params['d'],
+                                                  self.params['radius_fov'])
+
+        G, adj, A = generate_graph(len(agents), self.params['graph_type'])
+    
+        real_distances, noisy_distances = get_distances(agents, 
+                                                    targets, 
+                                                    self.params['noise_level'],
+                                                    self.params['bias'],
+                                                    self.params['radius_fov'],
+                                                    self.params['world_size'])
+    
+        cost_function = local_cost_function_task2
+        z_hystory, cost, norm_grad_cost, prova, norm_error = gradient_tracking_method(agents,
+                                                                                      targets,
+                                                                                      noisy_distances,
+                                                                                      adj,
+                                                                                      A,
+                                                                                      cost_function)
         
-        # Enable visualization buttons after task is run
+        # Visualization
+        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, prova, agents, targets, norm_error)
+        animate_world_evolution(agents, targets, z_hystory, self.params['graph_type'], self.params['world_size'], self.params['d'])
         self.enable_visualization_buttons()
     
     def run_task_1_2(self):
         messagebox.showinfo("Task 1.2", f"Running Task 1.2 with parameters:\n{json.dumps(self.get_display_params(), indent=2)}")
+        targets, agents = generate_agents_and_targets(self.params['num_targets'],
+                                                  self.params['ratio_at'],
+                                                  self.params['world_size'],
+                                                  self.params['d'],
+                                                  self.params['radius_fov'])
+
+        G, adj, A = generate_graph(len(agents), self.params['graph_type'])
+    
+        real_distances, noisy_distances = get_distances(agents, 
+                                                    targets, 
+                                                    self.params['noise_level'],
+                                                    self.params['bias'],
+                                                    self.params['radius_fov'],
+                                                    self.params['world_size'])
+    
+        cost_function = local_cost_function_task2
+        z_hystory, cost, norm_grad_cost, prova, norm_error = gradient_tracking_method(agents,
+                                                                                      targets,
+                                                                                      noisy_distances,
+                                                                                      adj,
+                                                                                      A,
+                                                                                      cost_function)
+        
+        # Visualization
+        plot_gradient_traking_results(z_hystory, cost, norm_grad_cost, prova, agents, targets, norm_error)
+        animate_world_evolution(agents, targets, z_hystory, self.params['graph_type'], self.params['world_size'], self.params['d'])
         self.enable_visualization_buttons()
     
     def get_display_params(self):
