@@ -48,7 +48,7 @@ def main():
     for task in task_to_run:
         # Run traking algorithm
         # TODO: remove parm
-        print(colored(f"Starting task {task}", 'green'))
+        print(colored(f"\n----------------Starting task {task}----------------\n ", 'green'))
         cost_function = task_functions[task]
         z_hystory, cost, norm_grad_cost, prova, norm_error = gradient_tracking_method(agents,
                                                                                       targets,
