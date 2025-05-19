@@ -1,14 +1,21 @@
 import numpy as np
-from utils import *
-import matplotlib.pyplot as plt
+from cost_function import *
 
-def aggregative_tracking_method(max_iters=2000, alpha=0.0001): 
-    intruders, agents = generate_agents_and_intruders()
-    visualize_world(agents, intruders)
-    graph_type = 'cycle'
-    _, adj, A = generate_graph(len(agents), type=graph_type)
-    # visualize_graph(G)
-    
+def compute_agents_barycenter(agents):
+    sigma = np.mean(agents, axis=0)
+    return sigma
+
+def compute_r_0(intruders, noise_radius, world_size, d):
+    barycenter_intruders = compute_agents_barycenter(intruders)
+    if (noise_radius == 0.0):
+        return barycenter_intruders
+    while True:
+        r_0_candidate = np.random.uniform(0, world_size, size=d)
+        if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
+            np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
+                return r_0_candidate
+
+def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, max_iters=2000, alpha=0.0001): 
     cost = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(agents[0])))
     s = np.zeros((max_iters, len(agents), len(agents[0])))
@@ -17,7 +24,7 @@ def aggregative_tracking_method(max_iters=2000, alpha=0.0001):
     gamma_bar = 3 * np.ones(len(agents))
     gamma_hat = 1 * np.ones(len(agents))
 
-    r_0 = compute_r_0(intruders)
+    r_0 = compute_r_0(intruders, noise_radius, world_size, d)
     sigma = compute_agents_barycenter(agents)
 
     # Initialization
@@ -51,17 +58,5 @@ def aggregative_tracking_method(max_iters=2000, alpha=0.0001):
             v[k+1, i] += grad_2_l_i_new - grad_2_l_i_old
             
             cost[k] += l_i
-    
-    fig, ax = plt.subplots(figsize=(8, 6), nrows=1, ncols=1)
-    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='violet')
-    ax.set_title('Cost vs Iteration')
-    ax.set_xlabel('Iteration')
-    plt.show()
-    
-    animate_world_evolution(intruders, z, s, sigma, r_0, world_size=PARAMETERS['world_size'], d=PARAMETERS['d'])
 
-def main(): 
-    aggregative_tracking_method()
-
-if __name__ == "__main__":
-    main()
+    return cost, z, s, sigma, r_0

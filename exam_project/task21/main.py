@@ -1,16 +1,15 @@
-import numpy as np
 from utils_graph import *
 from utils_visualization import *
 from utils_world_generation import *
 from cost_function import *
-from task21 import aggregative_tracking_method
+from aggregative_tracking import aggregative_tracking_method
 
 def main():
     
     PARAMETERS = {
         'num_intruders': 5,
         'world_size': 20,
-        'd': 4,
+        'd': 2,
         'intruder_radius': 10.0,
         'radius_spawn_agent': 5.0,
         'noise_r_0': 0.0,

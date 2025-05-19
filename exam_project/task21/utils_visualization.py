@@ -3,7 +3,7 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from task21 import compute_r_0, compute_agents_barycenter
+from aggregative_tracking import compute_r_0, compute_agents_barycenter
 matplotlib.use('TkAgg')
 
 def visualize_graph(G):
@@ -34,7 +34,7 @@ def visualize_world(agents, intruders, noise_radius, world_size, d):
             ax.scatter(agents[:, 0], agents[:, 1], c='black', marker='o', s=50, label='Agent')
             ax.scatter(intruders[:, 0], intruders[:, 1], facecolors='none', edgecolors='cyan', marker='s', s=50, label='Intruder')
             sigma = compute_agents_barycenter(agents)
-            ax.scatter(sigma[0], sigma[1], facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma')
+            ax.scatter(sigma[0], sigma[1], facecolors='none', edgecolors='mediumseagreen', marker='h', s=50, label='Sigma')
             target = compute_r_0(intruders, noise_radius, world_size, d)
             intruders_barycenter = compute_agents_barycenter(intruders)
             if not np.array_equal(intruders_barycenter, target):
@@ -49,7 +49,7 @@ def visualize_world(agents, intruders, noise_radius, world_size, d):
             ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='black', marker='o', s=50, label='Agent')
             ax.scatter(intruders[:, 0], intruders[:, 1], intruders[:, 2], facecolors='none', edgecolors='cyan', marker='s', s=50, label='Intruder')
             sigma = compute_agents_barycenter(agents)
-            ax.scatter(sigma[0], sigma[1], sigma[2], facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma')
+            ax.scatter(sigma[0], sigma[1], sigma[2], facecolors='none', edgecolors='mediumseagreen', marker='h', s=50, label='Sigma')
             target = compute_r_0(intruders, noise_radius, world_size, d)
             intruders_barycenter = compute_agents_barycenter(intruders)
             if not np.allclose(intruders_barycenter, target): 
@@ -122,7 +122,7 @@ def animate_world_evolution(intruders, z_history, s, r_0, world_size, d, speed=1
     if d == 3:
         intruder_plot = ax.scatter(intruders[:, 0], intruders[:, 1], intruders[:, 2], facecolors='none', edgecolors='cyan', marker='s', s=50, label='Intruder')
         ref_point = ax.scatter(r_0[0], r_0[1], r_0[2], c='red', marker='x', s=50, label=r'$r_0$')
-        sigma_scatter = ax.scatter(sigma_positions[0, 0], sigma_positions[0, 1], sigma_positions[0, 2],facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma')
+        sigma_scatter = ax.scatter(sigma_positions[0, 0], sigma_positions[0, 1], sigma_positions[0, 2],facecolors='none', edgecolors='mediumseagreen', marker='h', s=50, label='Sigma')
         agent_scatter = ax.scatter(positions[0, :, 0], positions[0, :, 1], positions[0, :, 2], c='black', marker='o', s=50, label='Agent')
         path_lines = []
         for i in range(n_agents):
@@ -147,7 +147,7 @@ def animate_world_evolution(intruders, z_history, s, r_0, world_size, d, speed=1
     else:
         intruder_plot = ax.scatter(intruders[:, 0], intruders[:, 1], facecolors='none', edgecolors='cyan', marker='s', s=50, label='Intruder')
         ref_point = ax.scatter(r_0[0], r_0[1], c='red', marker='x', s=50, label=r'$r_0$')
-        sigma_scatter = ax.scatter(sigma_positions[0, 0], sigma_positions[0, 1],facecolors='none', edgecolors='mediumseagreen', marker='^', s=50, label='Sigma')
+        sigma_scatter = ax.scatter(sigma_positions[0, 0], sigma_positions[0, 1],facecolors='none', edgecolors='mediumseagreen', marker='h', s=50, label='Sigma')
         agent_scatter = ax.scatter(positions[0, :, 0], positions[0, :, 1], c='black', marker='o', s=50, label='Agent')
         path_lines = []
         plt.grid()
@@ -167,7 +167,7 @@ def animate_world_evolution(intruders, z_history, s, r_0, world_size, d, speed=1
             sigma_path.set_data(x_data, y_data)
             return [agent_scatter, sigma_scatter, sigma_path] + path_lines
     ax.legend()
-    anim = FuncAnimation(fig, update, frames=num_steps, blit=True, interval=50, repeat=True)
+    anim = FuncAnimation(fig, update, frames=num_steps, blit=False, interval=50, repeat=True)
     if d == 3:
         ax.view_init(elev=30, azim=45)
     plt.tight_layout()
