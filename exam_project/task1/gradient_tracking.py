@@ -3,7 +3,7 @@ import numpy as np
 # extend the length of the print of numpy arrays
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
-def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=2250, alpha=0.025):
+def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=2250, alpha=0.005):
     # TODO: remove prova
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters, len(targets)))
