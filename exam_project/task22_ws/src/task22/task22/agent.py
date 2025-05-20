@@ -21,6 +21,7 @@ class Agent(Node):
         self.neighbors = self.get_parameter("neighbors").value
         self.max_iters = self.get_parameter("max_iters").value
         self.gamma_bar = self.get_parameter("gamma_bar").value
+        self.gamma_hat = self.get_parameter("gamma_hat").value
         self.intruder = np.array(self.get_parameter("intruder").value)
         communication_time = self.get_parameter("communication_time").value
         self.delta_T = communication_time / 10
@@ -33,7 +34,7 @@ class Agent(Node):
 
         self.z[0] = self.z_0
         self.s[0] = self.z_0
-        _, _, self.v[0] = self.local_cost_function(self.z_0, self.intruder, self.s[0], self.r_0, self.gamma, self.gamma_bar)
+        _, _, self.v[0] = self.local_cost_function(self.z_0, self.intruder, self.s[0], self.r_0, self.gamma, self.gamma_bar, self.gamma_hat)
 
         self.received_data = {}
         for j in self.neighbors:
@@ -111,6 +112,7 @@ class Agent(Node):
             r_0=self.r_0,
             gamma=self.gamma,
             gamma_bar=self.gamma_bar,
+            gamma_hat=self.gamma_hat,
             received_info=neighbor_data
         )
 
@@ -119,17 +121,17 @@ class Agent(Node):
         grad_phi_i = 1
         return phi_i, grad_phi_i
 
-    def local_cost_function(self, agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i):
+    def local_cost_function(self, agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i, gamma_hat_i):
         agent_to_intruder = np.linalg.norm(agent_i - intruder_i)**2 
         agent_to_sigma = np.linalg.norm(agent_i - sigma)**2
         intruder_to_r_0 = np.linalg.norm(intruder_i - r_0)**2
-        local_cost = gamma_i * agent_to_intruder + gamma_bar_i * agent_to_sigma + intruder_to_r_0
+        local_cost = gamma_i * agent_to_intruder + gamma_bar_i * agent_to_sigma + gamma_hat_i * intruder_to_r_0
         grad_1 = 2 * (gamma_i * (agent_i - intruder_i) + gamma_bar_i * (agent_i - sigma))
         grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
         return local_cost, grad_1, grad_2
     
-    def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, received_info):
-        _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar)
+    def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, received_info):
+        _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
         
         z[k+1] = z[k] - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
@@ -145,8 +147,8 @@ class Agent(Node):
             v_k_j = received_info[j]['v']
             v[k+1] += A[i] * v_k_j
             
-        _, _, grad_2_l_i_new = self.local_cost_function(z[k+1], intruder, s[k+1], r_0, gamma, gamma_bar)
-        _, _, grad_2_l_i_old = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar)
+        _, _, grad_2_l_i_new = self.local_cost_function(z[k+1], intruder, s[k+1], r_0, gamma, gamma_bar, gamma_hat)
+        _, _, grad_2_l_i_old = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         v[k+1] += grad_2_l_i_new - grad_2_l_i_old
 
 def main(args=None):

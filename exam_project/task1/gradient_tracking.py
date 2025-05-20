@@ -1,9 +1,7 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 # extend the length of the print of numpy arrays
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
-
 
 def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=2250, alpha=0.025):
     # TODO: remove prova

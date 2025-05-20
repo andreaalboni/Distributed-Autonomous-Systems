@@ -48,7 +48,7 @@ def main():
     for task in task_to_run:
         # Run traking algorithm
         # TODO: remove parm
-        print(colored(f"Starting task {task}", 'green'))
+        print(colored(f"\n----------------Starting task {task}----------------\n ", 'green'))
         cost_function = task_functions[task]
         z_hystory, cost, norm_grad_cost, prova, norm_error = gradient_tracking_method(agents,
                                                                                       targets,
@@ -59,7 +59,7 @@ def main():
         
         # Visualization
         visualize_world(agents, targets, PARAMETERS['world_size'], PARAMETERS['d'])
-        plot_gradient_traking_results(z_hystory, cost, norm_grad_cost, prova, agents, targets, norm_error)
+        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, prova, agents, targets, norm_error)
         animate_world_evolution(agents, targets, z_hystory, PARAMETERS['graph_type'], PARAMETERS['world_size'], PARAMETERS['d'])
 
 if __name__ == "__main__":

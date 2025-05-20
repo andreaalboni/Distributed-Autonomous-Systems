@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import networkx as nx
 from launch_ros.actions import Node
@@ -6,71 +7,76 @@ from launch.actions import ExecuteProcess
 from launch.substitutions import Command, FindExecutable
 from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
-import os
 
 PARAMETERS = {
     'num_intruders': 3,
-    'world_size': [20, 20],
+    'world_size': 20,
+    'd': 2,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
-    'p_er': 0.5,
+    'graph_type': 'cycle',
 }
 
 
-def debug_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent']):
+def debug_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], 
+                                    radius_spawn_agent=PARAMETERS['radius_spawn_agent'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
-        center = np.array([world_size[0]/2, world_size[1]/2])
+        candidate = np.random.uniform(0, world_size, size=d)
+        center = world_size/2 * np.ones_like(candidate)
         if (np.linalg.norm(candidate - intruder) <= radius_spawn_agent and
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
 
-def debug_spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], intruder_radius=PARAMETERS['intruder_radius']):
+def debug_spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], intruder_radius=PARAMETERS['intruder_radius'], d=PARAMETERS['d']):
     while True:
-        angle = np.random.uniform(0, 2 * np.pi)
-        noise = 0
-        candidate = np.array([
-            intruder_radius * np.sin(angle) + world_size[0]/2 + noise * np.sin(angle),
-            intruder_radius * np.cos(angle) + world_size[0]/2 + noise * np.cos(angle)
-        ])
+        if d == 2:
+            theta = np.random.uniform(0, 2 * np.pi)
+            candidate = np.array([
+                intruder_radius * np.cos(theta),
+                intruder_radius * np.sin(theta)
+            ])
+        elif d == 3:
+            theta = np.random.uniform(0, 2 * np.pi)  # azimuthal angle
+            phi = np.random.uniform(0, np.pi)        # polar angle
+            candidate = np.array([
+                intruder_radius * np.sin(phi) * np.cos(theta),
+                intruder_radius * np.sin(phi) * np.sin(theta),
+                intruder_radius * np.cos(phi)
+            ])
+        else:
+            raise ValueError("Only 2D and 3D spaces are supported")
+        candidate += world_size/2
         if (not any(np.allclose(candidate, a, atol=3.0) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=3.0) for t in existing_intruders)):
             return candidate
 
-def spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], radius_spawn_agent=PARAMETERS['radius_spawn_agent']):
+def spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size=PARAMETERS['world_size'],
+                               radius_spawn_agent=PARAMETERS['radius_spawn_agent'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (np.linalg.norm(candidate - intruder) <= radius_spawn_agent and
             not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
         
-def spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size']):
+def spawn_candidate(existing_agents, existing_intruders, world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     while True:
-        candidate = np.random.uniform(0, world_size[0], size=2)
+        candidate = np.random.uniform(0, world_size, size=d)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
             not any(np.allclose(candidate, t, atol=1e-1) for t in existing_intruders)):
             return candidate
 
-def generate_agents_and_intruders(num_intruders=PARAMETERS['num_intruders'], world_size=PARAMETERS['world_size']):
+def generate_agents_and_intruders(num_intruders=PARAMETERS['num_intruders']):
     intruders = []
     agents = []
     for _ in range(num_intruders):
-        # Genera un nuovo intruder
-        intruder = debug_spawn_candidate(agents, intruders, world_size=world_size)
+        intruder = debug_spawn_candidate(agents, intruders)
         intruders.append(intruder)
-        # Genera un agente vicino al proprio intruder
-        agent = debug_spawn_agent_near_intruder(intruder, agents, intruders, world_size=world_size)
+        agent = debug_spawn_agent_near_intruder(intruder, agents, intruders)
         agents.append(agent)
     return np.array(intruders), np.array(agents)
-
-def get_distances(agents, intruders):
-    distances = []
-    for agent in range(len(agents)):
-        distances.append(np.linalg.norm(agents[agent] - intruders[agent]))
-    return np.array(distances)
 
 def ensure_connected_graph(G):
     if nx.is_connected(G):
@@ -82,7 +88,7 @@ def ensure_connected_graph(G):
         G.add_edge(u, v)
     return G
 
-def generate_graph(num_agents, type, p_er=PARAMETERS['p_er']):
+def generate_graph(num_agents, type=PARAMETERS['graph_type'], p_er=0.5):
     if type == 'path':
         G = nx.path_graph(num_agents)
     elif type == 'cycle':
@@ -127,12 +133,12 @@ def compute_agents_barycenter(agents):
     sigma = np.mean(agents, axis=0)
     return sigma
 
-def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARAMETERS['world_size']):
+def compute_r_0(intruders, noise_radius=PARAMETERS['noise_r_0'], world_size=PARAMETERS['world_size'], d=PARAMETERS['d']):
     barycenter_intruders = compute_agents_barycenter(intruders)
     if (noise_radius == 0.0):
         return barycenter_intruders
     while True:
-        r_0_candidate = np.random.uniform(0, world_size[0], size=2)
+        r_0_candidate = np.random.uniform(0, world_size, size=d)
         if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
@@ -153,6 +159,7 @@ def generate_launch_description():
 
     gamma = 15 * np.ones(len(agents))
     gamma_bar = 3 * np.ones(len(agents))
+    gamma_hat = 1 * np.ones(len(agents))
 
     node_list = []
     package_name = "task22"
@@ -170,6 +177,7 @@ def generate_launch_description():
         A_i = A[i].tolist()
         z_0_i = z_0[i].tolist()
         gamma_bar_i = float(gamma_bar[i])
+        gamma_hat_i = float(gamma_hat[i])
         intruder_i = intruders[i].tolist()
         N_i = np.nonzero(adj[:, i])[0].tolist()
 
@@ -190,6 +198,7 @@ def generate_launch_description():
                         "max_iters": int(MAX_ITERS),
                         "intruder": intruder_i,
                         "gamma_bar": gamma_bar_i,
+                        "gamma_hat": gamma_hat_i,
                         "communication_time": float(COMM_TIME),
                     }
                 ],
