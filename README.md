@@ -44,3 +44,12 @@ xhost +local:docker
 ### External sources
 
 - [drone urdf model](https://github.com/ricardodeazambuja/simple_quad_gazebo/blob/main/src/simple_quad/src/description/simple_quad.urdf)
+
+
+### Latex
+```bash
+sudo apt-get install texlive-latex-base
+sudo apt-get install latexmk
+sudo apt-get install texlive-latex-recommended
+sudo apt-get install texlive-full
+```
