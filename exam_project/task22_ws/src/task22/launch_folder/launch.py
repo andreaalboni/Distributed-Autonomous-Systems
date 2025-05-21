@@ -11,7 +11,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 PARAMETERS = {
     'num_intruders': 3,
     'world_size': 20,
-    'd': 2,
+    'd': 3,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
@@ -243,6 +243,11 @@ def generate_launch_description():
         executable='visualizer',
         name='visualizer',
         output='screen',
+        parameters=[{
+            'intruders': intruders.tolist(),
+            'r_0': r_0,
+            'world_size': PARAMETERS['world_size'], 
+        }]
     )
     node_list.append(visualizer_node)
 
