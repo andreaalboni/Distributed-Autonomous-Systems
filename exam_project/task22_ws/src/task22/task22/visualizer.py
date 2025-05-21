@@ -24,29 +24,15 @@ class Visualizer(Node):
         self.d = len(self.r_0)
         self.intruders = [intruders[i:i+self.d] for i in range(0, len(intruders), self.d)]
         
-        self.get_logger().info(f'\033[92mintruders: {self.intruders}\033[0m')
-        
-        self.agent_trajectories_publisher = self.create_publisher(
-            MarkerArray, 
-            'agent_trajectories', 
-            10
-        )
-        self.intruder_publisher = self.create_publisher(
-            MarkerArray, 
-            'intruders', 
-            10
-        )
-        self.marker_publisher = self.create_publisher(
-            Marker, 
-            'r_0', 
-            10
-        )
+        self.agent_trajectories_publisher = self.create_publisher(MarkerArray, 'agent_trajectories', 10)
+        self.intruder_publisher = self.create_publisher(MarkerArray, 'intruders', 10)
+        self.marker_publisher = self.create_publisher(Marker, 'r_0', 10)
         self.agent_states = {}
         self.agent_trajectories = {}
         self.discovered_agents = set()
         
-        # QoS for subscribers (to ensure we get messages even if published before we subscribe)
-        qos = QoSProfile(
+        self.tf_broadcaster = TransformBroadcaster(self)
+        self.qos = QoSProfile(
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
             reliability=QoSReliabilityPolicy.RELIABLE,
             depth=10
