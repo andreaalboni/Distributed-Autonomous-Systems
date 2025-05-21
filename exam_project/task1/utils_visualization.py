@@ -10,8 +10,7 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-# TODO: remove prova
-def plot_gradient_tracking_results(z, cost, norm_grad_cost, prova, agents, targets, norm_error):
+def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error):
     """
     Visualizes the results of the gradient tracking algorithm.
     """
@@ -24,7 +23,6 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, prova, agents, targe
     
     ax = axes[1]
     ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='cyan')
-    ax.semilogy(np.arange(max_iters-1), prova[:-1], color='purple')
     ax.set_title('Gradient of the cost')
     ax.set_xlabel('Iteration')
     plt.show()

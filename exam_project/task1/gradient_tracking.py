@@ -3,12 +3,10 @@ import numpy as np
 # extend the length of the print of numpy arrays
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
-def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=2250, alpha=0.005):
-    # TODO: remove prova
+def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, max_iters=3250, alpha=0.0075):
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters, len(targets)))
     norm_error = np.zeros((max_iters, len(agents), len(targets)))
-    prova = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     s = np.zeros((max_iters, len(agents), len(targets), targets.shape[1]))
     
@@ -47,13 +45,12 @@ def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cos
             # if (np.any(np.isnan(grad_l_i_new)) or np.any(np.isnan(grad_l_i_old))):
             #     print(f"NaN in gradient update for agent {i} at iteration {k+1}")
             
-            total_grad += s[k+1,i]
+            total_grad += grad_l_i_old
             cost[k] += l_i
 
         for i in range(len(agents)):
             for j in range(len(targets)):
                 norm_error[k, i, j] += np.linalg.norm(z[k, i, j] - targets[j])
-        norm_grad_cost[k] = np.linalg.norm(total_grad / len(agents))
-        prova[k] = np.linalg.norm(s[k,0])
+        norm_grad_cost[k] = np.linalg.norm(total_grad)
     
-    return z, cost, norm_grad_cost, prova, norm_error
+    return z, cost, norm_grad_cost, norm_error
