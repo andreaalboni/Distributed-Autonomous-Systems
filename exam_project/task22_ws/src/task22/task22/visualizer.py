@@ -26,7 +26,6 @@ class Visualizer(Node):
         
         self.get_logger().info(f'\033[92mintruders: {self.intruders}\033[0m')
         
-        self.tf_broadcaster = TransformBroadcaster(self)
         self.agent_trajectories_publisher = self.create_publisher(
             MarkerArray, 
             'agent_trajectories', 
@@ -215,7 +214,7 @@ class Visualizer(Node):
             marker_array.markers.append(marker)
         
         # Publish all markers
-        self.marker_array_publisher.publish(marker_array)
+        self.agent_trajectories_publisher.publish(marker_array)
 
 def main(args=None):
     rclpy.init(args=args)
