@@ -59,4 +59,4 @@ def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_s
             
             cost[k] += l_i
 
-    return cost, z, s, sigma, r_0
+    return cost, z, r_0

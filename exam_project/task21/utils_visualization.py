@@ -91,15 +91,13 @@ def plot_graph_with_connections(G):
     plt.axis('off')  
     plt.show()
     
-def animate_world_evolution(intruders, z_history, s, r_0, world_size, d, speed=10):
+def animate_world_evolution(intruders, z_history, r_0, world_size, d, speed=10):
     T, n_agents, *_ = z_history.shape
     frame_skip = int(speed) + 1
     positions = z_history[::frame_skip]
-    s_positions = s[::frame_skip]
     sigma_positions = np.array([compute_agents_barycenter(pos) for pos in positions])
     pause_frames = int(3 * 20)
     positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
-    s_positions = np.concatenate([s_positions, np.repeat(s_positions[-1:], pause_frames, axis=0)])
     sigma_positions = np.concatenate([sigma_positions, np.repeat(sigma_positions[-1:], pause_frames, axis=0)])
     num_steps = len(positions)
     fig = plt.figure(figsize=(10, 8))
