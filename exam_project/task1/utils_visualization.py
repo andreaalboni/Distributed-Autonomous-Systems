@@ -121,17 +121,16 @@ def visualize_world(agents, targets, world_size, d):
         print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
         return None
 
-def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=10):
+def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=50):
     if d > 0 and d <= 3:
         agents = agents * world_size
         targets = targets * world_size
 
         z_history = z_history * world_size
         T, n_agents, n_targets, _ = z_history.shape
-        frame_skip = int(speed)
-        frame_skip += 1
-        num_steps = T // frame_skip
-        positions = z_history[::frame_skip]
+        num_frames = speed
+        indices = np.unique(np.geomspace(1, T-1, num=num_frames).astype(int))
+        positions = z_history[indices]
         pause_frames = int(3 * 20)
         positions = np.concatenate([positions, np.repeat(positions[-1:], pause_frames, axis=0)])
         num_steps = len(positions)

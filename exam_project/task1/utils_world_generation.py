@@ -52,6 +52,7 @@ def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_si
             dist = np.linalg.norm(agent - target)
             if dist > radius_fov:
                 agent_distance.append(np.nan)
+                noisy_distance_to_target.append(np.nan)
             else:
                 agent_distance.append(dist)
                 bias = np.random.uniform(-bias_param, bias_param)

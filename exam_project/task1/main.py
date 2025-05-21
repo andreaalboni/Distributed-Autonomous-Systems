@@ -13,7 +13,7 @@ def main():
         'ratio_at': 5,
         'd': 2,
         'world_size': 5,
-        'radius_fov': 1.0,# np.inf,
+        'radius_fov': 0.5,# np.inf,
         'noise_level': 0.0,
         'bias': 0.0,
         'graph_type': 'cycle',
@@ -23,7 +23,7 @@ def main():
     
     task_settings = {
         '1.1': [local_cost_function_task1, 0.00025],
-        '1.2': [local_cost_function_task2, 0.025],
+        '1.2': [local_cost_function_task2, 0.05],
     }
     
     #TODO: flag to print some data like adj, distances, etc..
