@@ -244,10 +244,11 @@ def generate_launch_description():
         name='visualizer',
         output='screen',
         parameters=[{
-            'intruders': intruders.tolist(),
+            # Flatten the intruders array and pass as a list
+            'intruders': intruders.flatten().tolist(),
             'r_0': r_0,
-            'world_size': PARAMETERS['world_size'], 
-        }]
+            'world_size': PARAMETERS['world_size'],
+        }],
     )
     node_list.append(visualizer_node)
 

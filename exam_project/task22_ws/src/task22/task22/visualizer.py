@@ -11,12 +11,35 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy
 
 class Visualizer(Node):
     def __init__(self):
-        super().__init__('visualizer')
+        super().__init__(
+            "visualizer",
+            allow_undeclared_parameters=True,
+            automatically_declare_parameters_from_overrides=True,
+        )
+                
+        intruders = np.array(self.get_parameter("intruders").value)
+        self.r_0 = np.array(self.get_parameter("r_0").value)
+        self.world_size = self.get_parameter("world_size").value
+        
+        self.d = len(self.r_0)
+        self.intruders = [intruders[i:i+self.d] for i in range(0, len(intruders), self.d)]
+        
+        self.get_logger().info(f'\033[92mintruders: {self.intruders}\033[0m')
         
         self.tf_broadcaster = TransformBroadcaster(self)
-        self.marker_publisher = self.create_publisher(
+        self.agent_trajectories_publisher = self.create_publisher(
             MarkerArray, 
             'agent_trajectories', 
+            10
+        )
+        self.intruder_publisher = self.create_publisher(
+            MarkerArray, 
+            'intruders', 
+            10
+        )
+        self.marker_publisher = self.create_publisher(
+            Marker, 
+            'r_0', 
             10
         )
         self.agent_states = {}
@@ -31,6 +54,8 @@ class Visualizer(Node):
         )
         self.create_timer(1.0, self.discover_agents)
         self.create_timer(0.05, self.publish_visualizations)
+        # self.publish_r_0(self.r_0)
+        self.publish_intruders(self.intruders)
     
     def discover_agents(self):
         topic_names_and_types = self.get_topic_names_and_types()
@@ -67,6 +92,81 @@ class Visualizer(Node):
                 position[i] = msg.z[i]                
             self.agent_trajectories[agent_id].append(position)
     
+    def publish_r_0(self, r_0):
+        """Publish r_0 as a single marker."""
+        
+        position = [0.0, 0.0, 0.0]
+        
+        for i in range(len(r_0)):
+            position[i]=r_0[i]
+            
+        marker = Marker()
+        marker.header.frame_id = "map"
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.ns = "r_0"
+        marker.id = 0
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        marker.pose.position.x = position[0]
+        marker.pose.position.y = position[1]
+        marker.pose.position.z = position[2]
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 0.2
+        marker.scale.y = 0.2
+        marker.scale.z = 0.2
+        marker.color.r = 1.0
+        marker.color.g = 0.0
+        marker.color.b = 0.0
+        marker.color.a = 1.0
+
+        self.marker_publisher.publish(marker)
+        self.get_logger().info('Published r_0 marker')
+        
+    def publish_intruders(self, intruders):
+        """Generate and publish random 3D points as markers."""
+        marker_array = MarkerArray()
+            
+        for i in range(len(intruders)):
+            
+            
+            position = [0.0, 0.0, 0.0]
+            
+            self.get_logger().info(f"intruder: {intruders[i]}")
+            
+            for j in range(len(intruders[i])):
+                position[j] = intruders[i][j]
+            
+            marker = Marker()
+            marker.header.frame_id = "map"
+            marker.header.stamp = self.get_clock().now().to_msg()
+            marker.ns = "points"
+            marker.id = i            
+            marker.type = Marker.SPHERE
+            marker.action = Marker.ADD
+            marker.pose.position.x = position[0]
+            marker.pose.position.y = position[1]
+            marker.pose.position.z = position[2]
+            marker.pose.orientation.x = 0.0
+            marker.pose.orientation.y = 0.0
+            marker.pose.orientation.z = 0.0
+            marker.pose.orientation.w = 1.0            
+            marker.scale.x = 0.2
+            marker.scale.y = 0.2
+            marker.scale.z = 0.2            
+            marker.color.r = 0.0
+            marker.color.g = 0.0
+            marker.color.b = 1.0
+            marker.color.a = 1.0  # Alpha (transparency)
+
+            marker_array.markers.append(marker)
+        
+        self.intruder_publisher.publish(marker_array)
+        self.get_logger().info(f'Published {len(marker_array.markers)} points')
+
+        
     def publish_visualizations(self):
         current_time = self.get_clock().now().to_msg()
         
@@ -115,7 +215,7 @@ class Visualizer(Node):
             marker_array.markers.append(marker)
         
         # Publish all markers
-        self.marker_publisher.publish(marker_array)
+        self.marker_array_publisher.publish(marker_array)
 
 def main(args=None):
     rclpy.init(args=args)
