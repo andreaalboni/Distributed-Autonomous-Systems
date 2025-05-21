@@ -13,7 +13,7 @@ def main():
         'ratio_at': 5,
         'd': 2,
         'world_size': 5,
-        'radius_fov': np.inf,
+        'radius_fov': 1.0,# np.inf,
         'noise_level': 0.0,
         'bias': 0.0,
         'graph_type': 'cycle',
@@ -21,9 +21,9 @@ def main():
     
     task_to_run = ['1.1', '1.2']
     
-    task_functions = {
-        '1.1': local_cost_function_task1,
-        '1.2': local_cost_function_task2,
+    task_settings = {
+        '1.1': [local_cost_function_task1, 0.00025],
+        '1.2': [local_cost_function_task2, 0.025],
     }
     
     #TODO: flag to print some data like adj, distances, etc..
@@ -49,13 +49,15 @@ def main():
         # Run traking algorithm
         # TODO: remove parm
         print(colored(f"\n----------------Starting task {task}----------------\n ", 'green'))
-        cost_function = task_functions[task]
+        cost_function = task_settings[task][0]
+        alpha = task_settings[task][1]
         z_hystory, cost, norm_grad_cost, norm_error = gradient_tracking_method(agents,
-                                                                                      targets,
-                                                                                      noisy_distances,
-                                                                                      adj,
-                                                                                      A,
-                                                                                      cost_function)
+                                                                               targets,
+                                                                               noisy_distances,
+                                                                               adj,
+                                                                               A,
+                                                                               cost_function,
+                                                                               alpha)
         
         # Visualization
         visualize_world(agents, targets, PARAMETERS['world_size'], PARAMETERS['d'])

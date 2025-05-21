@@ -121,7 +121,7 @@ def visualize_world(agents, targets, world_size, d):
         print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
         return None
 
-def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=4):
+def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=10):
     if d > 0 and d <= 3:
         agents = agents * world_size
         targets = targets * world_size

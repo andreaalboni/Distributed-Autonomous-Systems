@@ -33,7 +33,7 @@ def local_cost_function_task2(z, p_i, distances_i):
     for target in range(num_targets):
         if np.isnan(distances_i[target]):
             local_cost += 0
-            local_cost_gradient[target, :] = np.nan * np.zeros_like(p_i)
+            local_cost_gradient[target, :] = np.zeros_like(p_i)
         else:
             estimated_distance_squared = np.linalg.norm(z[target] - p_i)**2
             measured_distance_squared = distances_i[target]**2
