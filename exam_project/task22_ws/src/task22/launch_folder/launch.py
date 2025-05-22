@@ -1,4 +1,4 @@
-import os
+import os, xacro
 import numpy as np
 import networkx as nx
 from launch_ros.actions import Node
@@ -9,9 +9,9 @@ from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
 
 PARAMETERS = {
-    'num_intruders': 3,
+    'num_intruders': 5,
     'world_size': 20,
-    'd': 3,
+    'd': 2,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
@@ -171,6 +171,21 @@ def generate_launch_description():
         ' ',
         urdf_file
     ])
+
+
+    # # Add URDF publisher for Foxglove
+    # urdf_content = xacro.process_file(urdf_file).toxml()
+    # urdf_publisher = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     name='urdf_publisher',
+    #     parameters=[{
+    #         'robot_description': urdf_content,
+    #         'use_sim_time': True
+    #     }]
+    # )
+    # node_list.append(urdf_publisher)
+
 
     for i in range(N):
         gamma_i = float(gamma[i])
