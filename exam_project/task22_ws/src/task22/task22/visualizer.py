@@ -88,8 +88,7 @@ class Visualizer(Node):
         self.static_broadcaster.sendTransform(tf)
 
     def publish_world_grid(self):
-        self.get_logger().info('\033[92mPublishing world grid\033[0m')
-        size = float(self.world_size)       
+        size = float(self.world_size) * 1.25    
         step = 1.0                             
         half = size / 2.0
         grid = Marker()
@@ -146,7 +145,6 @@ class Visualizer(Node):
         self.get_logger().info('-> Published r_0 marker')
         
     def publish_intruders(self):
-        """Generate and publish random 3D points as markers."""
         marker_array = MarkerArray()
         for i in range(len(self.intruders)):
             marker = Marker()
@@ -169,60 +167,98 @@ class Visualizer(Node):
             marker.color.r = 0.0
             marker.color.g = 1.0
             marker.color.b = 1.0
-            marker.color.a = 1.0  # Alpha (transparency)
+            marker.color.a = 1.0  
             marker_array.markers.append(marker)
         self.intruders_publisher.publish(marker_array)
         self.get_logger().info(f'Published {len(marker_array.markers)} points')
 
         
+    def create_drone_marker(self, frame_id, marker_id, position, stamp):
+        markers = []
+        body = Marker()
+        body.header.frame_id = frame_id
+        body.header.stamp = stamp
+        body.ns = "drone_body"
+        body.id = marker_id
+        body.type = Marker.CYLINDER
+        body.action = Marker.ADD
+        body.pose.position.x = position[0]
+        body.pose.position.y = position[1]
+        body.pose.position.z = position[2]
+        body.pose.orientation.w = 1.0
+        body.scale.x = 0.3  # diameter
+        body.scale.y = 0.3  # diameter
+        body.scale.z = 0.1  # height
+        body.color.r = 0.7
+        body.color.g = 0.7
+        body.color.b = 0.7
+        body.color.a = 1.0
+        markers.append(body)
+        arm_length = 0.7
+        arm_width = 0.05
+        arm_height = 0.05
+        z_offset = 0.05  # Offset above the body
+        for i in range(4):
+            arm = Marker()
+            arm.header.frame_id = frame_id
+            arm.header.stamp = stamp
+            arm.ns = "drone_arms"
+            arm.id = marker_id * 10 + i + 1  # Unique ID for each arm
+            arm.type = Marker.CYLINDER
+            arm.action = Marker.ADD
+            arm.pose.position.x = position[0]
+            arm.pose.position.y = position[1]
+            arm.pose.position.z = position[2] + z_offset
+            angle = np.pi/4 + (np.pi/2 * i)
+            arm.pose.orientation.w = np.cos(angle/2)
+            arm.pose.orientation.z = np.sin(angle/2)
+            arm.scale.x = arm_length  # length
+            arm.scale.y = arm_width   # width
+            arm.scale.z = arm_height  # height
+            arm.color.r = 0.3
+            arm.color.g = 0.3
+            arm.color.b = 0.3
+            arm.color.a = 1.0
+            markers.append(arm)
+        return markers
+
     def publish_visualizations(self):
         current_time = self.get_clock().now().to_msg()
-        
-        # Publish TF transforms
-        for agent_id, state in self.agent_states.items():
-            t = TransformStamped()
-            t.header.stamp = current_time
-            t.header.frame_id = 'world'
-            t.child_frame_id = f'agent_{agent_id}/base_link'
-            if len(state['z']) >= 2:
-                t.transform.translation.x = state['z'][0]
-                t.transform.translation.y = state['z'][1]
-                if len(state['z']) >= 3:
-                    t.transform.translation.z = state['z'][2]
-                else:
-                    t.transform.translation.z = 0.0
-            t.transform.rotation.w = 1.0
-            t.transform.rotation.x = 0.0
-            t.transform.rotation.y = 0.0
-            t.transform.rotation.z = 0.0            
-            self.tf_broadcaster.sendTransform(t)
-        
-        # Publish trajectory markers
         marker_array = MarkerArray()
-        for agent_id, trajectory in self.agent_trajectories.items():
-            marker = Marker()
-            marker.header.frame_id = 'world'
-            marker.header.stamp = current_time
-            marker.ns = 'agent_trajectories'
-            marker.id = agent_id
-            marker.type = Marker.LINE_STRIP
-            marker.action = Marker.ADD
-            marker.scale.x = 0.05  # Line width            
-            marker.color.r = 0.5
-            marker.color.g = 0.5
-            marker.color.b = 0.5
-            marker.color.a = 1.0
-            
-            for point in trajectory:
-                p = Point()
-                p.x = point[0]
-                p.y = point[1]
-                p.z = point[2]
-                marker.points.append(p)
-            
-            marker_array.markers.append(marker)
-        
-        # Publish all markers
+        for agent_id, state in self.agent_states.items():
+            if len(state['z']) >= 2:
+                position = [
+                    state['z'][0],
+                    state['z'][1],
+                    state['z'][2] if len(state['z']) >= 3 else 0.0
+                ]
+                drone_markers = self.create_drone_marker(
+                    'world',
+                    agent_id,
+                    position,
+                    current_time
+                )
+                marker_array.markers.extend(drone_markers)
+                if agent_id in self.agent_trajectories:
+                    traj_marker = Marker()
+                    traj_marker.header.frame_id = 'world'
+                    traj_marker.header.stamp = current_time
+                    traj_marker.ns = 'agent_trajectories'
+                    traj_marker.id = agent_id
+                    traj_marker.type = Marker.LINE_STRIP
+                    traj_marker.action = Marker.ADD
+                    traj_marker.scale.x = 0.05  # Line width            
+                    traj_marker.color.r = 0.5
+                    traj_marker.color.g = 0.5
+                    traj_marker.color.b = 0.5
+                    traj_marker.color.a = 1.0
+                    for point in self.agent_trajectories[agent_id]:
+                        p = Point()
+                        p.x = point[0]
+                        p.y = point[1]
+                        p.z = point[2]
+                        traj_marker.points.append(p)
+                    marker_array.markers.append(traj_marker)
         self.agent_trajectories_publisher.publish(marker_array)
 
 def main(args=None):
