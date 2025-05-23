@@ -3,3 +3,11 @@ __pycache__/**
 **/build/
 **/install/
 **/log/
+**/main.log
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
