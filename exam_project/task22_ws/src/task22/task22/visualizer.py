@@ -82,7 +82,7 @@ class Visualizer(Node):
         tf.child_frame_id   = "grid"    # child
         tf.transform.translation.x = float(self.r_0[0])
         tf.transform.translation.y = float(self.r_0[1])
-        tf.transform.translation.z = float(self.r_0[2]) if len(self.r_0) > 2 else 0.0
+        tf.transform.translation.z = min(np.array(self.intruders)[:,2]) - 0.5 if len(self.r_0) > 2 else 0.0
         tf.transform.rotation.w = 1.0   # identity quaternion
         self.static_broadcaster.sendTransform(tf)
 
@@ -170,8 +170,7 @@ class Visualizer(Node):
             marker_array.markers.append(marker)
         self.intruders_publisher.publish(marker_array)
         self.get_logger().info(f'Published {len(marker_array.markers)} points')
-
-        
+      
     def create_drone_marker(self, frame_id, marker_id, position, stamp):
         markers = []
         body = Marker()
