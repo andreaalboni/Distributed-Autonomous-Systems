@@ -8,7 +8,7 @@ from task22.utils import generate_agents_and_intruders, generate_graph, compute_
 PARAMETERS = {
     'num_intruders': 5,
     'world_size': 20,
-    'd': 3,
+    'd': 2,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,

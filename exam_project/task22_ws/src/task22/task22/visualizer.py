@@ -23,15 +23,14 @@ class Visualizer(Node):
             depth=10
         )
                 
-        self.r_0 = np.array(self.get_parameter("r_0").value)
-        self.world_size = self.get_parameter("world_size").value
         self.d = self.get_parameter("d").value
+        self.r_0 = np.array(self.get_parameter("r_0").value)
+        self.fov_range = self.get_parameter("fov_range").value
+        self.world_size = self.get_parameter("world_size").value
         self.fov_vertical = self.get_parameter("fov_vertical").value
         self.fov_horizontal = self.get_parameter("fov_horizontal").value
-        self.fov_range = self.get_parameter("fov_range").value
 
-        self.d = len(self.r_0)
-        
+        self.prev_heading = {}
         
         intruders = np.array(self.get_parameter("intruders").value)
         initial_agent_positions = np.array(self.get_parameter("initial_agent_positions").value)
@@ -109,8 +108,8 @@ class Visualizer(Node):
             v_angle_rad = np.radians(float(self.fov_vertical))
             h_angle_rad = np.radians(float(self.fov_horizontal))
             for i in range(segments):
-                theta1 = -h_angle_rad/2 + (h_angle_rad * i / segments)
-                theta2 = -h_angle_rad/2 + (h_angle_rad * (i + 1) / segments)
+                theta1 = heading - h_angle_rad/2 + (h_angle_rad * i / segments)
+                theta2 = heading - h_angle_rad/2 + (h_angle_rad * (i + 1) / segments)
                 for v_angle in [-v_angle_rad/2, v_angle_rad/2]:
                     p0 = Point(x=position[0], y=position[1], z=z)  # Cone apex
                     p1 = Point(
@@ -137,7 +136,6 @@ class Visualizer(Node):
                     )
                     marker.points.extend([p0, p_top, p_bottom])
 
-        # Set marker properties
         marker.pose.orientation.w = 1.0
         marker.scale.x = 1.0
         marker.scale.y = 1.0
@@ -282,7 +280,8 @@ class Visualizer(Node):
         body.action = Marker.ADD
         body.pose.position.x = position[0]
         body.pose.position.y = position[1]
-        body.pose.position.z = position[2]
+        z = position[2] if len(position) >= 3 else 0.0
+        body.pose.position.z = z
         body.pose.orientation.w = 1.0
         body.scale.x = 0.4  # diameter
         body.scale.y = 0.4  # diameter
@@ -306,7 +305,7 @@ class Visualizer(Node):
             arm.action = Marker.ADD
             arm.pose.position.x = position[0]
             arm.pose.position.y = position[1]
-            arm.pose.position.z = position[2] + z_offset
+            arm.pose.position.z = z + z_offset
             angle = np.pi/4 + (np.pi/2 * i)
             arm.pose.orientation.w = np.cos(angle/2)
             arm.pose.orientation.z = np.sin(angle/2)
@@ -327,12 +326,7 @@ class Visualizer(Node):
         # Publish initial agent positions until agents are discovered
         if not self.agent_states:
             for i, pos in enumerate(self.initial_agent_positions):
-                drone_markers = self.create_drone_marker(
-                    'world',
-                    i,
-                    pos,
-                    current_time
-                )
+                drone_markers = self.create_drone_marker('world', i, pos, current_time)
                 marker_array.markers.extend(drone_markers)
 
         active_positions = []
@@ -344,22 +338,20 @@ class Visualizer(Node):
                     state['z'][2] if len(state['z']) >= 3 else 0.0
                 ]
                 active_positions.append(position)
-                
                 # Calculate motion direction
-                heading = 0.0  # default heading if we can't calculate direction
-                if agent_id in self.agent_trajectories and len(self.agent_trajectories[agent_id]) >= 2:
-                    # Get current and previous positions
-                    curr_pos = self.agent_trajectories[agent_id][-1]
-                    prev_pos = self.agent_trajectories[agent_id][-2]
-                    
-                    # Calculate direction vector
+                heading = 0.0
+                idx = self.agent_trajectories[agent_id].index(position)
+                curr_pos = position
+                if idx > 0:
+                    prev_pos = self.agent_trajectories[agent_id][idx-1]
                     dx = curr_pos[0] - prev_pos[0]
                     dy = curr_pos[1] - prev_pos[1]
-                    
-                    # Calculate heading angle in radians
-                    heading = np.arctan2(dy, dx)
-                
-                # Create drone markers
+                    if abs(dx) > 0.001 or abs(dy) > 0.001:
+                        heading = np.arctan2(dy, dx)
+                        self.prev_heading[agent_id] = heading
+                    elif agent_id in self.prev_heading:
+                        # Use the last valid heading if agent is not moving
+                        heading = self.prev_heading[agent_id]
                 drone_markers = self.create_drone_marker(
                     'world',
                     agent_id,
@@ -367,7 +359,6 @@ class Visualizer(Node):
                     current_time
                 )
                 marker_array.markers.extend(drone_markers)
-
                 # Add FOV marker for this agent with heading
                 fov_marker = self.create_fov_marker(agent_id, position, heading)
                 marker_array.markers.append(fov_marker)
