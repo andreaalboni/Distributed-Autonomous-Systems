@@ -459,7 +459,7 @@ class Visualizer(Node):
                 bary_traj.points.append(p)
             marker_array.markers.append(bary_traj)
 
-        self.agent_trajectories_publisher.publish(marker_array)
+        self.trajectories_publisher.publish(marker_array)
         current_time = self.get_clock().now().to_msg()
         marker_array = MarkerArray()
 
