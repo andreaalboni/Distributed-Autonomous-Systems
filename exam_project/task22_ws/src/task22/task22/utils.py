@@ -126,3 +126,29 @@ def compute_r_0(intruders, noise_radius, world_size, d):
         if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
+
+def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
+    # Simulate a LIDAR scan -> return matrix of distances between agents
+    num_agents = len(agents)
+    distances = np.zeros((num_agents, num_agents))
+    for i in range(num_agents):
+        for j in range(num_agents):
+            if i != j:
+                dist = np.linalg.norm(agents[i] - agents[j])
+                if d == 2:
+                    angle = np.arctan2(agents[j][1] - agents[i][1], agents[j][0] - agents[i][0])
+                    if (abs(angle) <= np.deg2rad(fov_horizontal / 2)) and (dist <= fov_range):
+                        distances[i, j] = dist
+                    else:
+                        distances[i, j] = np.nan
+                elif d == 3:
+                    dx, dy, dz = agents[j] - agents[i]
+                    azimuth = np.arctan2(dy, dx)
+                    elevation = np.arctan2(dz, np.sqrt(dx**2 + dy**2))
+                    if (abs(azimuth) <= np.deg2rad(fov_horizontal / 2)) and \
+                       (abs(elevation) <= np.deg2rad(fov_vertical / 2)) and \
+                       (dist <= fov_range):
+                        distances[i, j] = dist
+                    else:
+                        distances[i, j] = np.nan
+    return distances

@@ -25,6 +25,11 @@ class Visualizer(Node):
                 
         self.r_0 = np.array(self.get_parameter("r_0").value)
         self.world_size = self.get_parameter("world_size").value
+        self.d = self.get_parameter("d").value
+        self.fov_vertical = self.get_parameter("fov_vertical").value
+        self.fov_horizontal = self.get_parameter("fov_horizontal").value
+        self.fov_range = self.get_parameter("fov_range").value
+
         self.d = len(self.r_0)
         
         
@@ -51,6 +56,100 @@ class Visualizer(Node):
         self.publish_world_grid()
         self.publish_r_0()
         self.publish_intruders()
+    
+
+    def create_fov_marker(self, agent_id, position, heading):
+        marker = Marker()
+        marker.header.frame_id = 'world'
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.ns = 'fov'
+        marker.id = agent_id + 1000  # Unique ID for FOV markers
+        marker.action = Marker.ADD
+
+        # For 2D case
+        if self.d == 2:
+            marker.type = Marker.TRIANGLE_LIST
+            z = 0.0
+            segments = 32  # Number of triangles to approximate the sector
+            
+            # Convert FOV angle from degrees to radians
+            angle_rad = np.radians(float(self.fov_horizontal))
+            # Calculate the starting angle (centered around heading)
+            start_angle = heading - angle_rad/2
+            
+            # Create vertices for triangle fan
+            center = Point(x=position[0], y=position[1], z=z)
+            
+            for i in range(segments):
+                theta1 = start_angle + (angle_rad * i / segments)
+                theta2 = start_angle + (angle_rad * (i + 1) / segments)
+                
+                # First point of triangle (center)
+                marker.points.append(center)
+                
+                # Second point of triangle (first radius)
+                marker.points.append(Point(
+                    x=position[0] + self.fov_range * np.cos(theta1),
+                    y=position[1] + self.fov_range * np.sin(theta1),
+                    z=z
+                ))
+                
+                # Third point of triangle (second radius)
+                marker.points.append(Point(
+                    x=position[0] + self.fov_range * np.cos(theta2),
+                    y=position[1] + self.fov_range * np.sin(theta2),
+                    z=z
+                ))
+            
+        # For 3D case 
+        else:
+            marker.type = Marker.TRIANGLE_LIST
+            z = position[2]
+            segments = 32  # Number of segments for the circular approximation
+            v_angle_rad = np.radians(float(self.fov_vertical))
+            h_angle_rad = np.radians(float(self.fov_horizontal))
+            for i in range(segments):
+                theta1 = -h_angle_rad/2 + (h_angle_rad * i / segments)
+                theta2 = -h_angle_rad/2 + (h_angle_rad * (i + 1) / segments)
+                for v_angle in [-v_angle_rad/2, v_angle_rad/2]:
+                    p0 = Point(x=position[0], y=position[1], z=z)  # Cone apex
+                    p1 = Point(
+                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(v_angle),
+                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(v_angle),
+                        z=z + self.fov_range * np.sin(v_angle)
+                    )
+                    p2 = Point(
+                        x=position[0] + self.fov_range * np.cos(theta2) * np.cos(v_angle),
+                        y=position[1] + self.fov_range * np.sin(theta2) * np.cos(v_angle),
+                        z=z + self.fov_range * np.sin(v_angle)
+                    )
+                    marker.points.extend([p0, p1, p2])
+                if i % (segments/4) == 0:  # Create fewer vertical planes for cleaner visualization
+                    p_top = Point(
+                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(v_angle_rad/2),
+                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(v_angle_rad/2),
+                        z=z + self.fov_range * np.sin(v_angle_rad/2)
+                    )
+                    p_bottom = Point(
+                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(-v_angle_rad/2),
+                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(-v_angle_rad/2),
+                        z=z + self.fov_range * np.sin(-v_angle_rad/2)
+                    )
+                    marker.points.extend([p0, p_top, p_bottom])
+
+        # Set marker properties
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 1.0
+        marker.scale.y = 1.0
+        marker.scale.z = 1.0
+        
+        # Set color (semi-transparent)
+        marker.color.r = 0.0
+        marker.color.g = 1.0
+        marker.color.b = 0.0
+        marker.color.a = 0.3
+
+        return marker
 
     def discover_agents(self):
         topic_names_and_types = self.get_topic_names_and_types()
@@ -185,17 +284,17 @@ class Visualizer(Node):
         body.pose.position.y = position[1]
         body.pose.position.z = position[2]
         body.pose.orientation.w = 1.0
-        body.scale.x = 0.3  # diameter
-        body.scale.y = 0.3  # diameter
+        body.scale.x = 0.4  # diameter
+        body.scale.y = 0.4  # diameter
         body.scale.z = 0.1  # height
         body.color.r = 0.7
         body.color.g = 0.7
         body.color.b = 0.7
         body.color.a = 1.0
         markers.append(body)
-        arm_length = 0.7
-        arm_width = 0.05
-        arm_height = 0.05
+        arm_length = 0.9
+        arm_width = 0.075
+        arm_height = 0.075
         z_offset = 0.05  # Offset above the body
         for i in range(4):
             arm = Marker()
@@ -246,6 +345,20 @@ class Visualizer(Node):
                 ]
                 active_positions.append(position)
                 
+                # Calculate motion direction
+                heading = 0.0  # default heading if we can't calculate direction
+                if agent_id in self.agent_trajectories and len(self.agent_trajectories[agent_id]) >= 2:
+                    # Get current and previous positions
+                    curr_pos = self.agent_trajectories[agent_id][-1]
+                    prev_pos = self.agent_trajectories[agent_id][-2]
+                    
+                    # Calculate direction vector
+                    dx = curr_pos[0] - prev_pos[0]
+                    dy = curr_pos[1] - prev_pos[1]
+                    
+                    # Calculate heading angle in radians
+                    heading = np.arctan2(dy, dx)
+                
                 # Create drone markers
                 drone_markers = self.create_drone_marker(
                     'world',
@@ -254,6 +367,10 @@ class Visualizer(Node):
                     current_time
                 )
                 marker_array.markers.extend(drone_markers)
+
+                # Add FOV marker for this agent with heading
+                fov_marker = self.create_fov_marker(agent_id, position, heading)
+                marker_array.markers.append(fov_marker)
 
                 # Add agent trajectories
                 if agent_id in self.agent_trajectories:
@@ -342,7 +459,9 @@ class Visualizer(Node):
                 bary_traj.points.append(p)
             marker_array.markers.append(bary_traj)
 
-        self.trajectories_publisher.publish(marker_array)
+        self.agent_trajectories_publisher.publish(marker_array)
+        current_time = self.get_clock().now().to_msg()
+        marker_array = MarkerArray()
 
 def main(args=None):
     rclpy.init(args=args)
