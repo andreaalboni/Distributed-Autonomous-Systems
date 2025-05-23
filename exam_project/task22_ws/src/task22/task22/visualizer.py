@@ -224,6 +224,9 @@ class Visualizer(Node):
     def publish_visualizations(self):
         current_time = self.get_clock().now().to_msg()
         marker_array = MarkerArray()
+
+        # Calculate barycentre
+        active_positions = []
         for agent_id, state in self.agent_states.items():
             if len(state['z']) >= 2:
                 position = [
@@ -231,6 +234,9 @@ class Visualizer(Node):
                     state['z'][1],
                     state['z'][2] if len(state['z']) >= 3 else 0.0
                 ]
+                active_positions.append(position)
+                
+                # Create drone markers
                 drone_markers = self.create_drone_marker(
                     'world',
                     agent_id,
@@ -238,6 +244,8 @@ class Visualizer(Node):
                     current_time
                 )
                 marker_array.markers.extend(drone_markers)
+
+                # Add agent trajectories
                 if agent_id in self.agent_trajectories:
                     traj_marker = Marker()
                     traj_marker.header.frame_id = 'world'
@@ -258,6 +266,65 @@ class Visualizer(Node):
                         p.z = point[2]
                         traj_marker.points.append(p)
                     marker_array.markers.append(traj_marker)
+
+        # Add barycentre marker and trajectory if there are active agents
+        if active_positions:
+            barycentre = np.mean(active_positions, axis=0)
+            
+            # Store barycentre trajectory
+            if not hasattr(self, 'barycentre_trajectory'):
+                self.barycentre_trajectory = []
+            self.barycentre_trajectory.append(barycentre)
+
+            # Barycentre marker
+            bary_marker = Marker()
+            bary_marker.header.frame_id = 'world'
+            bary_marker.header.stamp = current_time
+            bary_marker.ns = 'barycentre'
+            bary_marker.id = 999  # Unique ID for barycentre
+            bary_marker.type = Marker.TRIANGLE_LIST
+            # Create hexagon vertices
+            r = 0.2
+            vertices = []
+            for i in range(6):
+                angle = i * np.pi / 3
+                vertices.extend([
+                    Point(x=0.0, y=0.0, z=0.0),  # center
+                    Point(x=r*np.cos(angle), y=r*np.sin(angle), z=0.0),
+                    Point(x=r*np.cos(angle + np.pi/3), y=r*np.sin(angle + np.pi/3), z=0.0)
+                ])
+            bary_marker.points = vertices
+            bary_marker.action = Marker.ADD
+            bary_marker.pose.position.x = barycentre[0]
+            bary_marker.pose.position.y = barycentre[1]
+            bary_marker.pose.position.z = barycentre[2]
+            bary_marker.pose.orientation.w = 1.0
+            bary_marker.scale.x = 0.4
+            bary_marker.scale.y = 0.4
+            bary_marker.scale.z = 0.4
+            bary_marker.color.g = 1.0  # Green
+            bary_marker.color.a = 0.75
+            marker_array.markers.append(bary_marker)
+
+            # Barycentre trajectory
+            bary_traj = Marker()
+            bary_traj.header.frame_id = 'world'
+            bary_traj.header.stamp = current_time
+            bary_traj.ns = 'barycentre_trajectory'
+            bary_traj.id = 1000  # Unique ID for barycentre trajectory
+            bary_traj.type = Marker.LINE_STRIP
+            bary_traj.action = Marker.ADD
+            bary_traj.scale.x = 0.05
+            bary_traj.color.g = 0.7  # Light green
+            bary_traj.color.a = 0.7
+            for point in self.barycentre_trajectory:
+                p = Point()
+                p.x = point[0]
+                p.y = point[1]
+                p.z = point[2]
+                bary_traj.points.append(p)
+            marker_array.markers.append(bary_traj)
+
         self.agent_trajectories_publisher.publish(marker_array)
 
 def main(args=None):
