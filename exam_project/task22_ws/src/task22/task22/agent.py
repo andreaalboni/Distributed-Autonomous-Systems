@@ -73,7 +73,7 @@ class Agent(Node):
                 
                 if self.k >= self.max_iters:
                     print(f"\nAgent {self.agent_id}: Max iterations reached")
-                    raise SystemExit
+                    rclpy.shutdown()
             else:
                 missing = [j for j in self.neighbors if self.k - 1 not in self.received_data[j]]
                 #print(f"Agent {self.agent_id}: Waiting for iter {self.k-1} from agents {missing}")
@@ -165,7 +165,8 @@ def main(args=None):
         rclpy.logging.get_logger("Quitting").info("Done")
     finally:
         aggregative_tracking_agent.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
