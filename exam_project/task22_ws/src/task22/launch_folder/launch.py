@@ -2,7 +2,7 @@ import numpy as np
 import networkx as nx
 from launch_ros.actions import Node
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, TimerAction
 from task22.utils import generate_agents_and_intruders, generate_graph, compute_r_0
 
 PARAMETERS = {
@@ -13,9 +13,9 @@ PARAMETERS = {
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
-    'max_iters': 100,
+    'max_iters': 500,
     'alpha': 0.001,
-    'communication_time': 5e-2,
+    'communication_time': 1e-2,
     'gamma': 15,
     'gamma_bar': 3,
     'gamma_hat': 1,
@@ -38,42 +38,7 @@ def generate_launch_description():
 
     node_list = []
     package_name = "task22"
-
-    for i in range(PARAMETERS['num_intruders']):
-        gamma_i = float(gamma[i])
-        A_i = A[i].tolist()
-        z_0_i = z_0[i].tolist()
-        gamma_bar_i = float(gamma_bar[i])
-        gamma_hat_i = float(gamma_hat[i])
-        intruder_i = intruders[i].tolist()
-        N_i = np.nonzero(adj[:, i])[0].tolist()
-
-        node_list.append(
-            Node(
-                package=package_name,
-                namespace=f"agent_{i}",
-                executable="agent",
-                parameters=[
-                    {
-                        "id": i,
-                        "A_i": A_i,
-                        "r_0": r_0,
-                        "z0": z_0_i,
-                        "gamma": gamma_i,
-                        "alpha": float(PARAMETERS['alpha']),
-                        "neighbors": N_i,
-                        "max_iters": int(PARAMETERS['max_iters']),
-                        "intruder": intruder_i,
-                        "gamma_bar": gamma_bar_i,
-                        "gamma_hat": gamma_hat_i,
-                        "communication_time": float(PARAMETERS['communication_time']),
-                    }
-                ],
-                output="screen",
-                prefix=f'xterm -geometry 100x3+{0}+{100 + i*100} -fa "Monospace" -fs 11 -title "agent_{i}" -fg white -bg black -hold -e',
-            )
-        )
-        
+    
     foxglove_bridge_node = ExecuteProcess(
         cmd=['ros2', 'launch', 'foxglove_bridge', 'foxglove_bridge_launch.xml'],
         output='screen'
@@ -87,11 +52,51 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             # Flatten the intruders array and pass as a list
+            'initial_agent_positions': z_0.flatten().tolist(),
             'intruders': intruders.flatten().tolist(),
             'r_0': r_0,
             'world_size': PARAMETERS['world_size'],
         }],
     )
     node_list.append(visualizer_node)
+
+    for i in range(PARAMETERS['num_intruders']):
+        gamma_i = float(gamma[i])
+        A_i = A[i].tolist()
+        z_0_i = z_0[i].tolist()
+        gamma_bar_i = float(gamma_bar[i])
+        gamma_hat_i = float(gamma_hat[i])
+        intruder_i = intruders[i].tolist()
+        N_i = np.nonzero(adj[:, i])[0].tolist()
+
+        node_list.append(
+            TimerAction(period=5.0,
+                actions=[
+                    Node(
+                        package=package_name,
+                        namespace=f"agent_{i}",
+                        executable="agent",
+                        parameters=[
+                            {
+                                "id": i,
+                                "A_i": A_i,
+                                "r_0": r_0,
+                                "z0": z_0_i,
+                                "gamma": gamma_i,
+                                "alpha": float(PARAMETERS['alpha']),
+                                "neighbors": N_i,
+                                "max_iters": int(PARAMETERS['max_iters']),
+                                "intruder": intruder_i,
+                                "gamma_bar": gamma_bar_i,
+                                "gamma_hat": gamma_hat_i,
+                                "communication_time": float(PARAMETERS['communication_time']),
+                            }
+                        ],
+                        output="screen",
+                        prefix=f'xterm -geometry 100x3+{0}+{100 + i*100} -fa "Monospace" -fs 11 -title "agent_{i}" -fg white -bg black -hold -e',
+                    )
+                ]
+            )
+        )
 
     return LaunchDescription(node_list)

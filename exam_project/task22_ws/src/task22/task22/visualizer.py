@@ -23,14 +23,17 @@ class Visualizer(Node):
             depth=10
         )
                 
-        intruders = np.array(self.get_parameter("intruders").value)
         self.r_0 = np.array(self.get_parameter("r_0").value)
         self.world_size = self.get_parameter("world_size").value
-        
         self.d = len(self.r_0)
-        self.intruders = [intruders[i:i+self.d] for i in range(0, len(intruders), self.d)]
         
-        self.agent_trajectories_publisher = self.create_publisher(MarkerArray, 'agent_trajectories', self.qos)
+        
+        intruders = np.array(self.get_parameter("intruders").value)
+        initial_agent_positions = np.array(self.get_parameter("initial_agent_positions").value)
+        self.intruders = [intruders[i:i+self.d] for i in range(0, len(intruders), self.d)]
+        self.initial_agent_positions = [initial_agent_positions[i:i+self.d] for i in range(0, len(initial_agent_positions), self.d)]
+        
+        self.trajectories_publisher = self.create_publisher(MarkerArray, 'trajectories', self.qos)
         self.intruders_publisher = self.create_publisher(MarkerArray, 'intruders', self.qos)
         self.marker_publisher = self.create_publisher(Marker, 'r_0', self.qos)
         self.grid_publisher = self.create_publisher(Marker, 'world_grid', self.qos)
@@ -48,7 +51,6 @@ class Visualizer(Node):
         self.publish_world_grid()
         self.publish_r_0()
         self.publish_intruders()
-    
 
     def discover_agents(self):
         topic_names_and_types = self.get_topic_names_and_types()
@@ -69,11 +71,10 @@ class Visualizer(Node):
 
     def agent_callback(self, msg, agent_id):
         self.agent_states[agent_id] = {'z': msg.z, 'k': msg.k}
-        if len(msg.z) >= 2:
-            pos = [0.0, 0.0, 0.0]
-            for i in range(len(msg.z)):
-                pos[i] = msg.z[i]
-            self.agent_trajectories[agent_id].append(pos)
+        pos = [0.0, 0.0, 0.0]
+        for i in range(len(msg.z)):
+            pos[i] = msg.z[i]
+        self.agent_trajectories[agent_id].append(pos)
     
     def publish_static_grid_tf(self):
         tf = TransformStamped()
@@ -223,8 +224,18 @@ class Visualizer(Node):
     def publish_visualizations(self):
         current_time = self.get_clock().now().to_msg()
         marker_array = MarkerArray()
+        
+        # Publish initial agent positions until agents are discovered
+        if not self.agent_states:
+            for i, pos in enumerate(self.initial_agent_positions):
+                drone_markers = self.create_drone_marker(
+                    'world',
+                    i,
+                    pos,
+                    current_time
+                )
+                marker_array.markers.extend(drone_markers)
 
-        # Calculate barycentre
         active_positions = []
         for agent_id, state in self.agent_states.items():
             if len(state['z']) >= 2:
@@ -251,7 +262,11 @@ class Visualizer(Node):
                     traj_marker.header.stamp = current_time
                     traj_marker.ns = 'agent_trajectories'
                     traj_marker.id = agent_id
-                    traj_marker.type = Marker.LINE_STRIP
+                    
+                    if len(self.agent_trajectories[agent_id]) > 1:
+                        traj_marker.type = Marker.LINE_STRIP
+                    else:
+                        traj_marker.type = Marker.POINTS
                     traj_marker.action = Marker.ADD
                     traj_marker.scale.x = 0.05  # Line width            
                     traj_marker.color.r = 0.5
@@ -266,8 +281,8 @@ class Visualizer(Node):
                         traj_marker.points.append(p)
                     marker_array.markers.append(traj_marker)
 
-        # Add barycentre marker and trajectory if there are active agents
-        if active_positions:
+        all_agents_present = len(self.agent_states) == len(self.agent_trajectories)
+        if all_agents_present and active_positions:
             barycentre = np.mean(active_positions, axis=0)
             
             # Store barycentre trajectory
@@ -311,7 +326,10 @@ class Visualizer(Node):
             bary_traj.header.stamp = current_time
             bary_traj.ns = 'barycentre_trajectory'
             bary_traj.id = 1000  # Unique ID for barycentre trajectory
-            bary_traj.type = Marker.LINE_STRIP
+            if len(self.barycentre_trajectory) > 1:
+                bary_traj.type = Marker.LINE_STRIP
+            else:
+                bary_traj.type = Marker.POINTS
             bary_traj.action = Marker.ADD
             bary_traj.scale.x = 0.05
             bary_traj.color.g = 0.7  # Light green
@@ -324,7 +342,7 @@ class Visualizer(Node):
                 bary_traj.points.append(p)
             marker_array.markers.append(bary_traj)
 
-        self.agent_trajectories_publisher.publish(marker_array)
+        self.trajectories_publisher.publish(marker_array)
 
 def main(args=None):
     rclpy.init(args=args)
