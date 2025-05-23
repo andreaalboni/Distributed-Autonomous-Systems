@@ -19,6 +19,9 @@ PARAMETERS = {
     'gamma': 15,
     'gamma_bar': 3,
     'gamma_hat': 1,
+    'fov_horizontal': 180,    # Horizontal Field of View in degrees
+    'fov_vertical': 30,       # Vertical Field of View in degrees
+    'fov_range': 1.0,         # Range of the Field of View
 }
 
 def generate_launch_description():
@@ -90,6 +93,10 @@ def generate_launch_description():
             'intruders': intruders.flatten().tolist(),
             'r_0': r_0,
             'world_size': PARAMETERS['world_size'],
+            'd': PARAMETERS['d'],
+            'fov_horizontal': PARAMETERS['fov_horizontal'],
+            'fov_vertical': PARAMETERS['fov_vertical'],
+            'fov_range': PARAMETERS['fov_range'],
         }],
     )
     node_list.append(visualizer_node)
