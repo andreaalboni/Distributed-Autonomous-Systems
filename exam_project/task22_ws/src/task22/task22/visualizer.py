@@ -3,7 +3,6 @@ import re
 import rclpy
 import numpy as np
 from rclpy.node import Node
-from geometry_msgs.msg import TransformStamped
 from geometry_msgs.msg import TransformStamped, Point
 from visualization_msgs.msg import Marker, MarkerArray
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg

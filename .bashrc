@@ -121,4 +121,4 @@ export SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
 export SETUPTOOLS_USE_DISTUTILS=stdlib
 source /opt/ros/humble/setup.bash
 source ~/task22_ws/install/setup.bash
-source ~/das_ros2_ws/install/setup.bash
+# source ~/das_ros2_ws/install/setup.bash

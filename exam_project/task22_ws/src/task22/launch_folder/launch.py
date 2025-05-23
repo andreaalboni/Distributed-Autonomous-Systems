@@ -1,12 +1,8 @@
-import os, xacro
 import numpy as np
 import networkx as nx
 from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess
-from launch.substitutions import Command, FindExecutable
-from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue
 
 PARAMETERS = {
     'num_intruders': 5,
@@ -164,29 +160,6 @@ def generate_launch_description():
     node_list = []
     package_name = "task22"
 
-    pkg_share = FindPackageShare(package='task22').find('task22')    
-    urdf_file = os.path.join(pkg_share, 'urdf', 'simple_quad.urdf')    
-    robot_description_content = Command([
-        FindExecutable(name='xacro'),
-        ' ',
-        urdf_file
-    ])
-
-
-    # # Add URDF publisher for Foxglove
-    # urdf_content = xacro.process_file(urdf_file).toxml()
-    # urdf_publisher = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     name='urdf_publisher',
-    #     parameters=[{
-    #         'robot_description': urdf_content,
-    #         'use_sim_time': True
-    #     }]
-    # )
-    # node_list.append(urdf_publisher)
-
-
     for i in range(N):
         gamma_i = float(gamma[i])
         A_i = A[i].tolist()
@@ -221,32 +194,7 @@ def generate_launch_description():
                 prefix=f'xterm -title "agent_{i}"  -fg white -bg black -fs 12 -fa "Monospace" -hold -e',
             )
         )
-
-        node_list.append(
-            Node(
-                package='robot_state_publisher',
-                executable='robot_state_publisher',
-                namespace=f'agent_{i}',
-                name=f'robot_state_publisher_agent_{i}',
-                output='screen',
-                parameters=[{
-                    'robot_description': ParameterValue(robot_description_content, value_type=str)
-                }],
-                remappings=[
-                    ('/tf', '/tf'),
-                    ('/tf_static', '/tf_static'),
-                ]
-            )
-        )
-
-    joint_state_publisher_node = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        output='screen',
-    )
-    node_list.append(joint_state_publisher_node)
-
+        
     foxglove_bridge_node = ExecuteProcess(
         cmd=['ros2', 'launch', 'foxglove_bridge', 'foxglove_bridge_launch.xml'],
         output='screen'

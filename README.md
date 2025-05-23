@@ -19,13 +19,13 @@ export HOST_GROUP_ID=$(id -g)
 ### 2. Build the Image
 
 ```bash
-docker-compose build
+docker compose build
 ```
 
 ### 3. Start the Container
 
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ### 4. Attach to a running container
@@ -40,11 +40,6 @@ run at each boot outside of the docker container:
 ```bash
 xhost +local:docker
 ```
-
-### External sources
-
-- [drone urdf model](https://github.com/ricardodeazambuja/simple_quad_gazebo/blob/main/src/simple_quad/src/description/simple_quad.urdf)
-
 
 ### Latex
 ```bash

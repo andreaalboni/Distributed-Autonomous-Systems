@@ -10,7 +10,6 @@ RUN groupadd -g 1000 ${DEV_NAME} && \
      useradd -d /home/${DEV_NAME} -s /bin/bash -m ${DEV_NAME} -u 1000 -g 1000 && \
      usermod -aG sudo ${DEV_NAME} && \
      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-##########################################################
 
 ##########################################################
 # Install ROS packages
@@ -20,8 +19,6 @@ RUN apt-get update -q && \
      apt install -yq \
           ros-${ROS_DISTRO}-rqt-graph \
           ros-${ROS_DISTRO}-foxglove-bridge \
-          ros-${ROS_DISTRO}-joint-state-publisher \
-          ros-${ROS_DISTRO}-xacro \
      && rm -rf /var/lib/apt/lists/*
 
 ##########################################################
@@ -42,16 +39,19 @@ RUN apt update -q && \
             python3-scipy \
             python3-matplotlib
 
-# Install requirements
-# COPY requirements.txt /home/${DEV_NAME}/
-# RUN pip3 install -r /home/${DEV_NAME}/requirements.txt 
-
 ##########################################################
-# Useful aliases
+# Aliases
 ##########################################################
 RUN echo 'PROMPT_DIRTRIM=1' >> /home/${DEV_NAME}/.bashrc
 RUN echo 'export ROS_DOMAIN_ID=100' >> /home/${DEV_NAME}/.bashrc
-##########################################################
 
-WORKDIR /home/${DEV_NAME}
+###########################################################
+# Disable sudo message and set up entrypoint
+###########################################################
+RUN touch /home/${DEV_NAME}/.hushlogin
+COPY entrypoint.sh /home/${DEV_NAME}/entrypoint.sh
+RUN chmod +x /home/${DEV_NAME}/entrypoint.sh
+WORKDIR /home/${DEV_NAME}/task22_ws
 USER ${DEV_NAME}
+ENTRYPOINT ["/home/user/entrypoint.sh"]
+CMD ["/bin/bash"]
