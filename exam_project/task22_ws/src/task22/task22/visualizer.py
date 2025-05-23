@@ -283,7 +283,7 @@ class Visualizer(Node):
             bary_marker.id = 999  # Unique ID for barycentre
             bary_marker.type = Marker.TRIANGLE_LIST
             # Create hexagon vertices
-            r = 0.2
+            r = 0.5
             vertices = []
             for i in range(6):
                 angle = i * np.pi / 3
