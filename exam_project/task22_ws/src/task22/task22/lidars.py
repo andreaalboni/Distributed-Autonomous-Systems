@@ -48,18 +48,30 @@ class Lidars(Node):
         if any(p is None for p in positions):
             return
         agents_array = np.vstack(positions)
-        distances = simulate_lidar_scan(agents_array,self.fov_horizontal,self.fov_vertical,self.fov_range,self.d)
+        distances, horizontal_angles, vertical_angles = simulate_lidar_scan(
+            agents_array,
+            self.fov_horizontal,
+            self.fov_vertical,
+            self.fov_range,
+            self.d
+        )
         for i, agent_id in enumerate(ids):
             detected_ids = []
             detected_dists = []
+            detected_h_angles = []
+            detected_v_angles = []
             for j, other_id in enumerate(ids):
                 if i != j and not np.isnan(distances[i, j]):
                     detected_ids.append(other_id)
                     detected_dists.append(distances[i, j])
+                    detected_h_angles.append(horizontal_angles[i, j])
+                    detected_v_angles.append(vertical_angles[i, j])
             msg = Lidar()
             msg.id = agent_id
             msg.detected_ids = detected_ids
-            msg.distances = detected_dists            
+            msg.distances = detected_dists
+            msg.horizontal_angles = detected_h_angles
+            msg.vertical_angles = detected_v_angles
             if agent_id in self.lidar_publishers:
                 self.lidar_publishers[agent_id].publish(msg)
 
