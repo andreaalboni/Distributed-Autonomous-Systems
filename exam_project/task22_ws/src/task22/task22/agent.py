@@ -165,8 +165,6 @@ class Agent(Node):
             return u.value
         else:
             return u_ref  # fallback if QP fails
-
-
         
     def dynamics(slef, z, u_ref, delta_T):
         return z + delta_T * u_ref # Simple integrator for now
