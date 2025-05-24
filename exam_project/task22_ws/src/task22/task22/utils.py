@@ -170,6 +170,8 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
     # Simulate a LIDAR scan -> return matrix of distances between agents
     num_agents = len(agents)
     distances = np.zeros((num_agents, num_agents))
+    horizontal_angles = np.zeros((num_agents, num_agents))
+    vertical_angles = np.zeros((num_agents, num_agents))
     for i in range(num_agents):
         for j in range(num_agents):
             if i != j:
@@ -178,8 +180,10 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                     angle = np.arctan2(agents[j][1] - agents[i][1], agents[j][0] - agents[i][0])
                     if (abs(angle) <= np.deg2rad(fov_horizontal / 2)) and (dist <= fov_range):
                         distances[i, j] = dist
+                        horizontal_angles[i, j] = angle
                     else:
                         distances[i, j] = np.nan
+                        horizontal_angles[i, j] = np.nan
                 elif d == 3:
                     dx, dy, dz = agents[j] - agents[i]
                     azimuth = np.arctan2(dy, dx)
@@ -188,6 +192,10 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                        (abs(elevation) <= np.deg2rad(fov_vertical / 2)) and \
                        (dist <= fov_range):
                         distances[i, j] = dist
+                        horizontal_angles[i, j] = azimuth
+                        vertical_angles[i, j] = elevation
                     else:
                         distances[i, j] = np.nan
-    return distances
+                        horizontal_angles[i, j] = np.nan
+                        vertical_angles[i, j] = np.nan
+    return distances, horizontal_angles, vertical_angles
