@@ -38,6 +38,7 @@ class Agent(Node):
         self.s = np.zeros((self.max_iters + 1, self.d))
         self.v = np.zeros((self.max_iters + 1, self.d))
         self.u_ref = np.zeros((self.max_iters + 1, self.d))
+        self.safe_u = np.zeros((self.max_iters + 1, self.d))
         self.cost = np.zeros((self.max_iters))
         self.visible_neighbors = {}
 
@@ -70,7 +71,10 @@ class Agent(Node):
             }
             
     def lidar_callback(self, msg):
-        self.visible_neighbors = dict(zip(msg.detected_ids, msg.distances, msg.horizontal_angles, msg.vertical_angles))
+        self.visible_neighbors = {
+            id_: (dist, horiz, vert)
+            for id_, dist, horiz, vert in zip(msg.detected_ids, msg.distances, msg.horizontal_angles, msg.vertical_angles)
+        }
         self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
 
     def timer_callback(self):
@@ -124,9 +128,10 @@ class Agent(Node):
             s=self.s,
             intruder=self.intruder,
             r_0=self.r_0,
-            gamma_sc=self.gamma_sc,
+            gamma=self.gamma,
             gamma_bar=self.gamma_bar,
             gamma_hat=self.gamma_hat,
+            gamma_sc=self.gamma_sc,
             received_info=neighbor_data
         )
 
@@ -151,6 +156,8 @@ class Agent(Node):
         grad_x_j = -2 * diff
         return V_s_ij, grad_x_i, grad_x_j
 
+
+        
     def safe_control(self, u_ref, x_i, neighbor_positions, delta, gamma_sc, u_max):
         u = cp.Variable(self.d)
         objective = cp.Minimize(cp.sum_squares(u - u_ref))
@@ -160,16 +167,21 @@ class Agent(Node):
             constraints.append(-grad_x_i @ u - 0.5 * gamma_sc * V_s <= 0)
         constraints.append(cp.norm(u, 2) <= u_max)
         prob = cp.Problem(objective, constraints)
-        prob.solve(solver=cp.OSQP)
-        if prob.status in ["optimal", "optimal_inaccurate"]:
-            return u.value
-        else:
-            return u_ref  # fallback if QP fails
+        solvers_to_try = [cp.ECOS, cp.SCS, cp.OSQP]
+        for solver in solvers_to_try:
+            try:
+                prob.solve(solver=solver)
+                if prob.status in ["optimal", "optimal_inaccurate"]:
+                    return u.value
+            except:
+                continue
+        
+        return u_ref 
         
     def dynamics(slef, z, u_ref, delta_T):
         return z + delta_T * u_ref # Simple integrator for now
         
-    def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, received_info):
+    def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
         
@@ -185,7 +197,7 @@ class Agent(Node):
             else:
                 neighbor_positions.append(np.array([x, y]))
         
-        self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, self.gamma_sc, self.u_max)
+        self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
 
         z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
     

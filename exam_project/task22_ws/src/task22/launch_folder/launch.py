@@ -18,12 +18,12 @@ PARAMETERS = {
     'gamma': 15,
     'gamma_bar': 3,
     'gamma_hat': 1,
-    'gamma_sc': 0.1,  # Safety control gain
+    'gamma_sc': 10,  # Safety control gain
     'fov_horizontal': 180,    # Horizontal Field of View in degrees
     'fov_vertical': 30,       # Vertical Field of View in degrees
     'fov_range': 10.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
-    "u_max": 1.0,  # Maximum control input
+    "u_max": 100.0,  # Maximum control input
     'communication_time': 1e-2,
 }
 
