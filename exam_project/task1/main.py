@@ -9,7 +9,7 @@ from termcolor import colored
 def main():
     
     PARAMETERS = {
-        'num_targets': 2,
+        'num_targets': 5,
         'ratio_at': 5,
         'd': 2,
         'world_size': 5,
