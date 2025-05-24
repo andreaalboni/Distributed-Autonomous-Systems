@@ -175,8 +175,21 @@ class Agent(Node):
                     return u.value
             except:
                 continue
-        
+        # is no solver worked, print a warning and return the reference control
+        self.get_logger().warn(f"Agent {self.agent_id}: No solver found a feasible solution, returning reference control")
         return u_ref 
+    
+    def compute_neighbor_positions(self, z, visible_neighbors):
+        neighbor_positions = []
+        for neighbor_id, (distance, horiz_angle, vert_angle) in visible_neighbors.items():
+            x = z[0] + distance * np.cos(vert_angle) * np.cos(horiz_angle)
+            y = z[1] + distance * np.cos(vert_angle) * np.sin(horiz_angle)
+            if self.d == 3:
+                z_pos = z[2] + distance * np.sin(vert_angle)
+                neighbor_positions.append(np.array([x, y, z_pos]))
+            else:
+                neighbor_positions.append(np.array([x, y]))
+        return neighbor_positions
         
     def dynamics(slef, z, u_ref, delta_T):
         return z + delta_T * u_ref # Simple integrator for now
@@ -186,19 +199,8 @@ class Agent(Node):
         _, grad_phi_i = self.local_phi_function(z[k])
         
         self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
-        
-        neighbor_positions = []
-        for neighbor_id, (distance, horiz_angle, vert_angle) in self.visible_neighbors.items():
-            x = z[k][0] + distance * np.cos(vert_angle) * np.cos(horiz_angle)
-            y = z[k][1] + distance * np.cos(vert_angle) * np.sin(horiz_angle)
-            if self.d == 3:
-                z_pos = z[k][2] + distance * np.sin(vert_angle)
-                neighbor_positions.append(np.array([x, y, z_pos]))
-            else:
-                neighbor_positions.append(np.array([x, y]))
-        
+        neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
         self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
-
         z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
     
         s[k+1] = A[i] * s[k]
