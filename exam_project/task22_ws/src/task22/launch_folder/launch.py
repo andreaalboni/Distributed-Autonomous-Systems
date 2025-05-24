@@ -14,7 +14,7 @@ PARAMETERS = {
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
     'max_iters': 500,
-    'alpha': 0.001,
+    'alpha': 0.1,
     'communication_time': 1e-2,
     'gamma': 15,
     'gamma_bar': 3,

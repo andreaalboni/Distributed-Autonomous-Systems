@@ -30,6 +30,7 @@ class Agent(Node):
         self.z = np.zeros((self.max_iters + 1, len(self.z_0)))
         self.s = np.zeros((self.max_iters + 1, len(self.z_0)))
         self.v = np.zeros((self.max_iters + 1, len(self.z_0)))
+        self.u_ref = np.zeros((self.max_iters + 1, len(self.z_0)))
         self.cost = np.zeros((self.max_iters))
 
         self.z[0] = self.z_0
@@ -130,11 +131,15 @@ class Agent(Node):
         grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
         return local_cost, grad_1, grad_2
     
+    def dynamics(slef, z, u_ref, delta_T):
+        return z + delta_T * u_ref # Simple integrator for now
+        
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
         
-        z[k+1] = z[k] - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+        self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+        z[k+1] = self.dynamics(z[k], self.u_ref[k], self.delta_T)
     
         s[k+1] = A[i] * s[k]
         for j in N_i:
