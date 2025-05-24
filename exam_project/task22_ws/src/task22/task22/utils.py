@@ -152,3 +152,10 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                     else:
                         distances[i, j] = np.nan
     return distances
+
+def compute_cbf(x_i, x_j, delta):
+    diff = x_i - x_j
+    V_s_ij = np.linalg.norm(diff)**2 - delta**2
+    grad_x_i = 2 * diff
+    grad_x_j = -2 * diff
+    return V_s_ij, grad_x_i, grad_x_j
