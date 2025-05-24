@@ -6,7 +6,7 @@ from launch.actions import ExecuteProcess, TimerAction
 from task22.utils import generate_agents_and_intruders, generate_graph, compute_r_0
 
 PARAMETERS = {
-    'num_intruders': 5,
+    'num_intruders': 3,
     'world_size': 20,
     'd': 2,
     'intruder_radius': 10.0,
