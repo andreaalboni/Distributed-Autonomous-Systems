@@ -25,10 +25,7 @@ setup(
         'console_scripts': [
             "agent = task22.agent:main",
             "visualizer = task22.visualizer:main",
-            "urdf_manager = task22.urdf_manager:main",
-            # debug 
-            'point_visualizer = task22.point_visualizer_node:main',
-            # 'drone_state_publisher = task22.drone_state_publisher:main',
+            "lidars = task22.lidars:main",
         ],
     },
 )

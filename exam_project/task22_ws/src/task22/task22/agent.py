@@ -3,6 +3,7 @@ import numpy as np
 from time import sleep
 from rclpy.node import Node
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
+from das_interfaces.msg import Lidar
 
 class Agent(Node):
     def __init__(self):
@@ -43,6 +44,8 @@ class Agent(Node):
 
         for j in self.neighbors:
             self.create_subscription(AggTrackMsg, f"/topic_{j}", self.listener_callback, 10)
+            
+        self.create_subscription(Lidar,f'/agent_{self.agent_id}/lidar',self.lidar_callback,10)
         
         self.publisher = self.create_publisher(AggTrackMsg, f"/topic_{self.agent_id}", 10)
         
@@ -58,7 +61,10 @@ class Agent(Node):
                 's': np.array(msg.s),
                 'v': np.array(msg.v)
             }
-            #print(f"Agent {self.agent_id}: Received message from agent {j} for iteration {k}")
+            
+    def lidar_callback(self, msg):
+        self.visible_neighbors = dict(zip(msg.detected_ids, msg.distances))
+        self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
 
     def timer_callback(self):
         if self.k == 0:

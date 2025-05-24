@@ -42,9 +42,12 @@ def generate_launch_description():
     node_list = []
     package_name = "task22"
     
-    foxglove_bridge_node = ExecuteProcess(
-        cmd=['ros2', 'launch', 'foxglove_bridge', 'foxglove_bridge_launch.xml'],
-        output='screen'
+    foxglove_bridge_node = Node(
+        package='foxglove_bridge',
+        executable='foxglove_bridge',
+        name='foxglove_bridge',
+        output='screen',
+        arguments=['--ros-args', '--log-level', 'ERROR']
     )
     node_list.append(foxglove_bridge_node)
 
@@ -66,6 +69,20 @@ def generate_launch_description():
         }],
     )
     node_list.append(visualizer_node)
+    
+    lidars_node = Node(
+        package='task22',
+        executable='lidars',
+        name='lidars',
+        output='screen',
+        parameters=[{
+            'd': PARAMETERS['d'],
+            'fov_horizontal': PARAMETERS['fov_horizontal'],
+            'fov_vertical': PARAMETERS['fov_vertical'],
+            'fov_range': PARAMETERS['fov_range'],
+        }],
+    )
+    node_list.append(lidars_node)
 
     for i in range(PARAMETERS['num_intruders']):
         gamma_i = float(gamma[i])
