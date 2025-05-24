@@ -4,6 +4,7 @@ from time import sleep
 from rclpy.node import Node
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 from das_interfaces.msg import Lidar
+import cvxpy as cp
 
 class Agent(Node):
     def __init__(self):
@@ -15,24 +16,30 @@ class Agent(Node):
 
         self.agent_id = self.get_parameter("id").value
         self.alpha = self.get_parameter("alpha").value
-        self.gamma = self.get_parameter("gamma").value
         self.z_0 = np.array(self.get_parameter("z0").value)
         self.r_0 = np.array(self.get_parameter("r_0").value)
         self.A_i = np.array(self.get_parameter("A_i").value)
         self.neighbors = self.get_parameter("neighbors").value
         self.max_iters = self.get_parameter("max_iters").value
+        self.gamma = self.get_parameter("gamma").value
         self.gamma_bar = self.get_parameter("gamma_bar").value
         self.gamma_hat = self.get_parameter("gamma_hat").value
+        self.gamma_sc = self.get_parameter("gamma_sc").value
         self.intruder = np.array(self.get_parameter("intruder").value)
+        self.safety_distance = self.get_parameter("safety_distance").value
+        self.u_max = self.get_parameter("u_max").value
         communication_time = self.get_parameter("communication_time").value
+        
         self.delta_T = communication_time / 10
+        self.d = len(self.z_0)
 
         self.k = 0
-        self.z = np.zeros((self.max_iters + 1, len(self.z_0)))
-        self.s = np.zeros((self.max_iters + 1, len(self.z_0)))
-        self.v = np.zeros((self.max_iters + 1, len(self.z_0)))
-        self.u_ref = np.zeros((self.max_iters + 1, len(self.z_0)))
+        self.z = np.zeros((self.max_iters + 1, self.d))
+        self.s = np.zeros((self.max_iters + 1, self.d))
+        self.v = np.zeros((self.max_iters + 1, self.d))
+        self.u_ref = np.zeros((self.max_iters + 1, self.d))
         self.cost = np.zeros((self.max_iters))
+        self.visible_neighbors = {}
 
         self.z[0] = self.z_0
         self.s[0] = self.z_0
@@ -117,7 +124,7 @@ class Agent(Node):
             s=self.s,
             intruder=self.intruder,
             r_0=self.r_0,
-            gamma=self.gamma,
+            gamma_sc=self.gamma_sc,
             gamma_bar=self.gamma_bar,
             gamma_hat=self.gamma_hat,
             received_info=neighbor_data
@@ -137,6 +144,30 @@ class Agent(Node):
         grad_2 = - 2 * gamma_bar_i * (agent_i - sigma)
         return local_cost, grad_1, grad_2
     
+    def compute_cbf(self, x_i, x_j, delta):
+        diff = x_i - x_j
+        V_s_ij = np.linalg.norm(diff)**2 - delta**2
+        grad_x_i = 2 * diff
+        grad_x_j = -2 * diff
+        return V_s_ij, grad_x_i, grad_x_j
+
+    def safe_control(self, u_ref, x_i, neighbor_positions, delta, gamma_sc, u_max):
+        u = cp.Variable(self.d)
+        objective = cp.Minimize(cp.sum_squares(u - u_ref))
+        constraints = []
+        for x_j in neighbor_positions:
+            V_s, grad_x_i, _ = self.compute_cbf(x_i, x_j, delta)
+            constraints.append(-grad_x_i @ u - 0.5 * gamma_sc * V_s <= 0)
+        constraints.append(cp.norm(u, 2) <= u_max)
+        prob = cp.Problem(objective, constraints)
+        prob.solve(solver=cp.OSQP)
+        if prob.status in ["optimal", "optimal_inaccurate"]:
+            return u.value
+        else:
+            return u_ref  # fallback if QP fails
+
+
+        
     def dynamics(slef, z, u_ref, delta_T):
         return z + delta_T * u_ref # Simple integrator for now
         
@@ -145,7 +176,13 @@ class Agent(Node):
         _, grad_phi_i = self.local_phi_function(z[k])
         
         self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
-        z[k+1] = self.dynamics(z[k], self.u_ref[k], self.delta_T)
+        
+        # TODO
+        # neighbor_positions = 
+
+        self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, self.gamma_sc, self.u_max)
+
+        z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
     
         s[k+1] = A[i] * s[k]
         for j in N_i:
