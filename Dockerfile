@@ -37,7 +37,8 @@ RUN apt update -q && \
             python3-networkx \
             python3-numpy \
             python3-scipy \
-            python3-matplotlib
+            python3-matplotlib && \
+     pip3 install --no-cache-dir cvxpy==1.1.15
 
 ##########################################################
 # Aliases
