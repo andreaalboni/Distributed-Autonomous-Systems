@@ -70,7 +70,7 @@ class Agent(Node):
             }
             
     def lidar_callback(self, msg):
-        self.visible_neighbors = dict(zip(msg.detected_ids, msg.distances))
+        self.visible_neighbors = dict(zip(msg.detected_ids, msg.distances, msg.horizontal_angles, msg.vertical_angles))
         self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
 
     def timer_callback(self):
@@ -175,9 +175,16 @@ class Agent(Node):
         
         self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
         
-        # TODO
-        # neighbor_positions = 
-
+        neighbor_positions = []
+        for neighbor_id, (distance, horiz_angle, vert_angle) in self.visible_neighbors.items():
+            x = z[k][0] + distance * np.cos(vert_angle) * np.cos(horiz_angle)
+            y = z[k][1] + distance * np.cos(vert_angle) * np.sin(horiz_angle)
+            if self.d == 3:
+                z_pos = z[k][2] + distance * np.sin(vert_angle)
+                neighbor_positions.append(np.array([x, y, z_pos]))
+            else:
+                neighbor_positions.append(np.array([x, y]))
+        
         self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, self.gamma_sc, self.u_max)
 
         z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
