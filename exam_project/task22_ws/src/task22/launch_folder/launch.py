@@ -23,7 +23,8 @@ PARAMETERS = {
     'fov_vertical': 30,       # Vertical Field of View in degrees
     'fov_range': 3.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
-    "u_max": 100.0,  # Maximum control input
+    'u_max': 100.0,  # Maximum control input
+    'tracking_tolerance': 0.1,
     'communication_time': 1e-2,
 }
 
@@ -119,6 +120,7 @@ def generate_launch_description():
                                 "gamma_sc": float(PARAMETERS['gamma_sc']),
                                 "safety_distance": float(PARAMETERS['safety_distance']),
                                 "u_max": float(PARAMETERS['u_max']),
+                                "tracking_tolerance": float(PARAMETERS['tracking_tolerance']),
                                 "communication_time": float(PARAMETERS['communication_time']),
                             }
                         ],

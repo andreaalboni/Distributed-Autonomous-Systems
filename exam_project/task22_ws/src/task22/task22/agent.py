@@ -28,17 +28,20 @@ class Agent(Node):
         self.intruder = np.array(self.get_parameter("intruder").value)
         self.safety_distance = self.get_parameter("safety_distance").value
         self.u_max = self.get_parameter("u_max").value
+        self.tracking_tolerance = self.get_parameter("tracking_tolerance").value
         communication_time = self.get_parameter("communication_time").value
         
         self.delta_T = communication_time / 10
+        self.current_goal = self.z_0.copy()
         self.d = len(self.z_0)
 
         self.k = 0
         self.z = np.zeros((self.max_iters + 1, self.d))
         self.s = np.zeros((self.max_iters + 1, self.d))
         self.v = np.zeros((self.max_iters + 1, self.d))
-        self.u_ref = np.zeros((self.max_iters + 1, self.d))
-        self.safe_u = np.zeros((self.max_iters + 1, self.d))
+        self.gradient_direction = np.zeros((self.max_iters + 1, self.d))
+        self.safe_gradient_direction = np.zeros((self.max_iters + 1, self.d))
+        self.integral_error = np.zeros_like(self.z_0)
         self.cost = np.zeros((self.max_iters))
         self.visible_neighbors = {}
 
@@ -84,14 +87,17 @@ class Agent(Node):
             self.k += 1
         else:
             if self._check_messages_received(self.k - 1):
-                self._process_iteration()
-                self._publish_current_state()
-                print(f"Agent {self.agent_id}: Iter {self.k:3d} \n z={self.z[self.k]}, s={self.s[self.k]}")
-                self.k += 1
-                
-                if self.k >= self.max_iters:
-                    print(f"\nAgent {self.agent_id}: Max iterations reached")
-                    rclpy.shutdown()
+                if self.has_reached_goal(): # to guarantee convergence
+                    self._process_iteration()
+                    self._publish_current_state()
+                    print(f"Agent {self.agent_id}: Iter {self.k:3d} \n z={self.z[self.k]}, s={self.s[self.k]}")
+                    self.k += 1
+
+                    if self.k >= self.max_iters:
+                        print(f"\nAgent {self.agent_id}: Max iterations reached")
+                        rclpy.shutdown()
+                else:
+                    self.get_logger().info(f"Agent {self.agent_id}: Waiting to reach target at step {self.k}...")
             else:
                 missing = [j for j in self.neighbors if self.k - 1 not in self.received_data[j]]
                 #print(f"Agent {self.agent_id}: Waiting for iter {self.k-1} from agents {missing}")
@@ -155,8 +161,6 @@ class Agent(Node):
         grad_x_i = 2 * diff
         grad_x_j = -2 * diff
         return V_s_ij, grad_x_i, grad_x_j
-
-
         
     def safe_control(self, u_ref, x_i, neighbor_positions, delta, gamma_sc, u_max):
         u = cp.Variable(self.d)
@@ -191,18 +195,39 @@ class Agent(Node):
                 neighbor_positions.append(np.array([x, y]))
         return neighbor_positions
         
-    def dynamics(slef, z, u_ref, delta_T):
-        return z + delta_T * u_ref # Simple integrator for now
+    # def dynamics(slef, z, u_ref, delta_T):
+    #     return z + delta_T * u_ref # Simple integrator for now
+    
+    def dynamics(self, pos, vel, acc, delta_T):
+        pos_next = pos + delta_T * vel
+        vel_next = vel + delta_T * acc
+        if len(pos) == 3:
+            vel_next += delta_T * np.array([0, 0, -9.81])
+        return pos_next, vel_next
+    
+    def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp, Ki, Kd):
+        error = desired_pos - current_pos
+        derivative = -current_vel
+        integral_error += error * self.delta_T
+        acc_command = Kp * error + Ki * integral_error + Kd * derivative
+        return acc_command, integral_error
+    
+    def has_reached_goal(self):
+        return np.linalg.norm(self.z[self.k] - self.current_goal) < self.tracking_tolerance
         
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
         
-        self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+        self.gradient_direction[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
         neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
-        self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
-        z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
-    
+        self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k],z[k],neighbor_positions,self.safety_distance,gamma_sc,self.u_max)
+
+        desired_pos = z[k] + self.delta_T * self.safe_gradient_direction[k]
+        self.current_goal = desired_pos.copy() 
+
+        acc_cmd, self.integral_error = self.pid_position_controller(desired_pos, z[k], self.v[k], self.integral_error, Kp=10, Ki=0, Kd=0)
+        z[k+1], self.v[k+1] = self.dynamics(z[k], self.v[k], acc_cmd, self.delta_T)
         s[k+1] = A[i] * s[k]
         for j in N_i:
             s_k_j = received_info[j]['s']
