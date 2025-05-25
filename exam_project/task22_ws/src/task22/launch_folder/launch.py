@@ -13,7 +13,7 @@ PARAMETERS = {
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
-    'max_iters': 500,
+    'max_iters': 1000,
     'alpha': 0.5,
     'gamma': 15,
     'gamma_bar': 3,
@@ -24,7 +24,7 @@ PARAMETERS = {
     'fov_range': 3.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
     'u_max': 100.0,  # Maximum control input
-    'tracking_tolerance': 0.1,
+    'tracking_tolerance': 1e-5,
     'communication_time': 1e-2,
 }
 

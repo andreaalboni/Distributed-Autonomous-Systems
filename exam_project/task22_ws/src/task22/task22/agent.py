@@ -39,6 +39,8 @@ class Agent(Node):
         self.z = np.zeros((self.max_iters + 1, self.d))
         self.s = np.zeros((self.max_iters + 1, self.d))
         self.v = np.zeros((self.max_iters + 1, self.d))
+        self.u_ref = np.zeros((self.max_iters + 1, self.d))
+        self.safe_u = np.zeros((self.max_iters + 1, self.d))
         self.gradient_direction = np.zeros((self.max_iters + 1, self.d))
         self.safe_gradient_direction = np.zeros((self.max_iters + 1, self.d))
         self.integral_error = np.zeros_like(self.z_0)
@@ -59,7 +61,8 @@ class Agent(Node):
         self.create_subscription(Lidar,f'/agent_{self.agent_id}/lidar',self.lidar_callback,10)
         
         self.publisher = self.create_publisher(AggTrackMsg, f"/topic_{self.agent_id}", 10)
-        
+        self.dynamics_publisher = self.create_publisher(AggTrackMsg, f"/dynamics_topic_{self.agent_id}", 10)
+
         self.timer = self.create_timer(communication_time, self.timer_callback)
         print(f"Agent {self.agent_id}: setup completed!")
 
@@ -78,29 +81,27 @@ class Agent(Node):
             id_: (dist, horiz, vert)
             for id_, dist, horiz, vert in zip(msg.detected_ids, msg.distances, msg.horizontal_angles, msg.vertical_angles)
         }
-        self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
+        # self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
 
     def timer_callback(self):
         if self.k == 0:
             self._publish_current_state()
-            print(f"Agent {self.agent_id}: Iter {self.k:3d} - Published initial state")
+            print(f"Agent {self.agent_id}: Iter {self.k:3d} - Published initial state \n z={self.z[self.k]}, s={self.s[self.k]}")
             self.k += 1
         else:
             if self._check_messages_received(self.k - 1):
-                if self.has_reached_goal(): # to guarantee convergence
-                    self._process_iteration()
-                    self._publish_current_state()
-                    print(f"Agent {self.agent_id}: Iter {self.k:3d} \n z={self.z[self.k]}, s={self.s[self.k]}")
-                    self.k += 1
+                self._process_iteration()
+                
+                self._publish_current_state()
+                print(f"Agent {self.agent_id}: Iter {self.k:3d} \n z={self.z[self.k]}, s={self.s[self.k]}")
+                self.k += 1
 
-                    if self.k >= self.max_iters:
-                        print(f"\nAgent {self.agent_id}: Max iterations reached")
-                        rclpy.shutdown()
-                else:
-                    self.get_logger().info(f"Agent {self.agent_id}: Waiting to reach target at step {self.k}...")
+                if self.k >= self.max_iters:
+                    print(f"\nAgent {self.agent_id}: Max iterations reached")
+                    rclpy.shutdown()
             else:
                 missing = [j for j in self.neighbors if self.k - 1 not in self.received_data[j]]
-                #print(f"Agent {self.agent_id}: Waiting for iter {self.k-1} from agents {missing}")
+                # print(f"Agent {self.agent_id}: Waiting for iter {self.k-1} from agents {missing}")
 
     def _check_messages_received(self, iteration):
         for j in self.neighbors:
@@ -108,18 +109,22 @@ class Agent(Node):
                 return False
         return True
 
-    def _publish_current_state(self):
+    def _publish_current_state(self, z=None, dynamics=False):
         msg = AggTrackMsg()
         msg.id = self.agent_id
         msg.k = self.k
-        msg.z = self.z[self.k].tolist()
         msg.s = self.s[self.k].tolist()
         msg.v = self.v[self.k].tolist()
-        self.publisher.publish(msg)
+        if not dynamics: 
+            msg.z = self.z[self.k].tolist()
+            self.publisher.publish(msg)
+        else:
+            msg.z = z.tolist()
+        self.dynamics_publisher.publish(msg)
 
     def _process_iteration(self):
         k = self.k
-        
+
         neighbor_data = {}
         for j in self.neighbors:
             neighbor_data[j] = self.received_data[j][k-1]
@@ -201,33 +206,46 @@ class Agent(Node):
     def dynamics(self, pos, vel, acc, delta_T):
         pos_next = pos + delta_T * vel
         vel_next = vel + delta_T * acc
-        if len(pos) == 3:
-            vel_next += delta_T * np.array([0, 0, -9.81])
+        # if len(pos) == 3:
+        #     vel_next += delta_T * np.array([0, 0, -9.81])
         return pos_next, vel_next
     
-    def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp, Ki, Kd):
+    def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp=2.0, Ki=0.0, Kd=0.0):
+        # Simple proportional control
         error = desired_pos - current_pos
-        derivative = -current_vel
-        integral_error += error * self.delta_T
-        acc_command = Kp * error + Ki * integral_error + Kd * derivative
+        acc_command = Kp * error
         return acc_command, integral_error
     
-    def has_reached_goal(self):
-        return np.linalg.norm(self.z[self.k] - self.current_goal) < self.tracking_tolerance
+    def has_reached_goal(self, pos):
+        return np.linalg.norm(pos - self.current_goal) < self.tracking_tolerance
         
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
         
+        # --------------- Position Control Dynamics ---------------
+        # self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+        # neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
+        # self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
+        # z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
+
+        # --------------- Double Integrator Dynamics ----------------
         self.gradient_direction[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
         neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
-        self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k],z[k],neighbor_positions,self.safety_distance,gamma_sc,self.u_max)
-
+        self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
         desired_pos = z[k] + self.delta_T * self.safe_gradient_direction[k]
-        self.current_goal = desired_pos.copy() 
+        self.current_goal = desired_pos.copy()
 
-        acc_cmd, self.integral_error = self.pid_position_controller(desired_pos, z[k], self.v[k], self.integral_error, Kp=10, Ki=0, Kd=0)
-        z[k+1], self.v[k+1] = self.dynamics(z[k], self.v[k], acc_cmd, self.delta_T)
+        pos = z[k]
+        vel = 0
+        self.get_logger().info(f"\033[91m{np.linalg.norm(pos - self.current_goal) < self.tracking_tolerance}\033[0m")
+        while not self.has_reached_goal(pos):
+            acc_cmd, self.integral_error = self.pid_position_controller(desired_pos, pos, vel, self.integral_error)
+            pos, vel = self.dynamics(pos, vel, acc_cmd, self.delta_T)
+            self._publish_current_state(pos, True)
+        z[k+1] = pos
+
+
         s[k+1] = A[i] * s[k]
         for j in N_i:
             s_k_j = received_info[j]['s']

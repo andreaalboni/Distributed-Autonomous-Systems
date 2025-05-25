@@ -93,9 +93,9 @@ def generate_agents_and_intruders(num_intruders, world_size, radius_spawn_agent,
     for _ in range(num_intruders):
         # def debug_spawn_candidate(existing_agents, existing_intruders, world_size, intruder_radius, d):
 
-        intruder = debug_safety_control_spawn_candidate(agents, intruders, world_size, intruder_radius, d)
+        intruder = debug_spawn_candidate(agents, intruders, world_size, intruder_radius, d)
         intruders.append(intruder)
-        agent = debug_safety_control_spawn_agent_near_intruder(intruder, agents, intruders, world_size, radius_spawn_agent, d)
+        agent = debug_spawn_agent_near_intruder(intruder, agents, intruders, world_size, radius_spawn_agent, d)
         agents.append(agent)
     print("\033[92m" + f"intruders: {intruders}" + "\033[0m")
     print("\033[94m" + f"agents: {agents}" + "\033[0m")

@@ -151,12 +151,13 @@ class Visualizer(Node):
 
     def discover_agents(self):
         topic_names_and_types = self.get_topic_names_and_types()
-        pattern = r'/topic_(\d+)'
+        pattern = r'/dynamics_topic_(\d+)'
         for topic_name, _ in topic_names_and_types:
             match = re.match(pattern, topic_name)
             if match and topic_name not in self.discovered_agents:
                 agent_id = int(match.group(1))
                 self.get_logger().info(f'Discovered new agent with ID {agent_id}')
+                self.get_logger().info(f'Subscribing to {topic_name}')
                 self.create_subscription(
                     AggTrackMsg,
                     topic_name,
@@ -239,7 +240,6 @@ class Visualizer(Node):
         marker.color.a = 1.0
 
         self.marker_publisher.publish(marker)
-        self.get_logger().info('-> Published r_0 marker')
         
     def publish_intruders(self):
         marker_array = MarkerArray()
@@ -267,7 +267,6 @@ class Visualizer(Node):
             marker.color.a = 1.0  
             marker_array.markers.append(marker)
         self.intruders_publisher.publish(marker_array)
-        self.get_logger().info(f'Published {len(marker_array.markers)} points')
       
     def create_drone_marker(self, frame_id, marker_id, position, stamp):
         markers = []
