@@ -32,8 +32,9 @@ class Agent(Node):
         communication_time = self.get_parameter("communication_time").value
         
         self.delta_T = communication_time / 10
-        self.current_goal = self.z_0.copy()
         self.d = len(self.z_0)
+        self.pos = self.z_0.copy()
+        self.vel = np.zeros(self.d)
 
         self.k = 0
         self.z = np.zeros((self.max_iters + 1, self.d))
@@ -43,7 +44,6 @@ class Agent(Node):
         self.safe_u = np.zeros((self.max_iters + 1, self.d))
         self.gradient_direction = np.zeros((self.max_iters + 1, self.d))
         self.safe_gradient_direction = np.zeros((self.max_iters + 1, self.d))
-        self.integral_error = np.zeros_like(self.z_0)
         self.cost = np.zeros((self.max_iters))
         self.visible_neighbors = {}
 
@@ -210,14 +210,16 @@ class Agent(Node):
         #     vel_next += delta_T * np.array([0, 0, -9.81])
         return pos_next, vel_next
     
-    def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp=2.0, Ki=0.0, Kd=0.0):
-        # Simple proportional control
+    def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp=1.0, Ki=0.01, Kd=0.5, max_integral=0.5):
         error = desired_pos - current_pos
-        acc_command = Kp * error
+        derivative = -current_vel
+        integral_error += error * self.delta_T
+        integral_error = np.clip(integral_error, -max_integral, max_integral)
+        acc_command = Kp * error + Ki * integral_error + Kd * derivative
         return acc_command, integral_error
     
-    def has_reached_goal(self, pos):
-        return np.linalg.norm(pos - self.current_goal) < self.tracking_tolerance
+    def has_reached_goal(self, pos, goal):
+        return np.linalg.norm(pos - goal) < self.tracking_tolerance
         
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
@@ -233,18 +235,13 @@ class Agent(Node):
         self.gradient_direction[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
         neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
         self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
-        desired_pos = z[k] + self.delta_T * self.safe_gradient_direction[k]
-        self.current_goal = desired_pos.copy()
+        z[k+1] = z[k] + self.delta_T * self.safe_gradient_direction[k]
 
-        pos = z[k]
-        vel = 0
-        self.get_logger().info(f"\033[91m{np.linalg.norm(pos - self.current_goal) < self.tracking_tolerance}\033[0m")
-        while not self.has_reached_goal(pos):
-            acc_cmd, self.integral_error = self.pid_position_controller(desired_pos, pos, vel, self.integral_error)
-            pos, vel = self.dynamics(pos, vel, acc_cmd, self.delta_T)
-            self._publish_current_state(pos, True)
-        z[k+1] = pos
-
+        integral_error = 0
+        while not self.has_reached_goal(self.pos, z[k+1]):
+            acc_cmd, integral_error = self.pid_position_controller(z[k+1], self.pos, self.vel, integral_error)
+            self.pos, self.vel = self.dynamics(self.pos, self.vel, acc_cmd, self.delta_T)
+            self._publish_current_state(self.pos, True)
 
         s[k+1] = A[i] * s[k]
         for j in N_i:

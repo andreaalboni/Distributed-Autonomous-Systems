@@ -24,7 +24,7 @@ PARAMETERS = {
     'fov_range': 3.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
     'u_max': 100.0,  # Maximum control input
-    'tracking_tolerance': 1e-5,
+    'tracking_tolerance': 1e-2,
     'communication_time': 1e-2,
 }
 
