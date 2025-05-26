@@ -3,8 +3,10 @@ import networkx as nx
 
 def debug_safety_control_spawn_agent_near_intruder(intruder, existing_agents, existing_intruders, world_size, radius_spawn_agent, d):
     if len(existing_agents) < 2:
-        if len(existing_agents) == 0: return [2, 2]
-        if len(existing_agents) == 1: return [1, 1]
+        if len(existing_agents) == 0:
+            return [2, 2, 2] if d == 3 else [2, 2]
+        if len(existing_agents) == 1:
+            return [1, 1, 1] if d == 3 else [1, 1]
     while True:
         candidate = np.random.uniform(0, world_size, size=d)
         if (np.linalg.norm(candidate - intruder) <= radius_spawn_agent and
@@ -13,9 +15,13 @@ def debug_safety_control_spawn_agent_near_intruder(intruder, existing_agents, ex
             return candidate
 
 def debug_safety_control_spawn_candidate(existing_agents, existing_intruders, world_size, intruder_radius, d):
-    if len(existing_intruders) < 2 and d == 2:
-        if len(existing_intruders) == 0: return [0, 0]
-        if len(existing_intruders) == 1: return [3, 3]
+    if len(existing_intruders) < 2:
+        if d == 2:
+            if len(existing_intruders) == 0: return [0, 0]
+            if len(existing_intruders) == 1: return [3, 3]
+        elif d == 3:
+            if len(existing_intruders) == 0: return [0, 0, 0]
+            if len(existing_intruders) == 1: return [3, 3, 3]
     while True:
         if d == 2:
             theta = np.random.uniform(0, 2 * np.pi)
