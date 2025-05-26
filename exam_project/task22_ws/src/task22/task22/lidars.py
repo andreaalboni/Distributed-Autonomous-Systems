@@ -4,7 +4,7 @@ import numpy as np
 import re
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 from das_interfaces.msg import Lidar
-from .utils import simulate_lidar_scan
+from .utils import simulate_lidar_scan, calculate_heading_from_movement
 
 class Lidars(Node):
     def __init__(self):
@@ -18,6 +18,8 @@ class Lidars(Node):
         self.fov_vertical = self.get_parameter("fov_vertical").value
         self.fov_horizontal = self.get_parameter("fov_horizontal").value        
         self.agent_positions = {}
+        self.agent_headings = {}
+        self.agent_prev_positions = {}
         self.discovered_agents = set()
         self.agent_trajectories = {}        
         self.lidar_publishers = {}        
@@ -35,21 +37,30 @@ class Lidars(Node):
                 self.create_subscription(AggTrackMsg,topic_name,lambda msg,id=agent_id: self.agent_callback(msg, id),10)
                 self.lidar_publishers[agent_id] = self.create_publisher(Lidar,f'/agent_{agent_id}/lidar',10)
                 self.agent_positions[agent_id] = None
+                self.agent_headings[agent_id] = 0.0 if self.d == 2 else [0.0, 0.0]  # Initialize headings
+                self.agent_prev_positions[agent_id] = None
                 self.discovered_agents.add(topic_name)
 
     def agent_callback(self, msg, agent_id):
-        self.agent_positions[agent_id] = np.array(msg.z)
+        new_position = np.array(msg.z)
+        new_heading = calculate_heading_from_movement(new_position,self.agent_prev_positions[agent_id],self.d)
+        if new_heading is not None:
+            self.agent_headings[agent_id] = new_heading
+        self.agent_prev_positions[agent_id] = self.agent_positions[agent_id]
+        self.agent_positions[agent_id] = new_position
 
     def compute_and_publish_lidar(self):
         if len(self.agent_positions) < 2:
             return
         ids = sorted(self.agent_positions.keys())
         positions = [self.agent_positions[i] for i in ids]
+        headings = np.array([self.agent_headings[i] for i in ids])
         if any(p is None for p in positions):
             return
         agents_array = np.vstack(positions)
         distances, horizontal_angles, vertical_angles = simulate_lidar_scan(
             agents_array,
+            headings,
             self.fov_horizontal,
             self.fov_vertical,
             self.fov_range,

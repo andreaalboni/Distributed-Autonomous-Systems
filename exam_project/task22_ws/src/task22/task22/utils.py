@@ -165,8 +165,25 @@ def compute_r_0(intruders, noise_radius, world_size, d):
         if (np.linalg.norm(r_0_candidate - barycenter_intruders) <= noise_radius and
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
+            
+def calculate_heading_from_movement(current_pos, previous_pos, d, threshold=1e-8):
+    if previous_pos is None:
+        return 0.0 if d == 2 else [0.0, 0.0]
+    diff = np.array(current_pos) - np.array(previous_pos)
+    if d == 2:
+        dx, dy = diff[0], diff[1]
+        if abs(dx) > threshold or abs(dy) > threshold:
+            return np.arctan2(dy, dx)
+        return None  # No significant movement
+    else:  # d == 3
+        dx, dy, dz = diff[0], diff[1], diff[2]
+        if abs(dx) > threshold or abs(dy) > threshold or abs(dz) > threshold:
+            azimuth = np.arctan2(dy, dx)
+            elevation = np.arctan2(dz, np.sqrt(dx**2 + dy**2))
+            return [azimuth, elevation]
+        return None  # No significant movement
 
-def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
+def simulate_lidar_scan(agents, heading, fov_horizontal, fov_vertical, fov_range, d):
     # Simulate a LIDAR scan -> return matrix of distances between agents
     num_agents = len(agents)
     distances = np.zeros((num_agents, num_agents))
@@ -178,7 +195,7 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                 dist = np.linalg.norm(agents[i] - agents[j])
                 if d == 2:
                     angle = np.arctan2(agents[j][1] - agents[i][1], agents[j][0] - agents[i][0])
-                    if (abs(angle) <= np.deg2rad(fov_horizontal / 2)) and (dist <= fov_range):
+                    if (abs(angle-heading[i]) <= np.deg2rad(fov_horizontal / 2)) and (dist <= fov_range):
                         distances[i, j] = dist
                         horizontal_angles[i, j] = angle
                     else:
@@ -188,8 +205,8 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                     dx, dy, dz = agents[j] - agents[i]
                     azimuth = np.arctan2(dy, dx)
                     elevation = np.arctan2(dz, np.sqrt(dx**2 + dy**2))
-                    if (abs(azimuth) <= np.deg2rad(fov_horizontal / 2)) and \
-                       (abs(elevation) <= np.deg2rad(fov_vertical / 2)) and \
+                    if (abs(azimuth-heading[i,0]) <= np.deg2rad(fov_horizontal / 2)) and \
+                       (abs(elevation-heading[i,1]) <= np.deg2rad(fov_vertical / 2)) and \
                        (dist <= fov_range):
                         distances[i, j] = dist
                         horizontal_angles[i, j] = azimuth
@@ -199,3 +216,4 @@ def simulate_lidar_scan(agents, fov_horizontal, fov_vertical, fov_range, d):
                         horizontal_angles[i, j] = np.nan
                         vertical_angles[i, j] = np.nan
     return distances, horizontal_angles, vertical_angles
+

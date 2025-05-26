@@ -8,6 +8,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 from tf2_ros import TransformBroadcaster, StaticTransformBroadcaster
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy
+from .utils import calculate_heading_from_movement
 
 class Visualizer(Node):
     def __init__(self):
@@ -344,10 +345,9 @@ class Visualizer(Node):
                 curr_pos = position
                 if idx > 0:
                     prev_pos = self.agent_trajectories[agent_id][idx-1]
-                    dx = curr_pos[0] - prev_pos[0]
-                    dy = curr_pos[1] - prev_pos[1]
-                    if abs(dx) > 0.001 or abs(dy) > 0.001:
-                        heading = np.arctan2(dy, dx)
+                    new_heading = calculate_heading_from_movement(curr_pos, prev_pos, self.d)
+                    if new_heading is not None:
+                        heading = new_heading if self.d == 2 else new_heading[0]  # Use azimuth for 3D
                         self.prev_heading[agent_id] = heading
                     elif agent_id in self.prev_heading:
                         # Use the last valid heading if agent is not moving

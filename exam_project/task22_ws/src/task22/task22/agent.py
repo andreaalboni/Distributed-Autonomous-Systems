@@ -5,6 +5,7 @@ from rclpy.node import Node
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 from das_interfaces.msg import Lidar
 import cvxpy as cp
+from visualization_msgs.msg import Marker
 
 class Agent(Node):
     def __init__(self):
@@ -189,7 +190,35 @@ class Agent(Node):
                 neighbor_positions.append(np.array([x, y, z_pos]))
             else:
                 neighbor_positions.append(np.array([x, y]))
+            self.publish_marker(x, y) # TODO: Remove this line when finished with debugging
         return neighbor_positions
+
+    # TODO: Remove this method when finished with debugging
+    def publish_marker(self, x, y):
+        if not hasattr(self, 'marker_pub'):
+            self.marker_pub = self.create_publisher(Marker, f'/agent_{self.agent_id}/marker', 10)
+        marker = Marker()
+        marker.header.frame_id = "world"
+        marker.header.stamp = self.get_clock().now().to_msg()
+        marker.ns = f"agent_{self.agent_id}"
+        marker.id = self.agent_id
+        marker.type = Marker.SPHERE
+        marker.action = Marker.ADD
+        marker.pose.position.x = float(x)
+        marker.pose.position.y = float(y)
+        marker.pose.position.z = 0.0
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 1.0
+        marker.scale.x = 0.3
+        marker.scale.y = 0.3
+        marker.scale.z = 0.3
+        marker.color.a = 1.0
+        marker.color.r = [1.0, 0.0, 0.0][self.agent_id % 3]  # Cycle through red, green, blue
+        marker.color.g = [0.0, 1.0, 0.0][self.agent_id % 3]
+        marker.color.b = [0.0, 0.0, 1.0][self.agent_id % 3]
+        self.marker_pub.publish(marker)
         
     def dynamics(slef, z, u_ref, delta_T):
         return z + delta_T * u_ref # Simple integrator for now
