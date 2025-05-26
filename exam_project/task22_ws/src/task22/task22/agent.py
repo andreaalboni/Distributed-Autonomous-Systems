@@ -188,13 +188,14 @@ class Agent(Node):
             if self.d == 3:
                 z_pos = z[2] + distance * np.sin(vert_angle)
                 neighbor_positions.append(np.array([x, y, z_pos]))
+                self.publish_marker(x, y, z_pos)
             else:
                 neighbor_positions.append(np.array([x, y]))
-            self.publish_marker(x, y) # TODO: Remove this line when finished with debugging
+                self.publish_marker(x, y, 0.0)
         return neighbor_positions
 
     # TODO: Remove this method when finished with debugging
-    def publish_marker(self, x, y):
+    def publish_marker(self, x, y, z):
         if not hasattr(self, 'marker_pub'):
             self.marker_pub = self.create_publisher(Marker, f'/agent_{self.agent_id}/marker', 10)
         marker = Marker()
@@ -206,7 +207,7 @@ class Agent(Node):
         marker.action = Marker.ADD
         marker.pose.position.x = float(x)
         marker.pose.position.y = float(y)
-        marker.pose.position.z = 0.0
+        marker.pose.position.z = float(z)
         marker.pose.orientation.x = 0.0
         marker.pose.orientation.y = 0.0
         marker.pose.orientation.z = 0.0
