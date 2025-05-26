@@ -8,7 +8,7 @@ from task22.utils import generate_agents_and_intruders, generate_graph, compute_
 PARAMETERS = {
     'num_intruders': 3,
     'world_size': 20,
-    'd': 2,
+    'd': 3,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
@@ -19,8 +19,8 @@ PARAMETERS = {
     'gamma_bar': 3,
     'gamma_hat': 1,
     'gamma_sc': 10,  # Safety control gain
-    'fov_horizontal': 180,    # Horizontal Field of View in degrees
-    'fov_vertical': 30,       # Vertical Field of View in degrees
+    'fov_horizontal': 360,    # Horizontal Field of View in degrees
+    'fov_vertical': 360,       # Vertical Field of View in degrees
     'fov_range': 3.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
     "u_max": 100.0,  # Maximum control input
@@ -54,6 +54,17 @@ def generate_launch_description():
     )
     node_list.append(foxglove_bridge_node)
 
+    fov_hor_angle = 0.0
+    fov_vert_angle = 0.0
+    if PARAMETERS['fov_horizontal'] == 360:
+        fov_hor_angle = 360
+    else:
+        fov_hor_angle = PARAMETERS['fov_horizontal'] % 360
+    if PARAMETERS['fov_vertical'] == 360:
+        fov_vert_angle = 360
+    else:
+        fov_vert_angle = PARAMETERS['fov_vertical'] % 360
+
     visualizer_node = Node(
         package='task22',
         executable='visualizer',
@@ -66,8 +77,8 @@ def generate_launch_description():
             'r_0': r_0,
             'world_size': PARAMETERS['world_size'],
             'd': PARAMETERS['d'],
-            'fov_horizontal': PARAMETERS['fov_horizontal'],
-            'fov_vertical': PARAMETERS['fov_vertical'],
+            'fov_horizontal': fov_hor_angle,
+            'fov_vertical': fov_vert_angle,
             'fov_range': PARAMETERS['fov_range'],
         }],
     )
@@ -80,8 +91,8 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'd': PARAMETERS['d'],
-            'fov_horizontal': PARAMETERS['fov_horizontal'],
-            'fov_vertical': PARAMETERS['fov_vertical'],
+            'fov_horizontal': fov_hor_angle,
+            'fov_vertical': fov_vert_angle,
             'fov_range': PARAMETERS['fov_range'],
         }],
     )

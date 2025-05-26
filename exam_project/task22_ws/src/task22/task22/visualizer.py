@@ -101,41 +101,88 @@ class Visualizer(Node):
                     z=z
                 ))
             
-        # For 3D case 
+        # For 3D case
         else:
             marker.type = Marker.TRIANGLE_LIST
             z = position[2]
-            segments = 32  # Number of segments for the circular approximation
-            v_angle_rad = np.radians(float(self.fov_vertical))
             h_angle_rad = np.radians(float(self.fov_horizontal))
-            for i in range(segments):
-                theta1 = heading - h_angle_rad/2 + (h_angle_rad * i / segments)
-                theta2 = heading - h_angle_rad/2 + (h_angle_rad * (i + 1) / segments)
-                for v_angle in [-v_angle_rad/2, v_angle_rad/2]:
-                    p0 = Point(x=position[0], y=position[1], z=z)  # Cone apex
+            v_angle_rad = np.radians(float(self.fov_vertical))
+            h_segments = max(8, int(32 * h_angle_rad / (2 * np.pi)))  # Scale segments with horizontal angle
+            v_segments = max(4, int(16 * v_angle_rad / (2 * np.pi)))  # Scale segments with vertical angle
+            h_start = heading - h_angle_rad / 2
+            h_end = heading + h_angle_rad / 2
+            if v_angle_rad >= 2 * np.pi:  # 360° or more
+                v_start = -np.pi / 2  # Bottom of sphere
+                v_end = np.pi / 2     # Top of sphere
+                v_segments = 16       # Full vertical resolution
+            else:
+                v_start = -v_angle_rad / 2  # Centered around horizontal plane
+                v_end = v_angle_rad / 2
+            for i in range(h_segments):
+                theta1 = h_start + (h_end - h_start) * i / h_segments
+                theta2 = h_start + (h_end - h_start) * (i + 1) / h_segments
+                for j in range(v_segments):
+                    phi1 = v_start + (v_end - v_start) * j / v_segments
+                    phi2 = v_start + (v_end - v_start) * (j + 1) / v_segments
                     p1 = Point(
-                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(v_angle),
-                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(v_angle),
-                        z=z + self.fov_range * np.sin(v_angle)
+                        x=position[0] + self.fov_range * np.cos(phi1) * np.cos(theta1),
+                        y=position[1] + self.fov_range * np.cos(phi1) * np.sin(theta1),
+                        z=z + self.fov_range * np.sin(phi1)
                     )
                     p2 = Point(
-                        x=position[0] + self.fov_range * np.cos(theta2) * np.cos(v_angle),
-                        y=position[1] + self.fov_range * np.sin(theta2) * np.cos(v_angle),
-                        z=z + self.fov_range * np.sin(v_angle)
+                        x=position[0] + self.fov_range * np.cos(phi1) * np.cos(theta2),
+                        y=position[1] + self.fov_range * np.cos(phi1) * np.sin(theta2),
+                        z=z + self.fov_range * np.sin(phi1)
                     )
+                    p3 = Point(
+                        x=position[0] + self.fov_range * np.cos(phi2) * np.cos(theta1),
+                        y=position[1] + self.fov_range * np.cos(phi2) * np.sin(theta1),
+                        z=z + self.fov_range * np.sin(phi2)
+                    )
+                    p4 = Point(
+                        x=position[0] + self.fov_range * np.cos(phi2) * np.cos(theta2),
+                        y=position[1] + self.fov_range * np.cos(phi2) * np.sin(theta2),
+                        z=z + self.fov_range * np.sin(phi2)
+                    )
+                    p0 = Point(x=position[0], y=position[1], z=z)
                     marker.points.extend([p0, p1, p2])
-                if i % (segments/4) == 0:  # Create fewer vertical planes for cleaner visualization
-                    p_top = Point(
-                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(v_angle_rad/2),
-                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(v_angle_rad/2),
-                        z=z + self.fov_range * np.sin(v_angle_rad/2)
-                    )
-                    p_bottom = Point(
-                        x=position[0] + self.fov_range * np.cos(theta1) * np.cos(-v_angle_rad/2),
-                        y=position[1] + self.fov_range * np.sin(theta1) * np.cos(-v_angle_rad/2),
-                        z=z + self.fov_range * np.sin(-v_angle_rad/2)
-                    )
-                    marker.points.extend([p0, p_top, p_bottom])
+                    marker.points.extend([p0, p2, p4])
+                    marker.points.extend([p0, p4, p3])
+                    marker.points.extend([p0, p3, p1])
+            if h_angle_rad < 2 * np.pi:  # Not full horizontal rotation
+                for edge_theta in [h_start, h_end]:
+                    for j in range(v_segments):
+                        phi1 = v_start + (v_end - v_start) * j / v_segments
+                        phi2 = v_start + (v_end - v_start) * (j + 1) / v_segments
+                        p0 = Point(x=position[0], y=position[1], z=z)
+                        p1 = Point(
+                            x=position[0] + self.fov_range * np.cos(phi1) * np.cos(edge_theta),
+                            y=position[1] + self.fov_range * np.cos(phi1) * np.sin(edge_theta),
+                            z=z + self.fov_range * np.sin(phi1)
+                        )
+                        p2 = Point(
+                            x=position[0] + self.fov_range * np.cos(phi2) * np.cos(edge_theta),
+                            y=position[1] + self.fov_range * np.cos(phi2) * np.sin(edge_theta),
+                            z=z + self.fov_range * np.sin(phi2)
+                        )
+                        marker.points.extend([p0, p1, p2])
+            if v_angle_rad < 2 * np.pi:  # Not full vertical rotation
+                for edge_phi in [v_start, v_end]:
+                    for i in range(h_segments):
+                        theta1 = h_start + (h_end - h_start) * i / h_segments
+                        theta2 = h_start + (h_end - h_start) * (i + 1) / h_segments
+                        p0 = Point(x=position[0], y=position[1], z=z)
+                        p1 = Point(
+                            x=position[0] + self.fov_range * np.cos(edge_phi) * np.cos(theta1),
+                            y=position[1] + self.fov_range * np.cos(edge_phi) * np.sin(theta1),
+                            z=z + self.fov_range * np.sin(edge_phi)
+                        )
+                        p2 = Point(
+                            x=position[0] + self.fov_range * np.cos(edge_phi) * np.cos(theta2),
+                            y=position[1] + self.fov_range * np.cos(edge_phi) * np.sin(theta2),
+                            z=z + self.fov_range * np.sin(edge_phi)
+                        )
+                        marker.points.extend([p0, p1, p2])
 
         marker.pose.orientation.w = 1.0
         marker.scale.x = 1.0
