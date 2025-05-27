@@ -13,7 +13,7 @@ PARAMETERS = {
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
-    'max_iters': 2500,
+    'max_iters': 21000,
     'alpha': 0.1,
     'gamma': 15,
     'gamma_bar': 3,
@@ -23,7 +23,8 @@ PARAMETERS = {
     'fov_vertical': 360,       # Vertical Field of View in degrees
     'fov_range': 3.0,         # Range of the Field of View
     'safety_distance': 2.0,  # Safety distance for agents
-    "u_max": 100.0,  # Maximum control input
+    'u_max': 100.0,  # Maximum control input
+    'tracking_tolerance': 1e-2,
     'communication_time': 1e-2,
 }
 
@@ -130,6 +131,7 @@ def generate_launch_description():
                                 "gamma_sc": float(PARAMETERS['gamma_sc']),
                                 "safety_distance": float(PARAMETERS['safety_distance']),
                                 "u_max": float(PARAMETERS['u_max']),
+                                "tracking_tolerance": float(PARAMETERS['tracking_tolerance']),
                                 "communication_time": float(PARAMETERS['communication_time']),
                             }
                         ],
