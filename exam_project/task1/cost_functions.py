@@ -1,26 +1,26 @@
 import numpy as np
+np.random.seed(42)
 
 def local_cost_function_task1(z, p_i, distances_i=None):
-    # p_i:  position of the agent
-    # z:    position of the targets
+    p_i = np.asarray(p_i).reshape(1, -1)
+    z = np.asarray(z)
     
-    p_i = np.asarray(p_i).reshape(1, -1)  # (1, d)
-    z = np.asarray(z)                     # (N, d)
+    d = p_i.shape[1]
+    np.random.seed(42)
+    eig_max = np.random.randint(low=2)
+    eigenvals = np.random.uniform(1, eig_max, d)
+    Q = np.diag(eigenvals)
+    b = np.random.uniform(0, 1)
     
+    diffs = p_i - z
     
-    Q = np.eye(p_i.shape[1]) * 10         # (d, d)
-    b = 1 # affine term 
-    
-    diffs =  p_i - z                      # (N, d)
-    
-    cost = 0.0
-    grad = np.zeros(p_i.shape[1])
+    local_cost = 0.0
+    local_cost_grad = np.zeros(p_i.shape[1])
     
     for diff in diffs:
-        cost += diff.T @ Q @ diff + b     # (d,)
-        grad += -2 * Q @ diff
-    
-    return cost, grad
+        local_cost += diff.T @ Q @ diff + b
+        local_cost_grad -= 2 * Q @ diff
+    return local_cost, local_cost_grad
 
 
 def local_cost_function_task2(z, p_i, distances_i):

@@ -15,11 +15,9 @@ def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cos
     z[0] = np.random.uniform(0.0, 1.0, z[0].shape)
     # z[0] = np.zeros((len(agents), len(targets), targets.shape[1]))
 
-    # initialize gradients
     for i in range(len(agents)):
         _, s[0, i] = local_cost_function(z[0, i], agents[i], noisy_distances[i])
 
-    # alpha = alpha / params['world_size'][0]
     # Ch 6 p 14 
     for k in range(max_iters - 1):        
         total_grad = np.zeros_like(s[0])

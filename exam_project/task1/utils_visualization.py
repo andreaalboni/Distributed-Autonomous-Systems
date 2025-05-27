@@ -11,9 +11,6 @@ def visualize_graph(G):
     plt.show()
     
 def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error):
-    """
-    Visualizes the results of the gradient tracking algorithm.
-    """
     max_iters = len(cost)
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     ax = axes[0]
@@ -27,30 +24,19 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     ax.set_xlabel('Iteration')
     plt.show()
     
-    fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=len(targets))
+    fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))
     fig.suptitle('Norm of the error for each target', fontsize=14)
-    # Create a color list for consistent colors across subplots
     colors = plt.cm.rainbow(np.linspace(0, 1, len(agents)))
     for j in range(len(targets)):
         ax = axes[j]
         for i in range(len(agents)):
-            ax.semilogy(np.arange(max_iters-1), norm_error[:-1, i, j], 
+            line = ax.semilogy(np.arange(max_iters-1), norm_error[:-1, i, j], 
                        color=colors[i],
-                       label=f'Agent {i}' if j==0 else None)
-            if j == 0: ax.legend()
+                       label=f'Agent {i}')
         ax.set_title(f'Target {j}')
         ax.set_xlabel('Iteration')
-    
-    """
-    ax = axes[1]
-    for i in range(len(targets)):
-        for j in range(len(agents)):
-            errors = [np.linalg.norm(z[t, j, i] - z_opt[i]) for t in range(max_iters-1)]
-            ax.semilogy(np.arange(max_iters-1), errors)
-    # ax.legend()
-    ax.set_title('Estimation error vs Iteration')
-    ax.set_xlabel('Iteration') 
-    """
+    plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left')
+    plt.tight_layout()
     plt.show()
     
 def visualize_world(agents, targets, world_size, d):
