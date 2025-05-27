@@ -19,7 +19,8 @@ PARAMETERS = {
     'gamma_bar': 3,
     'gamma_hat': 1,
     
-        'gamma_sc': 10,  # Safety control gain
+    'safety_control': True,
+        'gamma_sc': 10,             # Safety control gain
         'fov_horizontal': 360,      # Horizontal Field of View in degrees
         'fov_vertical': 360,        # Vertical Field of View in degrees
         'fov_range': 3.0,           # Range of the Field of View
@@ -96,6 +97,7 @@ def generate_launch_description():
         output='screen',
         parameters=[{
             'd': PARAMETERS['d'],
+            'safety_control': PARAMETERS['safety_control'],
             'fov_horizontal': fov_hor_angle,
             'fov_vertical': fov_vert_angle,
             'fov_range': PARAMETERS['fov_range'],
@@ -135,6 +137,7 @@ def generate_launch_description():
                                 "max_iters": int(PARAMETERS['max_iters']),
                                 "gamma_sc": float(PARAMETERS['gamma_sc']),
                                 "real_dynamics": PARAMETERS['real_dynamics'],
+                                'safety_control': PARAMETERS['safety_control'],
                                 "safety_distance": float(PARAMETERS['safety_distance']),
                                 "tracking_tolerance": float(PARAMETERS['tracking_tolerance']),
                                 "communication_time": float(PARAMETERS['communication_time']),
