@@ -17,20 +17,21 @@ class Agent(Node):
 
         self.agent_id = self.get_parameter("id").value
         self.alpha = self.get_parameter("alpha").value
+        self.u_max = self.get_parameter("u_max").value
+        self.gamma = self.get_parameter("gamma").value
         self.z_0 = np.array(self.get_parameter("z0").value)
+        self.gamma_sc = self.get_parameter("gamma_sc").value
         self.r_0 = np.array(self.get_parameter("r_0").value)
         self.A_i = np.array(self.get_parameter("A_i").value)
         self.neighbors = self.get_parameter("neighbors").value
         self.max_iters = self.get_parameter("max_iters").value
-        self.gamma = self.get_parameter("gamma").value
         self.gamma_bar = self.get_parameter("gamma_bar").value
         self.gamma_hat = self.get_parameter("gamma_hat").value
-        self.gamma_sc = self.get_parameter("gamma_sc").value
+        self.real_dynamics = self.get_parameter("real_dynamics").value
         self.intruder = np.array(self.get_parameter("intruder").value)
         self.safety_distance = self.get_parameter("safety_distance").value
-        self.u_max = self.get_parameter("u_max").value
-        self.tracking_tolerance = self.get_parameter("tracking_tolerance").value
         communication_time = self.get_parameter("communication_time").value
+        self.tracking_tolerance = self.get_parameter("tracking_tolerance").value
         
         self.delta_T = communication_time / 10
         self.d = len(self.z_0)
@@ -230,14 +231,12 @@ class Agent(Node):
         marker.color.b = [0.0, 0.0, 1.0][self.agent_id % 3]
         self.marker_pub.publish(marker)
         
-    # def dynamics(slef, z, u_ref, delta_T):
-    #     return z + delta_T * u_ref # Simple integrator for now
+    def dynamics(slef, z, u_ref, delta_T):
+        return z + delta_T * u_ref 
     
-    def dynamics(self, pos, vel, acc, delta_T):
+    def real_dynamics(self, pos, vel, acc, delta_T):
         pos_next = pos + delta_T * vel
         vel_next = vel + delta_T * acc
-        # if len(pos) == 3:
-        #     vel_next += delta_T * np.array([0, 0, -9.81])
         return pos_next, vel_next
     
     def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp=1.0, Ki=0.01, Kd=0.5, max_integral=0.5):
@@ -254,24 +253,24 @@ class Agent(Node):
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
-        
-        # --------------- Position Control Dynamics ---------------
-        # self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
-        # neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
-        # self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
-        # z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
 
-        # --------------- Double Integrator Dynamics ----------------
-        self.gradient_direction[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
-        neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
-        self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
-        z[k+1] = z[k] + self.delta_T * self.safe_gradient_direction[k]
-
-        integral_error = 0
-        while not self.has_reached_goal(self.pos, z[k+1]):
-            acc_cmd, integral_error = self.pid_position_controller(z[k+1], self.pos, self.vel, integral_error)
-            self.pos, self.vel = self.dynamics(self.pos, self.vel, acc_cmd, self.delta_T)
-            self._publish_current_state(self.pos, True)
+        if not self.real_dynamics:
+            # --------------- Position Control ---------------
+            self.u_ref[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+            neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
+            self.safe_u[k] = self.safe_control(self.u_ref[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
+            z[k+1] = self.dynamics(z[k], self.safe_u[k], self.delta_T)
+        else:
+            # --------------- Double Integrator Dynamics + PID low lever controller ----------------
+            self.gradient_direction[k] = - self.alpha * (grad_1_l_i + grad_phi_i * v[k])
+            neighbor_positions = self.compute_neighbor_positions(z[k], self.visible_neighbors)
+            self.safe_gradient_direction[k] = self.safe_control(self.gradient_direction[k], z[k], neighbor_positions, self.safety_distance, gamma_sc, self.u_max)
+            z[k+1] = z[k] + self.delta_T * self.safe_gradient_direction[k]
+            integral_error = 0
+            while not self.has_reached_goal(self.pos, z[k+1]):
+                acc_cmd, integral_error = self.pid_position_controller(z[k+1], self.pos, self.vel, integral_error)
+                self.pos, self.vel = self.real_dynamics(self.pos, self.vel, acc_cmd, self.delta_T)
+                self._publish_current_state(self.pos, True)
 
         s[k+1] = A[i] * s[k]
         for j in N_i:

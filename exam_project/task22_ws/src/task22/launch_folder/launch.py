@@ -18,13 +18,17 @@ PARAMETERS = {
     'gamma': 15,
     'gamma_bar': 3,
     'gamma_hat': 1,
-    'gamma_sc': 10,  # Safety control gain
-    'fov_horizontal': 360,    # Horizontal Field of View in degrees
-    'fov_vertical': 360,       # Vertical Field of View in degrees
-    'fov_range': 3.0,         # Range of the Field of View
-    'safety_distance': 2.0,  # Safety distance for agents
-    'u_max': 100.0,  # Maximum control input
-    'tracking_tolerance': 1e-2,
+    
+        'gamma_sc': 10,  # Safety control gain
+        'fov_horizontal': 360,      # Horizontal Field of View in degrees
+        'fov_vertical': 360,        # Vertical Field of View in degrees
+        'fov_range': 3.0,           # Range of the Field of View
+        'safety_distance': 2.0,     # Safety distance for agents
+    
+    'real_dynamics': True,      # Use real dynamics for agents
+        'u_max': 100.0,         # Maximum control input
+        'tracking_tolerance': 1e-2,
+    
     'communication_time': 1e-2,
 }
 
@@ -122,15 +126,16 @@ def generate_launch_description():
                                 "r_0": r_0,
                                 "z0": z_0_i,
                                 "gamma": gamma_i,
-                                "alpha": float(PARAMETERS['alpha']),
                                 "neighbors": N_i,
-                                "max_iters": int(PARAMETERS['max_iters']),
                                 "intruder": intruder_i,
                                 "gamma_bar": gamma_bar_i,
                                 "gamma_hat": gamma_hat_i,
-                                "gamma_sc": float(PARAMETERS['gamma_sc']),
-                                "safety_distance": float(PARAMETERS['safety_distance']),
+                                "alpha": float(PARAMETERS['alpha']),
                                 "u_max": float(PARAMETERS['u_max']),
+                                "max_iters": int(PARAMETERS['max_iters']),
+                                "gamma_sc": float(PARAMETERS['gamma_sc']),
+                                "real_dynamics": PARAMETERS['real_dynamics'],
+                                "safety_distance": float(PARAMETERS['safety_distance']),
                                 "tracking_tolerance": float(PARAMETERS['tracking_tolerance']),
                                 "communication_time": float(PARAMETERS['communication_time']),
                             }
