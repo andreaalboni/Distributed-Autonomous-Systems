@@ -230,7 +230,7 @@ class Agent(Node):
         marker.color.r = [1.0, 0.0, 0.0][self.agent_id % 3]  # Cycle through red, green, blue
         marker.color.g = [0.0, 1.0, 0.0][self.agent_id % 3]
         marker.color.b = [0.0, 0.0, 1.0][self.agent_id % 3]
-        self.marker_pub.publish(marker)
+        # self.marker_pub.publish(marker)
         
     def dynamics(self, z, u_ref, delta_T):
         return z + delta_T * u_ref 

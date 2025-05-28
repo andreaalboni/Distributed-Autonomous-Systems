@@ -65,58 +65,45 @@ class Visualizer(Node):
         marker.ns = 'fov'
         marker.id = agent_id + 1000  # Unique ID for FOV markers
         marker.action = Marker.ADD
+        h_angle_rad = np.radians(float(self.fov_horizontal))
 
         # For 2D case
         if self.d == 2:
             marker.type = Marker.TRIANGLE_LIST
             z = 0.0
-            h_segments = 32  # Number of triangles to approximate the sector
-            
-            # Convert FOV angle from degrees to radians
+            h_segments = max(8, int(32 * h_angle_rad / (2 * np.pi)))
             angle_rad = np.radians(float(self.fov_horizontal))
-            # Calculate the starting angle (centered around heading)
             start_angle = heading - angle_rad/2
-            
-            # Create vertices for triangle fan
             center = Point(x=position[0], y=position[1], z=z)
-            
             for i in range(h_segments):
                 theta1 = start_angle + (angle_rad * i / h_segments)
                 theta2 = start_angle + (angle_rad * (i + 1) / h_segments)
-                
-                # First point of triangle (center)
                 marker.points.append(center)
-                
-                # Second point of triangle (first radius)
                 marker.points.append(Point(
                     x=position[0] + self.fov_range * np.cos(theta1),
                     y=position[1] + self.fov_range * np.sin(theta1),
                     z=z
                 ))
-                
-                # Third point of triangle (second radius)
                 marker.points.append(Point(
                     x=position[0] + self.fov_range * np.cos(theta2),
                     y=position[1] + self.fov_range * np.sin(theta2),
                     z=z
                 ))
-            
         # For 3D case
         else:
             marker.type = Marker.TRIANGLE_LIST
             z = position[2]
-            h_angle_rad = np.radians(float(self.fov_horizontal))
             v_angle_rad = np.radians(float(self.fov_vertical))
-            h_segments = max(8, int(32 * h_angle_rad / (2 * np.pi)))  # Scale segments with horizontal angle
-            v_segments = max(4, int(16 * v_angle_rad / (2 * np.pi)))  # Scale segments with vertical angle
+            h_segments = max(8, int(32 * h_angle_rad / (2 * np.pi)))  
+            v_segments = max(4, int(16 * v_angle_rad / (2 * np.pi)))  
             h_start = heading - h_angle_rad / 2
             h_end = heading + h_angle_rad / 2
-            if v_angle_rad >= 2 * np.pi:  # 360° or more
-                v_start = -np.pi / 2  # Bottom of sphere
-                v_end = np.pi / 2     # Top of sphere
-                v_segments = 16       # Full vertical resolution
+            if v_angle_rad >= 2 * np.pi:  
+                v_start = -np.pi / 2  
+                v_end = np.pi / 2     
+                v_segments = 16       
             else:
-                v_start = -v_angle_rad / 2  # Centered around horizontal plane
+                v_start = -v_angle_rad / 2  
                 v_end = v_angle_rad / 2
             for i in range(h_segments):
                 theta1 = h_start + (h_end - h_start) * i / h_segments
@@ -194,7 +181,7 @@ class Visualizer(Node):
         marker.color.g = 1.0
         marker.color.b = 0.0
         if self.d == 3: marker.color.a = 0.5 / max(v_segments, h_segments)
-        else: marker.color.a = 0.25
+        else: marker.color.a = max(0.25, 1 / h_segments)
         return marker
 
     def discover_agents(self):
