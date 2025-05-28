@@ -30,6 +30,7 @@ class Visualizer(Node):
         self.world_size = self.get_parameter("world_size").value
         self.fov_vertical = self.get_parameter("fov_vertical").value
         self.fov_horizontal = self.get_parameter("fov_horizontal").value
+        self.safety_control = self.get_parameter("safety_control").value
 
         self.prev_heading = {}
         
@@ -393,8 +394,9 @@ class Visualizer(Node):
                 )
                 marker_array.markers.extend(drone_markers)
                 # Add FOV marker for this agent with heading
-                fov_marker = self.create_fov_marker(agent_id, position, heading)
-                marker_array.markers.append(fov_marker)
+                if self.safety_control:
+                    fov_marker = self.create_fov_marker(agent_id, position, heading)
+                    marker_array.markers.append(fov_marker)
 
                 # Add agent trajectories
                 if agent_id in self.agent_trajectories:

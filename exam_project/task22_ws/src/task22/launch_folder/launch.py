@@ -19,7 +19,7 @@ PARAMETERS = {
     'gamma_bar': 3,
     'gamma_hat': 1,
     
-    'safety_control': True,
+    'safety_control': False,
         'gamma_sc': 10,             # Safety control gain
         'fov_horizontal': 180,      # Horizontal Field of View in degrees
         'fov_vertical': 30,        # Vertical Field of View in degrees
@@ -83,9 +83,10 @@ def generate_launch_description():
             'r_0': r_0,
             'world_size': PARAMETERS['world_size'],
             'd': PARAMETERS['d'],
-            'fov_horizontal': fov_hor_angle,
-            'fov_vertical': fov_vert_angle,
-            'fov_range': PARAMETERS['fov_range'],
+            'safety_control': PARAMETERS['safety_control'],
+                'fov_horizontal': fov_hor_angle,
+                'fov_vertical': fov_vert_angle,
+                'fov_range': PARAMETERS['fov_range'],
         }],
     )
     node_list.append(visualizer_node)
