@@ -70,7 +70,7 @@ class Visualizer(Node):
         if self.d == 2:
             marker.type = Marker.TRIANGLE_LIST
             z = 0.0
-            segments = 32  # Number of triangles to approximate the sector
+            h_segments = 32  # Number of triangles to approximate the sector
             
             # Convert FOV angle from degrees to radians
             angle_rad = np.radians(float(self.fov_horizontal))
@@ -80,9 +80,9 @@ class Visualizer(Node):
             # Create vertices for triangle fan
             center = Point(x=position[0], y=position[1], z=z)
             
-            for i in range(segments):
-                theta1 = start_angle + (angle_rad * i / segments)
-                theta2 = start_angle + (angle_rad * (i + 1) / segments)
+            for i in range(h_segments):
+                theta1 = start_angle + (angle_rad * i / h_segments)
+                theta2 = start_angle + (angle_rad * (i + 1) / h_segments)
                 
                 # First point of triangle (center)
                 marker.points.append(center)
@@ -193,8 +193,8 @@ class Visualizer(Node):
         marker.color.r = 0.0
         marker.color.g = 1.0
         marker.color.b = 0.0
-        marker.color.a = 0.5 / max(v_segments, h_segments)
-
+        if self.d == 3: marker.color.a = 0.5 / max(v_segments, h_segments)
+        else: marker.color.a = 0.25
         return marker
 
     def discover_agents(self):
