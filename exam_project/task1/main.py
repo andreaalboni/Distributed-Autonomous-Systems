@@ -19,7 +19,7 @@ def main():
         'graph_type': 'cycle',
     }
     
-    task_to_run = ['1.1']#, '1.2']
+    task_to_run = ['1.1', '1.2']
     
     task_settings = {
         '1.1': [local_cost_function_task1, 1e-3],
