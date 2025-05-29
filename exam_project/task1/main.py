@@ -26,9 +26,6 @@ def main():
         '1.2': [local_cost_function_task2, 0.05],
     }
     
-    #TODO: flag to print some data like adj, distances, etc..
-    
-    
     # Initialization
     targets, agents = generate_agents_and_targets(PARAMETERS['num_targets'],
                                                   PARAMETERS['ratio_at'],

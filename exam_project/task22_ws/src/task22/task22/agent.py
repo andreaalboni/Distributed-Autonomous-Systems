@@ -205,7 +205,6 @@ class Agent(Node):
                 self.publish_marker(x, y, 0.0)
         return neighbor_positions
 
-    # TODO: Remove this method when finished with debugging
     def publish_marker(self, x, y, z):
         if not hasattr(self, 'marker_pub'):
             self.marker_pub = self.create_publisher(Marker, f'/agent_{self.agent_id}/marker', 10)
