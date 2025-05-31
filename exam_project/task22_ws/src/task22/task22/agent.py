@@ -187,7 +187,6 @@ class Agent(Node):
                     return u.value
             except:
                 continue
-        # is no solver worked, print a warning and return the reference control
         self.get_logger().warn(f"Agent {self.agent_id}: No solver found a feasible solution, returning reference control")
         return u_ref 
     

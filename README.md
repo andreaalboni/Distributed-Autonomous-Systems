@@ -1,25 +1,63 @@
-# ROS2 Humble Docker Compose Setup
+# Project istructions
 
 ## Prerequisites
 
 - Docker
 - Docker Compose
+- Python dependencies
 
-## Setup Instructions
+To satisfy all python dependencies please follow the steps below:
 
-### 1. Set User Permissions (Optional but Recommended)
+1. Create virtual environment: `python -m venv venv`
+2. activate it (on bash/Linux): `source venv/bin/activate`
+3. Install packages: `pip install -r requirements.txt`
+
+<!-- ### 1. Set User Permissions (Optional but Recommended)
 
 Before starting, you can set your host user ID and group ID to match the container:
 
 ```bash
 export HOST_USER_ID=$(id -u)
 export HOST_GROUP_ID=$(id -g)
+``` -->
+
+## Task 1
+
+To execute the task 1.1 and 1.2 run:
+
+```bash
+python exam_project/task1/main.py
 ```
 
-### 2. Build the Image
+## Task 2.1
+
+To execute the task 2.1 run:
+
+```bash
+python exam_project/task21/main.py 
+```
+
+## Task 2.2
+
+
+### 1. Open and login to foxglove
+
+With a chromium based browser visit [foxglove.dev](https://app.foxglove.dev/) or download from [here](https://foxglove.dev/download) the foxglove app.
+Once the login is done, click `open connection...`, and open the foxglove WebSocket URL `ws://localhost:8765`.
+In the top right, click on `layout`, then `Import from file...` and select the `DAS-foxglove-layout.json` file present in the root of the exam_project
+
+### 2. Build the Image (Linux only)
+
+In the folder containing the dockerfile run:
 
 ```bash
 docker compose build
+```
+
+In order to run GUI app in the docker container on wayland systems run:
+
+```bash
+xhost +local:docker
 ```
 
 ### 3. Start the Container
@@ -34,17 +72,12 @@ docker compose up
 docker exec -it das_ros2 /bin/bash
 ```
 
-in order to run GUI app in the docker container on wayland systems 
-run at each boot outside of the docker container:
+### 5. Run the simulation
+
+To run the task 2.2
 
 ```bash
-xhost +local:docker
+ros2 launch task22 launch.py
 ```
 
-### Latex
-```bash
-sudo apt-get install texlive-latex-base
-sudo apt-get install latexmk
-sudo apt-get install texlive-latex-recommended
-sudo apt-get install texlive-full
-```
+To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/`.

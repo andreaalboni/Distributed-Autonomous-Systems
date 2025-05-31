@@ -4,6 +4,7 @@ __pycache__/**
 **/install/
 **/log/
 **/main.log
+.venv/
 *.aux
 *.log
 *.out
