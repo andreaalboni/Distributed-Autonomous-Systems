@@ -12,7 +12,7 @@ PARAMETERS = {
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
-    'graph_type': 'cycle',
+    'graph_type': 'star', # Options: 'path', 'cycle', 'star', 'erdos_renyi'
     'max_iters': 5000,
     'alpha': 0.1,
     'gamma': 15,

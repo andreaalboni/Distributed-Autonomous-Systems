@@ -298,7 +298,7 @@ class Agent(Node):
         v[k+1] = A[i] * v[k]
         for j in N_i:
             v_k_j = received_info[j]['v']
-            v[k+1] += A[i] * v_k_j
+            v[k+1] += A[j] * v_k_j
             
         _, _, grad_2_l_i_new = self.local_cost_function(z[k+1], intruder, s[k+1], r_0, gamma, gamma_bar, gamma_hat)
         l_i, _, grad_2_l_i_old = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
