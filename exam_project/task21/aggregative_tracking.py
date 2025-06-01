@@ -15,7 +15,7 @@ def compute_r_0(intruders, noise_radius, world_size, d):
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
 
-def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, gamma, gamma_bar, gamma_hat, max_iters=12000, alpha=0.0001): 
+def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, gamma, gamma_bar, gamma_hat, max_iters, alpha=0.0001): 
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(agents[0])))

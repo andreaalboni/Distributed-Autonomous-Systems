@@ -17,6 +17,7 @@ def main():
         'gamma': 15,
         'gamma_bar': 3,
         'gamma_hat': 1,
+        'max_iters': 12000,
     }
         
     # Initialization
@@ -31,15 +32,16 @@ def main():
     # visualize_graph(G)
     
     cost, z, r_0, total_grad_cost = aggregative_tracking_method(agents,
-                                               intruders,
-                                               A,
-                                               adj,
-                                               PARAMETERS['noise_r_0'],
-                                               PARAMETERS['world_size'],
-                                               PARAMETERS['d'],
-                                               PARAMETERS['gamma'],
-                                               PARAMETERS['gamma_bar'],
-                                               PARAMETERS['gamma_hat'],)
+                                                                intruders,
+                                                                A,
+                                                                adj,
+                                                                PARAMETERS['noise_r_0'],
+                                                                PARAMETERS['world_size'],
+                                                                PARAMETERS['d'],
+                                                                PARAMETERS['gamma'],
+                                                                PARAMETERS['gamma_bar'],
+                                                                PARAMETERS['gamma_hat'],
+                                                                PARAMETERS['max_iters'])
     
     # Visualization
     plot_aggregative_tracking_results(cost, total_grad_cost)

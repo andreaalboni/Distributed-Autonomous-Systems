@@ -13,7 +13,7 @@ PARAMETERS = {
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
-    'max_iters': 210,
+    'max_iters': 5000,
     'alpha': 0.1,
     'gamma': 15,
     'gamma_bar': 3,
@@ -91,16 +91,18 @@ def generate_launch_description():
     )
     node_list.append(visualizer_node)
     
-    visualizer_node = Node(
+    plotter_node = Node(
         package='task22',
         executable='plotter',
         name='plotter',
         output='screen',
         parameters=[{
             'max_iters': PARAMETERS['max_iters'],
+            'num_intruders': PARAMETERS['num_intruders'],
+            'd': PARAMETERS['d'],
         }],
     )
-    node_list.append(visualizer_node)
+    node_list.append(plotter_node)
     
     lidars_node = Node(
         package='task22',

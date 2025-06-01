@@ -7,6 +7,20 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy
 from das_interfaces.msg import Plotting
 import matplotlib.pyplot as plt
 
+# example message structure:
+# ---
+# id: 0
+# k: 138
+# cost: 378.3528610545523
+# grad_1:
+# - 15.427788776285126
+# - 18.441648045148415
+# grad_phi: 1
+# grad_2:
+# - 36.46334546143352
+# - 31.580665483394196
+# ---
+
 
 class Plotter(Node):
     def __init__(self):
@@ -21,8 +35,19 @@ class Plotter(Node):
             reliability=QoSReliabilityPolicy.RELIABLE,
             depth=10
         )
-                
+        
         self.max_iters = self.get_parameter("max_iters").value
+        self.num_intruders = self.get_parameter("num_intruders").value
+        self.d = self.get_parameter("d").value
+        
+        self.discovered_agents = set()
+        self.cost_trajectory = np.zeros((self.num_intruders, self.max_iters))
+        self.grad_1_trajectory = np.zeros((self.num_intruders, self.max_iters, self.d)) 
+        self.grad_2_trajectory = np.zeros((self.num_intruders, self.max_iters, self.d))
+        self.grad_phi_trajectory = np.zeros((self.num_intruders, self.max_iters, self.d))
+        self.k_trajectory = np.zeros((self.num_intruders, self.max_iters))
+        
+        self.timer = self.create_timer(1.0, self.discover_agents)
 
     def discover_agents(self):
         topic_names_and_types = self.get_topic_names_and_types()
@@ -40,79 +65,66 @@ class Plotter(Node):
                     lambda msg, id=agent_id: self.agent_callback(msg, id),
                     10
                 )
-                self.cost_trajectory[agent_id] = []
                 self.discovered_agents.add(topic_name)
 
     def agent_callback(self, msg, agent_id):
-        
-        self.agent_data[agent_id] = {
-            'cost': msg.cost,
-            'grad_1': np.array(msg.grad_1),
-            'grad_2': np.array(msg.grad_2),
-            'grad_phi': np.array(msg.grad_phi),
-            'iteration': msg.k   
-        }
-        
-        self.cost_trajectory[agent_id].append(self.agent_data[agent_id]['cost'])
+        self.cost_trajectory[agent_id][msg.k] = msg.cost
+        self.grad_1_trajectory[agent_id][msg.k] = np.array(msg.grad_1)
+        self.grad_2_trajectory[agent_id][msg.k] = np.array(msg.grad_2)
+        self.grad_phi_trajectory[agent_id][msg.k] = np.array(msg.grad_phi)
+        self.k_trajectory[agent_id] = msg.k
 
-        if self.check_completion():
-            self.plot_results()
-
-    def check_completion(self):
-        if not self.agent_data:
-            return False
-            
-        for agent_id in self.agent_data:
-            if self.max_iters != self.agent_data[agent_id]['iteration']:
-                return False
-        return True
+        for i in range(self.num_intruders):
+            if self.k_trajectory[i][-1] >= self.max_iters - 1:
+                self.plot_results()
 
     def plot_results(self):
-        iterations = range(1, self.max_iters + 1)
         total_costs = []
         gradient_norms = []
-        num_agents = len(self.agent_data)
         
-        for iteration in iterations:
+        for iteration in range(self.max_iters):
             # Sum costs from all agents
-            cost_sum = 0.0
-            grad_sum = np.zeros_like(self.agent_data[list(self.agent_data.keys())[0]][1]['grad_1'])
+            cost_sum = 0
+            sum_grad_1 = 0
+            grad_sum = np.zeros_like(self.grad_1_trajectory[0][0])
             
-            for agent_id in self.agent_data:
-                data = self.agent_data[agent_id][iteration]
-                cost_sum += data['cost']
+            for agent_id in range(self.num_intruders):
+                cost_sum += self.cost_trajectory[agent_id][iteration]
+                sum_grad_1 += self.grad_1_trajectory[agent_id][iteration]
                 
-                # grad_1 + grad_2 * grad_phi / num_agents
-                agent_grad = data['grad_1'] + data['grad_2'] * data['grad_phi'] / num_agents
-                grad_sum += agent_grad
+                sum_grad_2 = np.zeros_like(self.grad_2_trajectory[0][0])
+                for j in range(self.num_intruders):
+                    sum_grad_2 += self.grad_2_trajectory[j][iteration]
+                 
+                grad_sum += sum_grad_1 + sum_grad_2 * self.grad_phi_trajectory[agent_id][iteration] / self.num_intruders     
             
             total_costs.append(cost_sum)
             gradient_norms.append(np.linalg.norm(grad_sum))
         
         # Create plots
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+        fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
         
         # Cost plot
-        ax1.plot(iterations, total_costs, 'b-', linewidth=2)
+        ax1 = axes[0]
+        ax1.semilogy(np.arange(1, self.max_iters-1), total_costs[1:-1], color='cornflowerblue')
         ax1.set_title('Total Cost')
         ax1.set_xlabel('Iteration')
         ax1.set_ylabel('Cost')
-        ax1.grid(True)
-        ax1.set_yscale('log')
         
         # Gradient norm plot
-        ax2.plot(iterations, gradient_norms, 'r-', linewidth=2)
+        ax2 = axes[1]
+        ax2.semilogy(np.arange(1, self.max_iters-1), gradient_norms[1:-1], color='indianred')
         ax2.set_title('Gradient Norm')
         ax2.set_xlabel('Iteration')
         ax2.set_ylabel('||∇f||')
-        ax2.grid(True)
-        ax2.set_yscale('log')
         
         plt.tight_layout()
         plt.show()
         
         self.get_logger().info(f'Final cost: {total_costs[-1]:.6f}')
         self.get_logger().info(f'Final gradient norm: {gradient_norms[-1]:.6f}')
+        
+        self.destroy_node()
 
 def main(args=None):
     rclpy.init(args=args)
