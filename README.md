@@ -1,25 +1,10 @@
 # Project istructions
 
-## Prerequisites
-
-- Docker
-- Docker Compose
-- Python dependencies
-
 To satisfy all python dependencies please follow the steps below:
 
 1. Create virtual environment: `python -m venv venv`
 2. activate it (on bash/Linux): `source venv/bin/activate`
 3. Install packages: `pip install -r requirements.txt`
-
-<!-- ### 1. Set User Permissions (Optional but Recommended)
-
-Before starting, you can set your host user ID and group ID to match the container:
-
-```bash
-export HOST_USER_ID=$(id -u)
-export HOST_GROUP_ID=$(id -g)
-``` -->
 
 ## Task 1
 
@@ -80,4 +65,4 @@ To run the task 2.2
 ros2 launch task22 launch.py
 ```
 
-To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/`.
+To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/` then a *colcon build* is required.
