@@ -17,12 +17,12 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost):
     
     ax = axes[0]
     ax.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
-    ax.set_title('Cost vs Iteration')
+    ax.set_title('Cost')
     ax.set_xlabel('Iteration')
     
     ax = axes[1]
-    ax.plot(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
-    ax.set_title('Gradient Norm vs Iteration')
+    ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
+    ax.set_title('Gradient Norm')
     ax.set_xlabel('Iteration')
     plt.show()
 

@@ -65,6 +65,7 @@ class Agent(Node):
         
         self.publisher = self.create_publisher(AggTrackMsg, f"/topic_{self.agent_id}", 10)
         self.dynamics_publisher = self.create_publisher(AggTrackMsg, f"/dynamics_topic_{self.agent_id}", 10)
+        # self.cost_publisher = self.creat_publisher(, f"/cost_{self.agent_id}", 10)
 
         self.timer = self.create_timer(communication_time, self.timer_callback)
         print(f"Agent {self.agent_id}: setup completed!")
