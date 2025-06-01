@@ -9,14 +9,15 @@ from termcolor import colored
 def main():
     
     PARAMETERS = {
-        'num_targets': 5,
+        'num_targets': 3,
         'ratio_at': 5,
         'd': 2,
         'world_size': 5,
         'radius_fov': 0.5,# np.inf,
         'noise_level': 0.0,
         'bias': 0.0,
-        'graph_type': 'cycle',
+        'graph_type': 'cycle', # 'cycle', 'star', 'erdos_renyi', 'path'
+        'max_iters': 10000,
     }
     
     task_to_run = ['1.1', '1.2']
@@ -44,7 +45,6 @@ def main():
     
     for task in task_to_run:
         # Run traking algorithm
-        # TODO: remove parm
         print(colored(f"\n----------------Starting task {task}----------------\n ", 'green'))
         cost_function = task_settings[task][0]
         alpha = task_settings[task][1]
@@ -54,7 +54,8 @@ def main():
                                                                                adj,
                                                                                A,
                                                                                cost_function,
-                                                                               alpha)
+                                                                               alpha,
+                                                                               PARAMETERS['max_iters'])
         
         # Visualization
         visualize_world(agents, targets, PARAMETERS['world_size'], PARAMETERS['d'])

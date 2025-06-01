@@ -31,5 +31,5 @@ def local_cost_function(agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i, g
 
 def local_phi_function(agent_i):
     phi_i = agent_i
-    grad_phi_i = 1
+    grad_phi_i = np.ones(agent_i.shape)
     return phi_i, grad_phi_i

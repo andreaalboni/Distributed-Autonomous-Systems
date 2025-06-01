@@ -3,7 +3,7 @@ import numpy as np
 # extend the length of the print of numpy arrays
 np.set_printoptions(threshold=np.inf, linewidth=np.inf, suppress=True)
 
-def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, alpha, max_iters=10250):
+def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, alpha, max_iters):
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters, len(targets)))
     norm_error = np.zeros((max_iters, len(agents), len(targets)))

@@ -153,7 +153,7 @@ class Agent(Node):
 
     def local_phi_function(self, agent_i):
         phi_i = agent_i
-        grad_phi_i = 1
+        grad_phi_i = np.ones(self.d)
         return phi_i, grad_phi_i
 
     def local_cost_function(self, agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i, gamma_hat_i):
@@ -257,7 +257,7 @@ class Agent(Node):
         plot_msg.k = self.k
         plot_msg.cost = float(l_i) 
         plot_msg.grad_1 = grad_1_l.tolist()   
-        plot_msg.grad_phi = int(grad_phi)   
+        plot_msg.grad_phi = grad_phi.tolist()
         plot_msg.grad_2 = grad_2_l_i.tolist()
         self.grad_publisher.publish(plot_msg)
   

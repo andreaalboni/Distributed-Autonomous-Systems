@@ -24,7 +24,7 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='cyan')
     ax.set_title('Gradient Norm')
     ax.set_xlabel('Iteration')
-    ax.set_ylabel('$||∇\ell||$')
+    ax.set_ylabel(r'$||∇\ell||$')
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     plt.tight_layout()
     plt.show()
@@ -112,7 +112,7 @@ def visualize_world(agents, targets, world_size, d):
         print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
         return None
 
-def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=50):
+def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=100):
     if d > 0 and d <= 3:
         agents = agents * world_size
         targets = targets * world_size

@@ -25,7 +25,7 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost):
     ax2.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
     ax2.set_title('Gradient Norm')
     ax2.set_xlabel('Iteration')
-    ax2.set_ylabel('$||∇\ell||$')
+    ax2.set_ylabel(r'$||∇\ell||$')
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     plt.tight_layout()
     plt.show()
