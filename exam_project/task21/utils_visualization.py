@@ -15,15 +15,17 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost):
     max_iters = cost.shape[0]
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     
-    ax = axes[0]
-    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
-    ax.set_title('Cost')
-    ax.set_xlabel('Iteration')
+    ax1 = axes[0]
+    ax1.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
+    ax1.set_title('Total Cost')
+    ax1.set_xlabel('Iteration')
+    ax1.set_ylabel('Cost')
     
-    ax = axes[1]
-    ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
-    ax.set_title('Gradient Norm')
-    ax.set_xlabel('Iteration')
+    ax2 = axes[1]
+    ax2.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
+    ax2.set_title('Gradient Norm')
+    ax2.set_xlabel('Iteration')
+    ax2.set_ylabel('||∇l||')
     plt.show()
 
 def visualize_world(agents, intruders, noise_radius, world_size, d):

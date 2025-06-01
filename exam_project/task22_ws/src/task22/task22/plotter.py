@@ -116,7 +116,7 @@ class Plotter(Node):
         ax2.semilogy(np.arange(1, self.max_iters-1), gradient_norms[1:-1], color='indianred')
         ax2.set_title('Gradient Norm')
         ax2.set_xlabel('Iteration')
-        ax2.set_ylabel('||∇f||')
+        ax2.set_ylabel('||∇l||')
         
         plt.tight_layout()
         plt.show()
