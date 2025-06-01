@@ -15,7 +15,7 @@ def compute_r_0(intruders, noise_radius, world_size, d):
             np.linalg.norm(r_0_candidate - barycenter_intruders) >= noise_radius/10):
                 return r_0_candidate
 
-def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, gamma, gamma_bar, gamma_hat, max_iters=2000, alpha=0.0001): 
+def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, gamma, gamma_bar, gamma_hat, max_iters=12000, alpha=0.0001): 
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(agents[0])))
@@ -41,7 +41,7 @@ def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_s
             _, grad_1_l_i, _ = local_cost_function(z[k, i], intruders[i], s[k, i], r_0, gamma[i], gamma_bar[i], gamma_hat[i])    # in z_i^{k}, s_i^{k}
             _, grad_phi_i = local_phi_function(z[k, i])
             z[k+1, i] = z[k, i] - alpha * ( grad_1_l_i + grad_phi_i * v[k, i] )
-            total_grad += grad_1_l_i + grad_phi_i / len(agents) 
+            total_grad += grad_1_l_i
         
         for i in range(len(agents)):
             s[k+1, i] = A[i, i] * s[k, i]
@@ -60,7 +60,11 @@ def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_s
             l_i, _, grad_2_l_i_old = local_cost_function(z[k, i], intruders[i], s[k, i], r_0, gamma[i], gamma_bar[i], gamma_hat[i])    # in z_i^{k}, s_i^{k}
             v[k+1, i] += grad_2_l_i_new - grad_2_l_i_old
             
-            total_grad += grad_2_l_i_old
+            total_grad_2 = np.zeros_like(v[0])
+            for j in range(len(agents)):
+                total_grad_2 += grad_2_l_i_old
+            _, grad_phi_i = local_phi_function(z[k, i])
+            total_grad += grad_phi_i * total_grad_2 / len(agents)
             cost[k] += l_i
         
         norm_grad_cost[k] = np.linalg.norm(total_grad)

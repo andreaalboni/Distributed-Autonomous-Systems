@@ -1,11 +1,13 @@
 import rclpy
+import cvxpy as cp
 import numpy as np
 from time import sleep
 from rclpy.node import Node
-from das_interfaces.msg import AggregativeTracking as AggTrackMsg
+from std_msgs.msg import Float32MultiArray
 from das_interfaces.msg import Lidar
-import cvxpy as cp
 from visualization_msgs.msg import Marker
+from das_interfaces.msg import AggregativeTracking as AggTrackMsg
+from das_interfaces.msg import Plotting as PlotMsg
 
 class Agent(Node):
     def __init__(self):
@@ -65,7 +67,7 @@ class Agent(Node):
         
         self.publisher = self.create_publisher(AggTrackMsg, f"/topic_{self.agent_id}", 10)
         self.dynamics_publisher = self.create_publisher(AggTrackMsg, f"/dynamics_topic_{self.agent_id}", 10)
-        # self.cost_publisher = self.creat_publisher(, f"/cost_{self.agent_id}", 10)
+        self.grad_publisher = self.create_publisher(PlotMsg, f"/plotting_{self.agent_id}", 10)
 
         self.timer = self.create_timer(communication_time, self.timer_callback)
         print(f"Agent {self.agent_id}: setup completed!")
@@ -249,7 +251,17 @@ class Agent(Node):
     
     def has_reached_goal(self, pos, goal):
         return np.linalg.norm(pos - goal) < self.tracking_tolerance
-        
+    
+    def publish_plotting_data(self, l_i, grad_1_l, grad_phi, grad_2_l_i):
+        plot_msg = PlotMsg()
+        plot_msg.id = self.agent_id
+        plot_msg.k = self.k
+        plot_msg.cost = float(l_i) 
+        plot_msg.grad_1 = grad_1_l.tolist()   
+        plot_msg.grad_phi = int(grad_phi)   
+        plot_msg.grad_2 = grad_2_l_i.tolist()
+        self.grad_publisher.publish(plot_msg)
+  
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
@@ -290,8 +302,10 @@ class Agent(Node):
             v[k+1] += A[i] * v_k_j
             
         _, _, grad_2_l_i_new = self.local_cost_function(z[k+1], intruder, s[k+1], r_0, gamma, gamma_bar, gamma_hat)
-        _, _, grad_2_l_i_old = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
+        l_i, _, grad_2_l_i_old = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         v[k+1] += grad_2_l_i_new - grad_2_l_i_old
+
+        self.publish_plotting_data(l_i, grad_1_l_i, grad_phi_i, grad_2_l_i_old)    
 
 def main(args=None):
     rclpy.init(args=args)
