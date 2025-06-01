@@ -14,6 +14,9 @@ def main():
         'radius_spawn_agent': 5.0,
         'noise_r_0': 0.0,
         'graph_type': 'cycle',
+        'gamma': 15,
+        'gamma_bar': 3,
+        'gamma_hat': 1,
     }
         
     # Initialization
@@ -33,7 +36,10 @@ def main():
                                                adj,
                                                PARAMETERS['noise_r_0'],
                                                PARAMETERS['world_size'],
-                                               PARAMETERS['d'])
+                                               PARAMETERS['d'],
+                                               PARAMETERS['gamma'],
+                                               PARAMETERS['gamma_bar'],
+                                               PARAMETERS['gamma_hat'],)
     
     # Visualization
     plot_aggregative_tracking_results(cost, total_grad_cost)
