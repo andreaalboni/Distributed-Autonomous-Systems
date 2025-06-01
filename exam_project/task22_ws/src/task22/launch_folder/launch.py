@@ -13,7 +13,7 @@ PARAMETERS = {
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
     'graph_type': 'cycle',
-    'max_iters': 21000,
+    'max_iters': 210,
     'alpha': 0.1,
     'gamma': 15,
     'gamma_bar': 3,
@@ -87,6 +87,17 @@ def generate_launch_description():
                 'fov_horizontal': fov_hor_angle,
                 'fov_vertical': fov_vert_angle,
                 'fov_range': PARAMETERS['fov_range'],
+        }],
+    )
+    node_list.append(visualizer_node)
+    
+    visualizer_node = Node(
+        package='task22',
+        executable='plotter',
+        name='plotter',
+        output='screen',
+        parameters=[{
+            'max_iters': PARAMETERS['max_iters'],
         }],
     )
     node_list.append(visualizer_node)

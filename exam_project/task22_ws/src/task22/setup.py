@@ -25,6 +25,7 @@ setup(
         'console_scripts': [
             "agent = task22.agent:main",
             "visualizer = task22.visualizer:main",
+            "plotter = task22.plotter:main",
             "lidars = task22.lidars:main",
         ],
     },
