@@ -3,11 +3,10 @@ import cvxpy as cp
 import numpy as np
 from time import sleep
 from rclpy.node import Node
-from std_msgs.msg import Float32MultiArray
 from das_interfaces.msg import Lidar
 from visualization_msgs.msg import Marker
-from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 from das_interfaces.msg import Plotting as PlotMsg
+from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 
 class Agent(Node):
     def __init__(self):

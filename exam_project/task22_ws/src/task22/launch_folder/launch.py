@@ -26,7 +26,7 @@ PARAMETERS = {
         'fov_range': 3.0,           # Range of the Field of View
         'safety_distance': 2.0,     # Safety distance for agents
     
-    'real_dynamics': True,      # Use real dynamics for agents
+    'real_dynamics': False,      # Use real dynamics for agents
         'u_max': 100.0,         # Maximum control input
         'tracking_tolerance': 1e-2,
     

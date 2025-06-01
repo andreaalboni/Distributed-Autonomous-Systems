@@ -13,15 +13,20 @@ def visualize_graph(G):
 def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error):
     max_iters = len(cost)
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
+    
     ax = axes[0]
-    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='magenta')
-    ax.set_title('Cost function')
+    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='magenta')       
+    ax.set_title('Total Cost')
     ax.set_xlabel('Iteration')
+    ax.set_ylabel('Cost')
     
     ax = axes[1]
     ax.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='cyan')
-    ax.set_title('Gradient of the cost')
+    ax.set_title('Gradient Norm')
     ax.set_xlabel('Iteration')
+    ax.set_ylabel('$||∇\ell||$')
+    plt.subplots_adjust(hspace=0.3, wspace=0.3)
+    plt.tight_layout()
     plt.show()
     
     fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))

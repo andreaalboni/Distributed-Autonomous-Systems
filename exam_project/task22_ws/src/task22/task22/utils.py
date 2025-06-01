@@ -130,7 +130,7 @@ def generate_graph(num_agents, type, p_er=0.5):
         G = nx.erdos_renyi_graph(num_agents, p=p_er, seed=0) 
         G = ensure_connected_graph(G)
     else:
-        raise ValueError("Unknown graph type. Use 'cycle', 'star', or 'erdos_renyi'.")
+        raise ValueError("Unknown graph type. Use 'cycle', 'path', 'star', or 'erdos_renyi'.")
     
     Adj = nx.adjacency_matrix(G).toarray()
     A = metropolis_hastings_weights(G)

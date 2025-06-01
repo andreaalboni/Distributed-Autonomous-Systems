@@ -100,25 +100,22 @@ class Plotter(Node):
             
             total_costs.append(cost_sum)
             gradient_norms.append(np.linalg.norm(grad_sum))
-        
-        # Create plots
+
         fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
         
-        # Cost plot
         ax1 = axes[0]
         ax1.semilogy(np.arange(1, self.max_iters-1), total_costs[1:-1], color='cornflowerblue')
         ax1.set_title('Total Cost')
         ax1.set_xlabel('Iteration')
         ax1.set_ylabel('Cost')
         
-        # Gradient norm plot
         ax2 = axes[1]
         ax2.semilogy(np.arange(1, self.max_iters-1), gradient_norms[1:-1], color='indianred')
         ax2.set_title('Gradient Norm')
         ax2.set_xlabel('Iteration')
-        ax2.set_ylabel('||∇l||')
-        
+        ax2.set_ylabel('$||∇\ell||$')
         plt.tight_layout()
+        plt.subplots_adjust(wspace=0.3, hspace=0.3)
         plt.show()
         
         self.get_logger().info(f'Final cost: {total_costs[-1]:.6f}')
