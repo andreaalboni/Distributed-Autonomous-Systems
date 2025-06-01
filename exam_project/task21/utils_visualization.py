@@ -11,14 +11,21 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def plot_aggregative_tracking_results(cost):
+def plot_aggregative_tracking_results(cost, norm_grad_cost):
     max_iters = cost.shape[0]
-    fig, ax = plt.subplots(figsize=(8, 6), nrows=1, ncols=1)
-    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='violet')
+    fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
+    
+    ax = axes[0]
+    ax.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
     ax.set_title('Cost vs Iteration')
     ax.set_xlabel('Iteration')
-    plt.show()
     
+    ax = axes[1]
+    ax.plot(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
+    ax.set_title('Gradient Norm vs Iteration')
+    ax.set_xlabel('Iteration')
+    plt.show()
+
 def visualize_world(agents, intruders, noise_radius, world_size, d):
     if d <= 3 and d > 1:
         fig = plt.figure(figsize=(10, 8))

@@ -27,7 +27,7 @@ def main():
     G, adj, A = generate_graph(len(agents), PARAMETERS['graph_type'])
     # visualize_graph(G)
     
-    cost, z, r_0 = aggregative_tracking_method(agents,
+    cost, z, r_0, total_grad_cost = aggregative_tracking_method(agents,
                                                intruders,
                                                A,
                                                adj,
@@ -36,7 +36,7 @@ def main():
                                                PARAMETERS['d'])
     
     # Visualization
-    plot_aggregative_tracking_results(cost)
+    plot_aggregative_tracking_results(cost, total_grad_cost)
     animate_world_evolution(intruders, z, r_0, PARAMETERS['world_size'], PARAMETERS['d'])
     return
 
