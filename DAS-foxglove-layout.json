@@ -3,13 +3,13 @@
     "3D!2ymwvek": {
       "cameraState": {
         "perspective": true,
-        "distance": 75.89554049200596,
-        "phi": 51.49897330595226,
-        "thetaOffset": 89.90486257929504,
+        "distance": 37.01235612442361,
+        "phi": 48.441983650299285,
+        "thetaOffset": 120.20011634191575,
         "targetOffset": [
-          25.96281002575086,
-          4.7651739369783925,
-          -14.7002828524277
+          2.4151391643389526,
+          8.366159912996034,
+          2.2009973184648398e-16
         ],
         "target": [
           0,
@@ -42,6 +42,9 @@
         },
         "frame:arm1_link": {
           "visible": true
+        },
+        "frame:grid": {
+          "visible": false
         }
       },
       "topics": {
@@ -52,13 +55,22 @@
           "visible": true,
           "displayMode": "auto",
           "showOutlines": true,
-          "showAxis": false
+          "showAxis": false,
+          "fallbackColor": "#ff0000",
+          "opacity": 1
         },
         "/initialpose": {
           "visible": true
         },
         "/move_base_simple/goal": {
-          "visible": true
+          "visible": true,
+          "axisScale": 1500,
+          "type": "arrow",
+          "arrowScale": [
+            3.5,
+            0.15,
+            0.15
+          ]
         },
         "/agent_trajectories": {
           "visible": true,
@@ -68,17 +80,91 @@
             }
           },
           "showOutlines": true
+        },
+        "/r_0": {
+          "visible": true
+        },
+        "/intruders": {
+          "visible": true,
+          "namespaces": {
+            "points": {
+              "visible": true
+            }
+          }
+        },
+        "/world_grid": {
+          "visible": true,
+          "color": "#3300ffff",
+          "flatColor": "#ff0000ff",
+          "colorMode": "rgba-fields",
+          "colorField": "red",
+          "colorMap": "turbo",
+          "frameLocked": false
+        },
+        "/trajectories": {
+          "visible": true,
+          "namespaces": {
+            "agent_trajectories": {
+              "visible": true
+            },
+            "drone_body": {
+              "visible": true
+            },
+            "drone_arms": {
+              "visible": true
+            },
+            "barycentre_trajectory": {
+              "visible": true
+            },
+            "barycentre": {
+              "visible": true
+            },
+            "fov": {
+              "visible": true
+            }
+          }
+        },
+        "/agent_2/marker": {
+          "visible": true
+        },
+        "/agent_1/marker": {
+          "visible": true
+        },
+        "/agent_0/marker": {
+          "visible": true
         }
       },
       "layers": {
-        "grid": {
-          "visible": true,
+        "bf445e48-e75c-4a88-8781-042fb515ab41": {
+          "visible": false,
           "frameLocked": true,
           "label": "Grid",
-          "instanceId": "3f6cd183-a110-4001-a51a-aaa56218ba8e",
+          "instanceId": "bf445e48-e75c-4a88-8781-042fb515ab41",
           "layerId": "foxglove.Grid",
           "size": 10,
           "divisions": 10,
+          "lineWidth": 1,
+          "color": "#248eff",
+          "position": [
+            null,
+            0,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "order": 1
+        },
+        "6c86dcfd-9de2-48b2-a9af-ddd1d3f4693d": {
+          "visible": false,
+          "frameLocked": true,
+          "label": "Grid",
+          "instanceId": "6c86dcfd-9de2-48b2-a9af-ddd1d3f4693d",
+          "layerId": "foxglove.Grid",
+          "frameId": "grid",
+          "divisions": 50,
           "lineWidth": 1,
           "color": "#248eff",
           "position": [
@@ -90,72 +176,9 @@
             0,
             0,
             0
-          ]
-        },
-        "3e9b270e-879a-4680-b054-357cbeb49b20": {
-          "displayMode": "auto",
-          "showAxis": false,
-          "axisScale": 1,
-          "showOutlines": true,
-          "opacity": 1,
-          "visible": true,
-          "frameLocked": true,
-          "instanceId": "3e9b270e-879a-4680-b054-357cbeb49b20",
-          "label": "URDF",
-          "layerId": "foxglove.Urdf",
-          "sourceType": "topic",
-          "url": "",
-          "filePath": "",
-          "parameter": "",
-          "topic": "/agent_0/robot_description",
-          "framePrefix": "agent_0/",
-          "order": 1,
-          "links": {
-            "agent_0/arm1_link": {
-              "visible": true
-            },
-            "agent_0/arm1_motor_link": {
-              "visible": true
-            }
-          }
-        },
-        "981b498c-1caf-463b-b257-6795648a4979": {
-          "displayMode": "auto",
-          "showAxis": false,
-          "axisScale": 1,
-          "showOutlines": true,
-          "opacity": 1,
-          "visible": true,
-          "frameLocked": true,
-          "instanceId": "981b498c-1caf-463b-b257-6795648a4979",
-          "label": "URDF",
-          "layerId": "foxglove.Urdf",
-          "sourceType": "topic",
-          "url": "",
-          "filePath": "",
-          "parameter": "",
-          "topic": "/agent_0/robot_description",
-          "framePrefix": "agent_1/",
-          "order": 1
-        },
-        "5c4d61d6-dcfc-4611-8574-7e51c5aec844": {
-          "displayMode": "auto",
-          "showAxis": false,
-          "axisScale": 1,
-          "showOutlines": true,
-          "opacity": 1,
-          "visible": true,
-          "frameLocked": true,
-          "instanceId": "5c4d61d6-dcfc-4611-8574-7e51c5aec844",
-          "label": "URDF",
-          "layerId": "foxglove.Urdf",
-          "sourceType": "topic",
-          "url": "",
-          "filePath": "",
-          "parameter": "",
-          "topic": "/agent_2/robot_description",
-          "framePrefix": "agent_2/",
-          "order": 1
+          ],
+          "order": 2,
+          "size": 50
         }
       },
       "publish": {
@@ -169,43 +192,6 @@
       },
       "imageMode": {},
       "followTf": "world"
-    },
-    "Plot!3eeaug6": {
-      "paths": [
-        {
-          "timestampMethod": "receiveTime",
-          "value": "/topic_0.z[:]",
-          "enabled": true,
-          "color": "#4e98e2",
-          "label": "z",
-          "timestampPath": "/topic_0.k",
-          "showLine": true
-        },
-        {
-          "timestampMethod": "receiveTime",
-          "value": "/topic_0.s[:]",
-          "enabled": true,
-          "color": "#f5774d",
-          "label": "s"
-        },
-        {
-          "timestampMethod": "receiveTime",
-          "value": "/topic_0.v[:]",
-          "enabled": true,
-          "color": "#f7df71",
-          "label": "v"
-        }
-      ],
-      "showXAxisLabels": true,
-      "showYAxisLabels": true,
-      "showLegend": true,
-      "legendDisplay": "floating",
-      "showPlotValuesInLegend": false,
-      "isSynced": true,
-      "xAxisVal": "timestamp",
-      "sidebarDimension": 240,
-      "xAxisLabel": "time",
-      "minXValue": 0
     }
   },
   "globalVariables": {},
@@ -213,10 +199,5 @@
   "playbackConfig": {
     "speed": 1
   },
-  "layout": {
-    "first": "3D!2ymwvek",
-    "second": "Plot!3eeaug6",
-    "direction": "column",
-    "splitPercentage": 75.4601226993865
-  }
+  "layout": "3D!2ymwvek"
 }
