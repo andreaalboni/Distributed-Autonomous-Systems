@@ -2,10 +2,12 @@ import numpy as np
 from cost_function import *
 
 def compute_agents_barycenter(agents):
+    """Compute the barycenter (mean position) of a set of agents."""
     sigma = np.mean(agents, axis=0)
     return sigma
 
 def compute_r_0(intruders, noise_radius, world_size, d):
+    """Generates a random point near the barycenter of intruders within a specified noise radius."""
     barycenter_intruders = compute_agents_barycenter(intruders)
     if (noise_radius == 0.0):
         return barycenter_intruders
@@ -16,6 +18,30 @@ def compute_r_0(intruders, noise_radius, world_size, d):
                 return r_0_candidate
 
 def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_size, d, gamma, gamma_bar, gamma_hat, max_iters, alpha=0.0001): 
+    """
+    Perform distributed aggregative tracking for a multi-agent system.
+    Each agent updates its state based on local and neighbor information to track intruders
+    while minimizing a local cost function and aggregating information from its neighbors.
+    Args:
+        agents (np.ndarray): Initial positions of agents, shape (n_agents, state_dim).
+        intruders (np.ndarray): Positions of intruders, shape (n_agents, state_dim).
+        A (np.ndarray): Weight matrix for consensus, shape (n_agents, n_agents).
+        adj (np.ndarray): Adjacency matrix indicating agent connectivity, shape (n_agents, n_agents).
+        noise_radius (float): Noise radius for intruder detection.
+        world_size (float): Size of the environment.
+        d (float): Distance parameter for cost computation.
+        gamma (float or np.ndarray): Regularization parameter(s).
+        gamma_bar (float or np.ndarray): Regularization parameter(s).
+        gamma_hat (float or np.ndarray): Regularization parameter(s).
+        max_iters (int): Number of iterations to run the algorithm.
+        alpha (float, optional): Step size for gradient updates. Defaults to 0.0001.
+    Returns:
+        tuple: Tuple containing:
+            - cost (np.ndarray): Cost at each iteration, shape (max_iters,).
+            - z (np.ndarray): Agent states at each iteration, shape (max_iters, n_agents, state_dim).
+            - r_0 (np.ndarray): Initial detection radii for intruders.
+            - norm_grad_cost (np.ndarray): Norm of the gradient of the cost at each iteration, shape (max_iters,).
+    """
     cost = np.zeros((max_iters))
     norm_grad_cost = np.zeros((max_iters))
     z = np.zeros((max_iters, len(agents), len(agents[0])))
@@ -26,8 +52,7 @@ def aggregative_tracking_method(agents, intruders, A, adj, noise_radius, world_s
     gamma_hat = gamma_hat * np.ones(len(agents))
 
     r_0 = compute_r_0(intruders, noise_radius, world_size, d)
-    sigma = compute_agents_barycenter(agents)
-
+    
     # Initialization
     z[0] = agents
     s[0] = agents   # phi_i(z_i) = z_i: regular barycenter

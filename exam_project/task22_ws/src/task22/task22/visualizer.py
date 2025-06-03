@@ -11,6 +11,7 @@ from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy
 from .utils import calculate_heading_from_movement
 
 class Visualizer(Node):
+    """ROS2 node for visualizing multi-agent tracking system components."""
     def __init__(self):
         super().__init__(
             "visualizer",
@@ -60,6 +61,16 @@ class Visualizer(Node):
     
 
     def create_fov_marker(self, agent_id, position, heading):
+        """Create field of view visualization marker for an agent.
+        Generates a 3D cone or 2D sector representing the agent's sensing
+        field of view based on the configured horizontal and vertical angles.
+        Args:
+            agent_id (int): Unique identifier of the agent.
+            position (np.ndarray): Current position of the agent.
+            heading (float or list): Heading direction(s) of the agent.
+        Returns:
+            Marker: RViz marker representing the field of view.
+        """
         marker = Marker()
         marker.header.frame_id = 'world'
         marker.header.stamp = self.get_clock().now().to_msg()
@@ -137,6 +148,8 @@ class Visualizer(Node):
                     marker.points.extend([p0, p2, p4])
                     marker.points.extend([p0, p4, p3])
                     marker.points.extend([p0, p3, p1])
+            
+            # Add cone edge surfaces if not full rotation
             if h_angle_rad < 2 * np.pi:  # Not full horizontal rotation
                 for edge_theta in [h_start, h_end]:
                     for j in range(v_segments):
@@ -172,6 +185,7 @@ class Visualizer(Node):
                         )
                         marker.points.extend([p0, p1, p2])
 
+        # Set marker properties
         marker.pose.orientation.w = 1.0
         marker.scale.x = 1.0
         marker.scale.y = 1.0
@@ -186,6 +200,7 @@ class Visualizer(Node):
         return marker
 
     def discover_agents(self):
+        """Automatically discover new agents in the system."""
         topic_names_and_types = self.get_topic_names_and_types()
         pattern = r'/dynamics_topic_(\d+)'
         for topic_name, _ in topic_names_and_types:
@@ -204,6 +219,7 @@ class Visualizer(Node):
                 self.discovered_agents.add(topic_name)
 
     def agent_callback(self, msg, agent_id):
+        """Callback for receiving agent state updates."""
         self.agent_states[agent_id] = {'z': msg.z, 'k': msg.k}
         pos = [0.0, 0.0, 0.0]
         for i in range(len(msg.z)):
@@ -211,6 +227,7 @@ class Visualizer(Node):
         self.agent_trajectories[agent_id].append(pos)
     
     def publish_static_grid_tf(self):
+        """Publish static transform for the world grid reference frame."""
         tf = TransformStamped()
         tf.header.stamp = self.get_clock().now().to_msg()
         tf.header.frame_id  = "world"   # parent
@@ -222,6 +239,7 @@ class Visualizer(Node):
         self.static_broadcaster.sendTransform(tf)
 
     def publish_world_grid(self):
+        """Publish visualization marker for the world coordinate grid."""
         size = float(self.world_size) * 1.25    
         step = 1.0                             
         half = size / 2.0
@@ -253,6 +271,7 @@ class Visualizer(Node):
         self.grid_publisher.publish(grid)
 
     def publish_r_0(self):
+        """Publish visualization marker for the reference position."""
         marker = Marker()
         marker.header.frame_id = "world"
         marker.header.stamp = self.get_clock().now().to_msg()
@@ -278,6 +297,7 @@ class Visualizer(Node):
         self.marker_publisher.publish(marker)
         
     def publish_intruders(self):
+        """Publish visualization markers for all intruders in the system."""
         marker_array = MarkerArray()
         for i in range(len(self.intruders)):
             marker = Marker()
@@ -305,6 +325,7 @@ class Visualizer(Node):
         self.intruders_publisher.publish(marker_array)
       
     def create_drone_marker(self, frame_id, marker_id, position, stamp):
+        """Create detailed drone visualization markers."""
         markers = []
         body = Marker()
         body.header.frame_id = frame_id
@@ -355,6 +376,7 @@ class Visualizer(Node):
         return markers
 
     def publish_visualizations(self):
+        """Coordinates the publishing of all visualization elements."""
         current_time = self.get_clock().now().to_msg()
         marker_array = MarkerArray()
         

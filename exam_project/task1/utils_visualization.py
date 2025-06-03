@@ -6,11 +6,13 @@ from matplotlib.animation import FuncAnimation
 matplotlib.use('TkAgg')
     
 def visualize_graph(G):
+    """Visualizes the given NetworkX graph"""
     plt.figure(figsize=(8, 8))
     nx.draw(G, with_labels=True)
     plt.show()
     
 def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error):
+    """Plot the cost, gradient norm, and per-target error norms for gradient tracking results."""
     max_iters = len(cost)
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
     
@@ -45,19 +47,17 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     plt.show()
     
 def visualize_world(agents, targets, world_size, d):
+    """Visualizes the positions of agents and targets in a 1D, 2D, or 3D world."""
     if d <= 3 and d > 0:
         agents = agents * world_size
         targets = targets * world_size
-        
         fig = plt.figure(figsize=(8, 8))
         if d == 3:
             ax = fig.add_subplot(111, projection='3d')
         else:
             ax = fig.add_subplot(111)
-            
         ax.set_title('World visualization')
         padding = 0.2
-        
         if d == 1:
             ax.set_xlim(-padding * world_size, world_size * (1 + padding))
             ax.set_yticks([])
@@ -65,7 +65,6 @@ def visualize_world(agents, targets, world_size, d):
             ax.scatter(targets, np.zeros_like(targets), c='red', marker='x', s=50, label='Target')
             ax.grid(False)
             ax.set_aspect('equal')
-            
         elif d == 2:
             ax.set_xlim(-padding * world_size, world_size * (1 + padding))
             ax.set_ylim(-padding * world_size, world_size * (1 + padding))
@@ -73,39 +72,29 @@ def visualize_world(agents, targets, world_size, d):
             ax.scatter(targets[:, 0], targets[:, 1], c='red', marker='x', s=50, label='Target')
             ax.grid(True)
             ax.set_aspect('equal')
-            
         elif d == 3:
             ax.set_xlim(-padding * world_size, world_size * (1 + padding))
             ax.set_ylim(-padding * world_size, world_size * (1 + padding))
             ax.set_zlim(-padding * world_size, world_size * (1 + padding))
-            
             ax.scatter(agents[:, 0], agents[:, 1], agents[:, 2], c='blue', marker='o', s=50, label='Agent')
             ax.scatter(targets[:, 0], targets[:, 1], targets[:, 2], c='red', marker='x', s=50, label='Target')
-            
             x_limits = ax.get_xlim3d()
             y_limits = ax.get_ylim3d()
             z_limits = ax.get_zlim3d()
-            
             x_range = abs(x_limits[1] - x_limits[0])
             y_range = abs(y_limits[1] - y_limits[0])
             z_range = abs(z_limits[1] - z_limits[0])
-            
             max_range = max(x_range, y_range, z_range)
-            
             mid_x = np.mean(x_limits)
             mid_y = np.mean(y_limits)
             mid_z = np.mean(z_limits)
-            
             ax.set_xlim3d([mid_x - max_range/2, mid_x + max_range/2])
             ax.set_ylim3d([mid_y - max_range/2, mid_y + max_range/2])
             ax.set_zlim3d([mid_z - max_range/2, mid_z + max_range/2])
-            
             ax.grid(True)
-            
             ax.set_xlabel('X')
             ax.set_ylabel('Y')
             ax.set_zlabel('Z')
-            
         ax.legend()
         plt.show()
     else:
@@ -113,6 +102,7 @@ def visualize_world(agents, targets, world_size, d):
         return None
 
 def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=100):
+    """Animates the evolution of agent-target positions in 1D, 2D, or 3D worlds."""
     if d > 0 and d <= 3:
         agents = agents * world_size
         targets = targets * world_size

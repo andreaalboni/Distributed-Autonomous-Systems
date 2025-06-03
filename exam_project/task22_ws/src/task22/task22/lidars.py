@@ -7,6 +7,7 @@ from das_interfaces.msg import Lidar
 from .utils import simulate_lidar_scan, calculate_heading_from_movement
 
 class Lidars(Node):
+    """ROS2 node for simulating lidar sensors for all agents in the system."""
     def __init__(self):
         super().__init__(
             "lidars",
@@ -27,6 +28,7 @@ class Lidars(Node):
         self.create_timer(0.5, self.compute_and_publish_lidar)
 
     def discover_agents(self):
+        """Automatically discover new agents in the system."""
         topic_names_and_types = self.get_topic_names_and_types()
         pattern = r'/topic_(\d+)'
         for topic_name, _ in topic_names_and_types:
@@ -42,6 +44,7 @@ class Lidars(Node):
                 self.discovered_agents.add(topic_name)
 
     def agent_callback(self, msg, agent_id):
+        """Callback for receiving agent position and state updates."""
         new_position = np.array(msg.z)
         new_heading = calculate_heading_from_movement(new_position,self.agent_prev_positions[agent_id],self.d)
         if new_heading is not None:
@@ -50,6 +53,7 @@ class Lidars(Node):
         self.agent_positions[agent_id] = new_position
 
     def compute_and_publish_lidar(self):
+        """Compute and publish lidar scan data for all agents."""
         if len(self.agent_positions) < 2:
             return
         ids = sorted(self.agent_positions.keys())

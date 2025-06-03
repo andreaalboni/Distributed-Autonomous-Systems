@@ -7,14 +7,16 @@ from aggregative_tracking import compute_r_0, compute_agents_barycenter
 matplotlib.use('TkAgg')
 
 def visualize_graph(G):
+    """Visualizes the given NetworkX graph"""
     plt.figure(figsize=(8, 8))
     nx.draw(G, with_labels=True)
     plt.show()
     
 def plot_aggregative_tracking_results(cost, norm_grad_cost):
+    """Plot the evolution of total cost and gradient norm over optimization iterations using semilogarithmic plots."""
     max_iters = cost.shape[0]
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
-    
+
     ax1 = axes[0]
     ax1.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
     ax1.set_title('Total Cost')
@@ -31,6 +33,7 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost):
     plt.show()
 
 def visualize_world(agents, intruders, noise_radius, world_size, d):
+    """Visualizes the positions of agents and intruders in a 2D or 3D world."""
     if d <= 3 and d > 1:
         fig = plt.figure(figsize=(10, 8))
         if d == 3:
@@ -92,17 +95,18 @@ def visualize_world(agents, intruders, noise_radius, world_size, d):
         return None
 
 def plot_graph_with_connections(G):
+    """Visualizes a NetworkX graph with nodes, edges, and labels."""
     pos = nx.spring_layout(G)  
     plt.figure(figsize=(8, 8))
     nx.draw_networkx_nodes(G, pos, node_color='skyblue', node_size=500)
     nx.draw_networkx_edges(G, pos, edge_color='gray', width=1.5)
     nx.draw_networkx_labels(G, pos, font_size=12, font_color='black')
-    # Mostriamo il titolo
     plt.title("Graph")
     plt.axis('off')  
     plt.show()
     
 def animate_world_evolution(intruders, z_history, r_0, world_size, d, speed=10):
+    """Animates the evolution of agent and intruder positions in a 2D or 3D world over time."""
     T, n_agents, *_ = z_history.shape
     frame_skip = int(speed) + 1
     positions = z_history[::frame_skip]

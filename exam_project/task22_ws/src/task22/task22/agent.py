@@ -9,13 +9,40 @@ from das_interfaces.msg import Plotting as PlotMsg
 from das_interfaces.msg import AggregativeTracking as AggTrackMsg
 
 class Agent(Node):
+    """ROS2 node implementing an aggregative tracking agent.
+    This class implements a distributed aggregative tracking algorithm where multiple
+    agents coordinate to track an intruder while maintaining formation constraints.
+    The agent communicates with neighboring agents and uses lidar data for collision
+    avoidance.
+    Attributes:
+        agent_id (int): Unique identifier for this agent.
+        alpha (float): Step size parameter for gradient descent.
+        u_max (float): Maximum control input magnitude.
+        gamma (float): Weight parameter for intruder tracking cost.
+        z_0 (np.ndarray): Initial position of the agent.
+        gamma_sc (float): Safety control parameter for CBF.
+        r_0 (np.ndarray): Reference position for tracking.
+        A_i (np.ndarray): Communication weight matrix row for this agent.
+        neighbors (list): List of neighboring agent IDs.
+        max_iters (int): Maximum number of iterations to run.
+        gamma_bar (float): Weight parameter for formation tracking cost.
+        gamma_hat (float): Weight parameter for reference tracking cost.
+        real_dyn (bool): Whether to use double integrator dynamics.
+        intruder (np.ndarray): Current intruder position.
+        safety_control (bool): Whether to enable collision avoidance.
+        safety_distance (float): Minimum safe distance between agents.
+        tracking_tolerance (float): Tolerance for goal reaching in real dynamics.
+    """
+
     def __init__(self):
+        """Initialize the aggregative tracking agent."""
         super().__init__(
             "aggregative_tracking_agent",
             allow_undeclared_parameters=True,
             automatically_declare_parameters_from_overrides=True,
         )
 
+        # Load parameters from ROS parameter server
         self.agent_id = self.get_parameter("id").value
         self.alpha = self.get_parameter("alpha").value
         self.u_max = self.get_parameter("u_max").value
@@ -72,6 +99,7 @@ class Agent(Node):
         print(f"Agent {self.agent_id}: setup completed!")
 
     def listener_callback(self, msg):
+        """Callback for receiving messages from neighboring agents."""
         j = int(msg.id)
         k = int(msg.k)
         if j in self.neighbors:
@@ -82,13 +110,18 @@ class Agent(Node):
             }
             
     def lidar_callback(self, msg):
+        """Callback for processing lidar sensor data."""
         self.visible_neighbors = {
             id_: (dist, horiz, vert)
             for id_, dist, horiz, vert in zip(msg.detected_ids, msg.distances, msg.horizontal_angles, msg.vertical_angles)
         }
-        # self.get_logger().info(f"\033[92mAgent {self.agent_id}: Lidar scan received, visible neighbors: {self.visible_neighbors}\033[0m")
 
     def timer_callback(self):
+        """Main timer callback that orchestrates the aggregative tracking algorithm.
+        Handles the synchronization of iterations, processes received messages,
+        executes one iteration of the aggregative tracking algorithm, and
+        publishes the updated state.
+        """
         if self.k == 0:
             self._publish_current_state()
             print(f"Agent {self.agent_id}: Iter {self.k:3d} - Published initial state \n z={self.z[self.k]}, s={self.s[self.k]}")
@@ -106,15 +139,16 @@ class Agent(Node):
                     rclpy.shutdown()
             else:
                 missing = [j for j in self.neighbors if self.k - 1 not in self.received_data[j]]
-                # print(f"Agent {self.agent_id}: Waiting for iter {self.k-1} from agents {missing}")
 
     def _check_messages_received(self, iteration):
+        """Check if messages from all neighbors have been received for a given iteration."""
         for j in self.neighbors:
             if iteration not in self.received_data[j]:
                 return False
         return True
 
     def _publish_current_state(self, z=None, dynamics=False):
+        """Publish the current agent state to other agents."""
         msg = AggTrackMsg()
         msg.id = self.agent_id
         msg.k = self.k
@@ -128,6 +162,7 @@ class Agent(Node):
         self.dynamics_publisher.publish(msg)
 
     def _process_iteration(self):
+        """Process one iteration of the aggregative tracking algorithm."""
         k = self.k
 
         neighbor_data = {}
@@ -152,11 +187,34 @@ class Agent(Node):
         )
 
     def local_phi_function(self, agent_i):
+        """Compute the local phi function and its gradient for aggregative tracking.
+        Args:
+            agent_i (np.ndarray): Current position of the agent.
+        Returns:
+            tuple: A tuple containing:
+                - phi_i (np.ndarray): Value of the phi function.
+                - grad_phi_i (np.ndarray): Gradient of the phi function.
+        """
         phi_i = agent_i
         grad_phi_i = np.ones(self.d)
         return phi_i, grad_phi_i
 
     def local_cost_function(self, agent_i, intruder_i, sigma, r_0, gamma_i, gamma_bar_i, gamma_hat_i):
+        """Compute the local cost function and its gradients.
+        Args:
+            agent_i (np.ndarray): Current position of the agent.
+            intruder_i (np.ndarray): Current position of the intruder.
+            sigma (np.ndarray): Aggregative variable for formation control.
+            r_0 (np.ndarray): Reference position.
+            gamma_i (float): Weight for intruder tracking.
+            gamma_bar_i (float): Weight for formation tracking.
+            gamma_hat_i (float): Weight for reference tracking.
+        Returns:
+            tuple: A tuple containing:
+                - local_cost (float): Value of the local cost function.
+                - grad_1 (np.ndarray): Gradient with respect to agent position.
+                - grad_2 (np.ndarray): Gradient with respect to sigma.
+        """
         agent_to_intruder = np.linalg.norm(agent_i - intruder_i)**2 
         agent_to_sigma = np.linalg.norm(agent_i - sigma)**2
         intruder_to_r_0 = np.linalg.norm(intruder_i - r_0)**2
@@ -166,6 +224,17 @@ class Agent(Node):
         return local_cost, grad_1, grad_2
     
     def compute_cbf(self, x_i, x_j, delta):
+        """Compute the Control Barrier Function (CBF) for collision avoidance.
+        Args:
+            x_i (np.ndarray): Position of agent i.
+            x_j (np.ndarray): Position of agent j.
+            delta (float): Minimum safe distance.
+        Returns:
+            tuple: A tuple containing:
+                - V_s_ij (float): CBF value.
+                - grad_x_i (np.ndarray): CBF gradient with respect to x_i.
+                - grad_x_j (np.ndarray): CBF gradient with respect to x_j.
+        """
         diff = x_i - x_j
         V_s_ij = np.linalg.norm(diff)**2 - delta**2
         grad_x_i = 2 * diff
@@ -173,6 +242,19 @@ class Agent(Node):
         return V_s_ij, grad_x_i, grad_x_j
         
     def safe_control(self, u_ref, x_i, neighbor_positions, delta, gamma_sc, u_max):
+        """Compute safe control input using Control Barrier Functions.
+        Solves a quadratic program to find the control input closest to the
+        reference control while satisfying safety constraints.
+        Args:
+            u_ref (np.ndarray): Reference control input.
+            x_i (np.ndarray): Current position of the agent.
+            neighbor_positions (list): List of neighbor positions.
+            delta (float): Minimum safe distance.
+            gamma_sc (float): CBF gain parameter.
+            u_max (float): Maximum control input magnitude.
+        Returns:
+            np.ndarray: Safe control input that satisfies CBF constraints.
+        """
         u = cp.Variable(self.d)
         objective = cp.Minimize(cp.sum_squares(u - u_ref))
         constraints = []
@@ -193,6 +275,13 @@ class Agent(Node):
         return u_ref 
     
     def compute_neighbor_positions(self, z, visible_neighbors):
+        """Compute neighbor positions from lidar data.
+        Args:
+            z (np.ndarray): Current agent position.
+            visible_neighbors (dict): Dictionary of visible neighbors with distance/angle data.
+        Returns:
+            list: List of neighbor positions in Cartesian coordinates.
+        """
         neighbor_positions = []
         for neighbor_id, (distance, horiz_angle, vert_angle) in visible_neighbors.items():
             x = z[0] + distance * np.cos(vert_angle) * np.cos(horiz_angle)
@@ -207,6 +296,7 @@ class Agent(Node):
         return neighbor_positions
 
     def publish_marker(self, x, y, z):
+        """Publish a visualization marker for the agent."""
         if not hasattr(self, 'marker_pub'):
             self.marker_pub = self.create_publisher(Marker, f'/agent_{self.agent_id}/marker', 10)
         marker = Marker()
@@ -230,17 +320,50 @@ class Agent(Node):
         marker.color.r = [1.0, 0.0, 0.0][self.agent_id % 3]  # Cycle through red, green, blue
         marker.color.g = [0.0, 1.0, 0.0][self.agent_id % 3]
         marker.color.b = [0.0, 0.0, 1.0][self.agent_id % 3]
-        # self.marker_pub.publish(marker)
         
     def dynamics(self, z, u_ref, delta_T):
+        """Simple integrator dynamics model.
+        Args:
+            z (np.ndarray): Current position.
+            u_ref (np.ndarray): Control input.
+            delta_T (float): Time step.
+        Returns:
+            np.ndarray: Updated position.
+        """
         return z + delta_T * u_ref 
     
     def real_dynamics(self, pos, vel, acc, delta_T):
+        """Double integrator dynamics model.
+        Args:
+            pos (np.ndarray): Current position.
+            vel (np.ndarray): Current velocity.
+            acc (np.ndarray): Acceleration input.
+            delta_T (float): Time step.
+        Returns:
+            tuple: A tuple containing:
+                - pos_next (np.ndarray): Updated position.
+                - vel_next (np.ndarray): Updated velocity.
+        """
         pos_next = pos + delta_T * vel
         vel_next = vel + delta_T * acc
         return pos_next, vel_next
     
     def pid_position_controller(self, desired_pos, current_pos, current_vel, integral_error, Kp=1.0, Ki=0.01, Kd=0.5, max_integral=0.5):
+        """PID controller for position tracking.
+        Args:
+            desired_pos (np.ndarray): Desired position.
+            current_pos (np.ndarray): Current position.
+            current_vel (np.ndarray): Current velocity.
+            integral_error (np.ndarray): Accumulated integral error.
+            Kp (float): Proportional gain.
+            Ki (float): Integral gain.
+            Kd (float): Derivative gain.
+            max_integral (float): Maximum integral error magnitude.
+        Returns:
+            tuple: A tuple containing:
+                - acc_command (np.ndarray): Acceleration command.
+                - integral_error (np.ndarray): Updated integral error.
+        """
         error = desired_pos - current_pos
         derivative = -current_vel
         integral_error += error * self.delta_T
@@ -249,9 +372,17 @@ class Agent(Node):
         return acc_command, integral_error
     
     def has_reached_goal(self, pos, goal):
+        """Check if the agent has reached the goal position."""
         return np.linalg.norm(pos - goal) < self.tracking_tolerance
     
     def publish_plotting_data(self, l_i, grad_1_l, grad_phi, grad_2_l_i):
+        """Publish data for plotting and analysis.
+        Args:
+            l_i (float): Local cost function value.
+            grad_1_l (np.ndarray): Gradient of cost w.r.t. agent position.
+            grad_phi (np.ndarray): Gradient of phi function.
+            grad_2_l_i (np.ndarray): Gradient of cost w.r.t. sigma.
+        """
         plot_msg = PlotMsg()
         plot_msg.id = self.agent_id
         plot_msg.k = self.k
@@ -262,6 +393,26 @@ class Agent(Node):
         self.grad_publisher.publish(plot_msg)
   
     def aggregative_tracking(self, i, A, N_i, k, z, v, s, intruder, r_0, gamma, gamma_bar, gamma_hat, gamma_sc, received_info):
+        """Main aggregative tracking algorithm implementation. Executes one
+        iteration of the distributed aggregative tracking algorithm.
+        Updates agent position, aggregative variable (s), and dual variable (v)
+        based on local cost gradients and neighbor information.
+        Args:
+            i (int): Agent ID.
+            A (np.ndarray): Communication weight matrix row.
+            N_i (list): List of neighbor agent IDs.
+            k (int): Current iteration number.
+            z (np.ndarray): Position trajectory array.
+            v (np.ndarray): Dual variable trajectory array.
+            s (np.ndarray): Aggregative variable trajectory array.
+            intruder (np.ndarray): Intruder position.
+            r_0 (np.ndarray): Reference position.
+            gamma (float): Intruder tracking weight.
+            gamma_bar (float): Formation tracking weight.
+            gamma_hat (float): Reference tracking weight.
+            gamma_sc (float): Safety control parameter.
+            received_info (dict): Information received from neighbors.
+        """
         _, grad_1_l_i, _ = self.local_cost_function(z[k], intruder, s[k], r_0, gamma, gamma_bar, gamma_hat)
         _, grad_phi_i = self.local_phi_function(z[k])
 

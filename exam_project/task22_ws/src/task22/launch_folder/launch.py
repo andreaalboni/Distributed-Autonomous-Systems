@@ -2,7 +2,7 @@ import numpy as np
 import networkx as nx
 from launch_ros.actions import Node
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, TimerAction
+from launch.actions import TimerAction
 from task22.utils import generate_agents_and_intruders, generate_graph, compute_r_0
 
 PARAMETERS = {
@@ -34,6 +34,18 @@ PARAMETERS = {
 }
 
 def generate_launch_description():
+    """
+    Generates a ROS 2 launch description for the task22 project.
+    This function sets up and launches multiple nodes required for the simulation.
+    Nodes launched:
+        - foxglove_bridge: Provides a bridge for visualization and debugging.
+        - visualizer: Visualizes agent and intruder positions and simulation state.
+        - plotter: Handles plotting of simulation results.
+        - lidars: Simulates lidar sensors for agents.
+        - agent_{i} (one per intruder): Runs the agent logic for each intruder, with parameters specific to each agent.
+    Returns:
+        LaunchDescription: A ROS 2 LaunchDescription object containing all configured nodes and actions.
+    """
     _, adj, A = generate_graph(PARAMETERS['num_intruders'], type=PARAMETERS['graph_type'])
     intruders, agents = generate_agents_and_intruders(PARAMETERS['num_intruders'], 
                                                       PARAMETERS['world_size'], 

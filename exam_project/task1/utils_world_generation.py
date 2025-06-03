@@ -2,9 +2,11 @@ import warnings
 import numpy as np
 
 def is_in_fov(agent_pos, target_pos, radius_fov):
+    """Check if the target position is within the agent's field of view radius."""
     return np.linalg.norm(agent_pos - target_pos) <= radius_fov
 
 def spawn_agent_near_target(target, existing_agents, existing_targets, world_size, d, radius_fov):
+    """Spawns an agent near a target within a specified field of view, avoiding overlap with existing agents and targets."""
     while True:
         candidate = np.random.uniform(0, world_size, size=d)
         if (is_in_fov(candidate, target, radius_fov) and 
@@ -13,6 +15,7 @@ def spawn_agent_near_target(target, existing_agents, existing_targets, world_siz
             return candidate
         
 def spawn_candidate(existing_agents, existing_targets, world_size, d):
+    """Generates a random candidate position within the world that does not overlap with existing agents or targets."""
     while True:
         candidate = np.random.uniform(0, world_size, size=d)
         if (not any(np.allclose(candidate, a, atol=1e-1) for a in existing_agents) and 
@@ -20,6 +23,17 @@ def spawn_candidate(existing_agents, existing_targets, world_size, d):
             return candidate
 
 def generate_agents_and_targets(num_targets, ratio_at, world_size, d, radius_fov):
+    """
+    Generate positions for agents and targets in a 2D world.
+    Args:
+        num_targets (int): Number of targets to generate.
+        ratio_at (float): Ratio of agents to targets.
+        world_size (float): Size of the world (assumed square).
+        d (float): Minimum distance between entities.
+        radius_fov (float): Field of view radius for agents.
+    Returns:
+        tuple: Normalized numpy arrays of target positions and agent positions.
+    """
     targets = []
     agents = []
     # Spawn targets and required agents
@@ -43,6 +57,22 @@ def generate_agents_and_targets(num_targets, ratio_at, world_size, d, radius_fov
     return targets, agents
 
 def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_size):
+    """
+    Compute true and noisy distances between agents and targets.
+
+    Args:
+        agents (np.ndarray): Array of agent positions.
+        targets (np.ndarray): Array of target positions.
+        noise_level (float): Standard deviation of Gaussian noise.
+        bias_param (float): Maximum absolute value for uniform bias.
+        radius_fov (float): Field of view radius; distances beyond this are set to NaN.
+        world_size (float): Size of the world, used to scale noise.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: 
+            - distances: True distances between agents and targets (NaN if out of FOV).
+            - noisy_distances: Noisy distances with bias and noise added (NaN if out of FOV).
+    """
     distances = []
     noisy_distances = []
     for agent in agents:
