@@ -8,7 +8,7 @@ from task22.utils import generate_agents_and_intruders, generate_graph, compute_
 PARAMETERS = {
     'num_intruders': 5,
     'world_size': 20,
-    'd': 2,
+    'd': 3,
     'intruder_radius': 10.0,
     'radius_spawn_agent': 5.0,
     'noise_r_0': 0.0,
@@ -19,14 +19,14 @@ PARAMETERS = {
     'gamma_bar': 3,
     'gamma_hat': 1,
     
-    'safety_control': False,
+    'safety_control': True,
         'gamma_sc': 10,             # Safety control gain
         'fov_horizontal': 180,      # Horizontal Field of View in degrees
         'fov_vertical': 30,        # Vertical Field of View in degrees
         'fov_range': 3.0,           # Range of the Field of View
         'safety_distance': 2.0,     # Safety distance for agents
     
-    'real_dynamics': False,      # Use real dynamics for agents
+    'real_dynamics': True,      # Use real dynamics for agents
         'u_max': 100.0,         # Maximum control input
         'tracking_tolerance': 1e-2,
     

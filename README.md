@@ -65,4 +65,10 @@ To run the task 2.2
 ros2 launch task22 launch.py
 ```
 
-To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/` then a *colcon build* is required.
+To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/` then a *colcon build* is required:
+
+Inside `~/task22_ws`, run:
+
+```bash
+colcon build && source install/setup.bash && ros2 launch task22 launch.py
+```

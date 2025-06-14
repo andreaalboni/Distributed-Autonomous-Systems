@@ -3,7 +3,7 @@ np.random.seed(42)
 
 def local_cost_function_task1(z, p_i, distances_i=None):
     """
-    Compute the local cost and its gradient for task 1.
+    Compute the local cost and its gradient for task 1.1
 
     Args:
         z (array-like): Input variable(s) for the cost function.
