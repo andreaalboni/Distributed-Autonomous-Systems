@@ -56,7 +56,7 @@ def generate_agents_and_targets(num_targets, ratio_at, world_size, d, radius_fov
     agents = np.array(agents) / world_size
     return targets, agents
 
-def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_size):
+def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_size, task):
     """
     Compute true and noisy distances between agents and targets.
 
@@ -89,6 +89,8 @@ def get_distances(agents, targets, noise_level, bias_param, radius_fov, world_si
                 var = np.random.normal(0, noise_level)
                 noise = (bias + var) / world_size
                 noisy_distance_to_target.append(dist + noise)
+            if task == '1.1':
+                break
         distances.append(agent_distance)
         noisy_distances.append(noisy_distance_to_target)
     return np.array(distances), np.array(noisy_distances)

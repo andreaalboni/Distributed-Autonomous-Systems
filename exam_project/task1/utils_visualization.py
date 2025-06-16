@@ -11,7 +11,7 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error):
+def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error, task):
     """Plot the cost, gradient norm, and per-target error norms for gradient tracking results."""
     max_iters = len(cost)
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
@@ -31,20 +31,21 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     plt.tight_layout()
     plt.show()
     
-    fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))
-    fig.suptitle('Norm of the error for each target', fontsize=14)
-    colors = plt.cm.rainbow(np.linspace(0, 1, len(agents)))
-    for j in range(len(targets)):
-        ax = axes[j]
-        for i in range(len(agents)):
-            line = ax.semilogy(np.arange(max_iters-1), norm_error[:-1, i, j], 
-                       color=colors[i],
-                       label=f'Agent {i}')
-        ax.set_title(f'Target {j}')
-        ax.set_xlabel('Iteration')
-    plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left')
-    plt.tight_layout()
-    plt.show()
+    if task == '1.2':
+        fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))
+        fig.suptitle('Norm of the error for each target', fontsize=14)
+        colors = plt.cm.rainbow(np.linspace(0, 1, len(agents)))
+        for j in range(len(targets)):
+            ax = axes[j]
+            for i in range(len(agents)):
+                line = ax.semilogy(np.arange(max_iters-1), norm_error[:-1, i, j], 
+                        color=colors[i],
+                        label=f'Agent {i}')
+            ax.set_title(f'Target {j}')
+            ax.set_xlabel('Iteration')
+        plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left')
+        plt.tight_layout()
+        plt.show()
     
 def visualize_world(agents, targets, world_size, d):
     """Visualizes the positions of agents and targets in a 1D, 2D, or 3D world."""

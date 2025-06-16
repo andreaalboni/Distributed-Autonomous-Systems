@@ -1,7 +1,15 @@
 import numpy as np
 np.random.seed(42)
 
-def local_cost_function_task1(z, p_i, distances_i=None):
+def quadratic_cost_function_param(world_size):
+    d = world_size
+    eig_max = np.random.randint(low=2, high=10)
+    eigenvals = np.random.uniform(low=1, high=eig_max, size=d)
+    Q = np.diag(eigenvals)
+    b = np.random.uniform(low=0, high=1)
+    return Q, b
+
+def local_cost_function_task1(z, p_i, Q, b, distances_i=None):
     """
     Compute the local cost and its gradient for task 1.1
 
@@ -15,22 +23,16 @@ def local_cost_function_task1(z, p_i, distances_i=None):
     """
     p_i = np.asarray(p_i).reshape(1, -1)
     z = np.asarray(z)
-    d = p_i.shape[1]
-    np.random.seed(42)
-    eig_max = np.random.randint(low=2)
-    eigenvals = np.random.uniform(1, eig_max, d)
-    Q = np.diag(eigenvals)
-    b = np.random.uniform(0, 1)
     diffs = p_i - z
     local_cost = 0.0
     local_cost_grad = np.zeros(p_i.shape[1])
     for diff in diffs:
         local_cost += diff.T @ Q @ diff + b
-        local_cost_grad -= 2 * Q @ diff
+        local_cost_grad -= 2 * Q @ diff    
     return local_cost, local_cost_grad
 
 
-def local_cost_function_task2(z, p_i, distances_i):
+def local_cost_function_task2(z, p_i, distances_i, Q=None, b=None):
     """
     Computes the local cost and its gradient for an agent based on estimated and measured distances to multiple targets.
 
