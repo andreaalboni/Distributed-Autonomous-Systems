@@ -3,6 +3,7 @@ import numpy as np
 def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cost_function, alpha, max_iters, task, Q=None, b=None):
     """
     Implements the gradient tracking algorithm for distributed optimization.
+
     Args:
         agents (np.ndarray): Array of agent positions or states.
         targets (np.ndarray): Array of target positions.
@@ -12,12 +13,19 @@ def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cos
         local_cost_function (callable): Function to compute local cost and gradient.
         alpha (float): Step size for the gradient update.
         max_iters (int): Maximum number of iterations.
+        task (str): Task identifier. If '1.1', uses single-target mode; otherwise, uses multi-target mode.
+        Q (np.ndarray, optional): Optional parameter for the local cost function.
+        b (np.ndarray, optional): Optional parameter for the local cost function.
+
     Returns:
         tuple: 
-            z (np.ndarray): Trajectory of agent estimates over iterations.
+            z (np.ndarray): Trajectory of agent estimates over iterations. 
+                Shape is (max_iters, n_agents, 1, dim) if task == '1.1', else (max_iters, n_agents, n_targets, dim).
             cost (np.ndarray): Accumulated local costs at each iteration.
-            norm_grad_cost (np.ndarray): Norm of the aggregated gradient at each iteration.
-            norm_error (np.ndarray): Norm of the error between agent estimates and targets.
+            norm_grad_cost (np.ndarray): Norm of the aggregated gradient at each iteration. 
+                Shape is (max_iters, 1) if task == '1.1', else (max_iters, n_targets).
+            norm_error (np.ndarray): Norm of the error between agent estimates and targets. 
+                Shape is (max_iters, n_agents, 1) if task == '1.1', else (max_iters, n_agents, n_targets).
     """
     cost = np.zeros((max_iters))
     if task == '1.1':
@@ -46,7 +54,7 @@ def gradient_tracking_method(agents, targets, noisy_distances, adj, A, local_cos
             z[k+1, i] = A[i, i] * z[k, i]
             N_i = np.nonzero(adj[i])[0]
             for j in N_i: # for each neighbor
-                z[k+1, i] += A[i, j] * z[k, j]    
+                z[k+1, i] += A[i, j] * z[k, j]
             z[k+1, i] -= alpha * s[k, i]
         
         # gradient update
