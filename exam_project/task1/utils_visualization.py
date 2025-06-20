@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import networkx as nx
 import matplotlib
@@ -11,7 +12,7 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error, task):
+def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, norm_error, task, save=False):
     """Plot the cost, gradient norm, and per-target error norms for gradient tracking results."""
     max_iters = len(cost)
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
@@ -30,6 +31,11 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     plt.tight_layout()
     plt.show()
+    if save:
+        task = task.replace('.', '')
+        os.makedirs('./plots', exist_ok=True)
+        fig.savefig(f'./plots/gradient_tracking_results_task{task}.png')
+        print(f"Plots saved as 'gradient_tracking_results_task{task}.png'")
     
     if task == '1.2':
         fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))
@@ -46,7 +52,7 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
         plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left')
         plt.tight_layout()
         plt.show()
-    
+
 def visualize_world(agents, targets, world_size, d):
     """Visualizes the positions of agents and targets in a 1D, 2D, or 3D world."""
     if d <= 3 and d > 0:
@@ -102,7 +108,7 @@ def visualize_world(agents, targets, world_size, d):
         print(f"Visualization only supports dimensions 1-3. Current dimension: {d}")
         return None
 
-def animate_world_evolution(agents, targets, z_history, type, world_size, d, speed=100):
+def animate_world_evolution(agents, targets, z_history, type, world_size, d, task, speed=100, save=False):
     """Animates the evolution of agent-target positions in 1D, 2D, or 3D worlds."""
     if d > 0 and d <= 3:
         agents = agents * world_size
@@ -204,6 +210,11 @@ def animate_world_evolution(agents, targets, z_history, type, world_size, d, spe
                 repeat=True
             )
         plt.show()
+        if save:
+            task = task.replace('.', '')
+            os.makedirs('./videos', exist_ok=True)
+            anim.save(f'./videos/world_evolution_task{task}.gif', writer='pillow', fps=15)
+            print(f"Animation saved as 'world_evolution_task{task}.gif'")
         return anim
     else:
         print(f"Animation only supports dimensions 1-3. Current dimension: {d}")

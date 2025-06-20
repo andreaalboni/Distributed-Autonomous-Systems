@@ -14,7 +14,7 @@ def main():
         'd': 2,                     # Dimension of the world 
         'world_size': 5,            # Size of the world (world_size x world_size)
         'radius_fov': np.inf,       # Radius of the field of view
-        'noise_level': 0.0,         # Noise level for distance measurements
+        'noise_level': 0.1,         # Noise level for distance measurements
         'bias': 0.0,                # Bias for distance measurements  
         'graph_type': 'path',       # 'cycle', 'star', 'erdos_renyi', 'path'
         'max_iters': 10000,
@@ -68,8 +68,8 @@ def main():
         
         # Visualization
         #visualize_world(agents, targets, PARAMETERS['world_size'], PARAMETERS['d'])
-        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, agents, targets, norm_error, task)
-        animate_world_evolution(agents, targets, z_hystory, PARAMETERS['graph_type'], PARAMETERS['world_size'], PARAMETERS['d'])
+        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, agents, targets, norm_error, task=task, save=True)
+        animate_world_evolution(agents, targets, z_hystory, PARAMETERS['graph_type'], PARAMETERS['world_size'], PARAMETERS['d'], task=task, save=True)
 
 if __name__ == "__main__":
     main()

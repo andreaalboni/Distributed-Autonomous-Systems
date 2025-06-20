@@ -1,3 +1,4 @@
+import os
 import matplotlib
 import numpy as np
 import networkx as nx
@@ -12,7 +13,7 @@ def visualize_graph(G):
     nx.draw(G, with_labels=True)
     plt.show()
     
-def plot_aggregative_tracking_results(cost, norm_grad_cost):
+def plot_aggregative_tracking_results(cost, norm_grad_cost, save=False):
     """Plot the evolution of total cost and gradient norm over optimization iterations using semilogarithmic plots."""
     max_iters = cost.shape[0]
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
@@ -31,6 +32,10 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost):
     plt.subplots_adjust(hspace=0.3, wspace=0.3)
     plt.tight_layout()
     plt.show()
+    if save:
+        os.makedirs('./plots', exist_ok=True)
+        fig.savefig('./plots/aggregative_tracking_results_task21.png')
+        print("Plots saved as 'aggregative_tracking_results_task21.png'")
 
 def visualize_world(agents, intruders, noise_radius, world_size, d):
     """Visualizes the positions of agents and intruders in a 2D or 3D world."""
@@ -105,7 +110,7 @@ def plot_graph_with_connections(G):
     plt.axis('off')  
     plt.show()
     
-def animate_world_evolution(intruders, z_history, r_0, world_size, d, speed=10):
+def animate_world_evolution(intruders, z_history, r_0, world_size, d, speed=10, save=False):
     """Animates the evolution of agent and intruder positions in a 2D or 3D world over time."""
     T, n_agents, *_ = z_history.shape
     frame_skip = int(speed) + 1
@@ -185,4 +190,9 @@ def animate_world_evolution(intruders, z_history, r_0, world_size, d, speed=10):
         ax.view_init(elev=30, azim=45)
     plt.tight_layout()
     plt.show()
+
+    if save:
+        os.makedirs('./videos', exist_ok=True)
+        anim.save('./videos/world_evolution_task21.gif', writer='pillow', fps=15)
+        print("Animation saved as 'world_evolution_task21.gif'")
     return anim
