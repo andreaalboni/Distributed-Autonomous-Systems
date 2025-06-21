@@ -50,14 +50,10 @@ class Visualizer(Node):
         self.discovered_agents = set()
         
         self.tf_broadcaster = TransformBroadcaster(self)
+        self.static_broadcaster = StaticTransformBroadcaster(self)
         self.create_timer(1.0, self.discover_agents)
         self.create_timer(0.05, self.publish_visualizations)
-        
-        self.static_broadcaster = StaticTransformBroadcaster(self)
-        self.publish_static_grid_tf()
-        self.publish_world_grid()
-        self.publish_r_0()
-        self.publish_intruders()
+        self.create_timer(2.0, self.publish_static_elements)
     
 
     def create_fov_marker(self, agent_id, position, heading):
@@ -225,6 +221,13 @@ class Visualizer(Node):
         for i in range(len(msg.z)):
             pos[i] = msg.z[i]
         self.agent_trajectories[agent_id].append(pos)
+        
+    def publish_static_elements(self):
+        """Periodically republish static visualization elements to ensure they remain visible."""
+        self.publish_static_grid_tf()
+        self.publish_world_grid()
+        self.publish_r_0()
+        self.publish_intruders()
     
     def publish_static_grid_tf(self):
         """Publish static transform for the world grid reference frame."""
