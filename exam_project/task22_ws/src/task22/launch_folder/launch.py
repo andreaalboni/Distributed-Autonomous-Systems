@@ -21,8 +21,8 @@ PARAMETERS = {
     
     'safety_control': True,
         'gamma_sc': 20,             # Safety control gain
-        'fov_horizontal': 180,      # Horizontal Field of View in degrees
-        'fov_vertical': 30,        # Vertical Field of View in degrees
+        'fov_horizontal': 360,      # Horizontal Field of View in degrees
+        'fov_vertical': 360,        # Vertical Field of View in degrees
         'fov_range': 3.0,           # Range of the Field of View
         'safety_distance': 3.0,     # Safety distance for agents
     

@@ -243,7 +243,7 @@ class Visualizer(Node):
 
     def publish_world_grid(self):
         """Publish visualization marker for the world coordinate grid."""
-        size = float(self.world_size) * 1.25    
+        size = float(self.world_size) * 1.5    
         step = 1.0                             
         half = size / 2.0
         grid = Marker()
