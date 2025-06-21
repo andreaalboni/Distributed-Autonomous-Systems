@@ -34,8 +34,8 @@ def plot_gradient_tracking_results(z, cost, norm_grad_cost, agents, targets, nor
     if save:
         task = task.replace('.', '')
         os.makedirs('./plots', exist_ok=True)
-        fig.savefig(f'./plots/gradient_tracking_results_task{task}.png')
-        print(f"Plots saved as 'gradient_tracking_results_task{task}.png'")
+        fig.savefig(f'./plots/gradient_tracking_results_task{task}.pdf', format='pdf')
+        print(f"Plots saved as 'gradient_tracking_results_task{task}.pdf")
     
     if task == '1.2':
         fig, axes = plt.subplots(figsize=(14, 6), nrows=1, ncols=len(targets))

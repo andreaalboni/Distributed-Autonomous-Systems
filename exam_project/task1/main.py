@@ -16,14 +16,14 @@ def main():
         'radius_fov': np.inf,       # Radius of the field of view
         'noise_level': 0.1,         # Noise level for distance measurements
         'bias': 0.0,                # Bias for distance measurements  
-        'graph_type': 'path',       # 'cycle', 'star', 'erdos_renyi', 'path'
+        'graph_type': 'erdos_renyi',       # 'cycle', 'star', 'erdos_renyi', 'path'
         'max_iters': 10000,
     }
     
     task_to_run = ['1.1', '1.2']
     
     task_settings = {
-        '1.1': [local_cost_function_task1, 1.5e-4],
+        '1.1': [local_cost_function_task1, 1.5e-3],
         '1.2': [local_cost_function_task2, 0.04],
     }
     
@@ -68,8 +68,8 @@ def main():
         
         # Visualization
         #visualize_world(agents, targets, PARAMETERS['world_size'], PARAMETERS['d'])
-        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, agents, targets, norm_error, task=task, save=True)
-        animate_world_evolution(agents, targets, z_hystory, PARAMETERS['graph_type'], PARAMETERS['world_size'], PARAMETERS['d'], task=task, save=True)
+        plot_gradient_tracking_results(z_hystory, cost, norm_grad_cost, agents, targets, norm_error, task=task, save=False)
+        animate_world_evolution(agents, targets, z_hystory, PARAMETERS['graph_type'], PARAMETERS['world_size'], PARAMETERS['d'], task=task, save=False)
 
 if __name__ == "__main__":
     main()
