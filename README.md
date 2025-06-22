@@ -24,12 +24,11 @@ python exam_project/task21/main.py
 
 ## Task 2.2
 
-
 ### 1. Open and login to foxglove
 
 With a chromium based browser visit [foxglove.dev](https://app.foxglove.dev/) or download from [here](https://foxglove.dev/download) the foxglove app.
 Once the login is done, click `open connection...`, and open the foxglove WebSocket URL `ws://localhost:8765`.
-In the top right, click on `layout`, then `Import from file...` and select the `DAS-foxglove-layout.json` file present in the root of the exam_project
+In the top right, click on `layout`, then `Import from file...` and select the `DAS-foxglove-layout.json` file present in the root of the project
 
 ### 2. Build the Image (Linux only)
 
@@ -39,7 +38,7 @@ In the folder containing the dockerfile run:
 docker compose build
 ```
 
-In order to run GUI app in the docker container on wayland systems run:
+In order to run GUI apps in the docker container on wayland systems run:
 
 ```bash
 xhost +local:docker
@@ -52,6 +51,8 @@ docker compose up
 ```
 
 ### 4. Attach to a running container
+
+In a new terminal run:
 
 ```bash
 docker exec -it das_ros2 /bin/bash
@@ -67,7 +68,7 @@ ros2 launch task22 launch.py
 
 To change parameters change the values of the `PARAMETERS` dictionary in the launch.py file inside the folder `/exam_project/task22_ws/src/task22/launch_folder/` then a *colcon build* is required:
 
-Inside `~/task22_ws`, run:
+Inside `exam_project/task22_ws`, run:
 
 ```bash
 colcon build && source install/setup.bash && ros2 launch task22 launch.py
