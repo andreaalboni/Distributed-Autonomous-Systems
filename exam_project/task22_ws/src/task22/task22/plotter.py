@@ -24,6 +24,7 @@ class Plotter(Node):
         self.max_iters = self.get_parameter("max_iters").value
         self.num_intruders = self.get_parameter("num_intruders").value
         self.d = self.get_parameter("d").value
+        self.save = self.get_parameter("save").value
         
         self.discovered_agents = set()
         self.cost_trajectory = np.zeros((self.num_intruders, self.max_iters))
@@ -67,7 +68,7 @@ class Plotter(Node):
 
     def plot_results(self):
         """Plots the total cost and gradient norm trajectories over iterations and logs the final values."""
-        total_costs = []
+        total_cost = []
         gradient_norms = []
         for iteration in range(self.max_iters):
             # Sum costs from all agents
@@ -81,11 +82,11 @@ class Plotter(Node):
                 for j in range(self.num_intruders):
                     sum_grad_2 += self.grad_2_trajectory[j][iteration]
                 grad_sum += sum_grad_1 + sum_grad_2 * self.grad_phi_trajectory[agent_id][iteration] / self.num_intruders     
-            total_costs.append(cost_sum)
+            total_cost.append(cost_sum)
             gradient_norms.append(np.linalg.norm(grad_sum))
         fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
         ax1 = axes[0]
-        ax1.semilogy(np.arange(1, self.max_iters-1), total_costs[1:-1], color='cornflowerblue')
+        ax1.semilogy(np.arange(1, self.max_iters-1), total_cost[1:-1], color='cornflowerblue')
         ax1.set_title('Total Cost')
         ax1.set_xlabel('Iteration')
         ax1.set_ylabel('Cost')
@@ -96,8 +97,10 @@ class Plotter(Node):
         ax2.set_ylabel('$||∇\ell||$')
         plt.tight_layout()
         plt.subplots_adjust(wspace=0.3, hspace=0.3)
+        if self.save:
+            plt.savefig('aggregative_tracking_results_task22.png', dpi=300)
         plt.show()
-        self.get_logger().info(f'Final cost: {total_costs[-1]:.6f}')
+        self.get_logger().info(f'Final cost: {total_cost[-1]:.6f}')
         self.get_logger().info(f'Final gradient norm: {gradient_norms[-1]:.6f}')
         self.destroy_node()
 
