@@ -9,7 +9,7 @@ def main():
     PARAMETERS = {
         'num_intruders': 5,
         'world_size': 20,
-        'd': 2,
+        'd': 3,
         'intruder_radius': 10.0,
         'radius_spawn_agent': 5.0,
         'noise_r_0': 0.0,
@@ -44,7 +44,7 @@ def main():
                                                                 PARAMETERS['max_iters'])
     
     # Visualization
-    plot_aggregative_tracking_results(cost, total_grad_cost, save=False)
+    plot_aggregative_tracking_results(cost, total_grad_cost, save=True)
     animate_world_evolution(intruders, z, r_0, PARAMETERS['world_size'], PARAMETERS['d'], save=False)
     return
 

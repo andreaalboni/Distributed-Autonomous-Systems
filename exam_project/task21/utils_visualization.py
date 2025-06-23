@@ -19,13 +19,13 @@ def plot_aggregative_tracking_results(cost, norm_grad_cost, save=False):
     fig, axes = plt.subplots(figsize=(8, 6), nrows=1, ncols=2)
 
     ax1 = axes[0]
-    ax1.semilogy(np.arange(max_iters-1), cost[:-1], color='cornflowerblue')
+    ax1.semilogy(np.arange(1, max_iters-1), cost[1:-1], color='cornflowerblue')
     ax1.set_title('Total Cost')
     ax1.set_xlabel('Iteration')
     ax1.set_ylabel('Cost')
     
     ax2 = axes[1]
-    ax2.semilogy(np.arange(max_iters-1), norm_grad_cost[:-1], color='indianred')
+    ax2.semilogy(np.arange(1, max_iters-1), norm_grad_cost[1:-1], color='indianred')
     ax2.set_title('Gradient Norm')
     ax2.set_xlabel('Iteration')
     ax2.set_ylabel(r'$||∇\ell||$')
